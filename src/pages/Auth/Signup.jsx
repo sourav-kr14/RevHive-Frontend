@@ -37,17 +37,52 @@ const Signup = () => {
     navigate("/Signin");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
+
     if (!formData.agreeTerms) {
       alert("You must agree to the Terms and Conditions.");
       return;
     }
-    console.log("Registration Data:", formData);
+
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.userName,
+          email: formData.email,
+          password: formData.password,
+          bio: formData.bio,
+          dob: formData.dob,
+        }),
+      });
+
+      let data = null;
+
+      const text = await response.text();
+      if (text) {
+        data = JSON.parse(text);
+      }
+
+      if (!response.ok) {
+        alert(data?.message || "Registration failed");
+        return;
+      }
+
+      alert("Registration successful!");
+      navigate("/user/dashboard");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong!");
+    }
   };
 
   return (
