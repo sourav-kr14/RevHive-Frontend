@@ -78,7 +78,7 @@ const Signup = () => {
       }
 
       alert("Registration successful!");
-      navigate("/user/dashboard");
+      navigate("/Signin");
     } catch (error) {
       console.error(error);
       alert("Something went wrong!");
