@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Post from "../components/Post";
+
 export default function UserDashboard() {
   const navigate = useNavigate();
 
@@ -23,58 +24,46 @@ export default function UserDashboard() {
           </h2>
 
           <ul className="space-y-6 text-gray-400">
-            <li className="hover:text-white cursor-pointer">🏠 Dashboard</li>
-            <li className="hover:text-white cursor-pointer">👤 Profile</li>
-            <li className="hover:text-white cursor-pointer">⚙️ Settings</li>
+            <li>🏠 Dashboard</li>
+            <li>👤 Profile</li>
+            <li>⚙️ Settings</li>
           </ul>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 hover:bg-red-700 py-2 rounded-lg"
-        >
+        <button onClick={handleLogout} className="bg-red-600 py-2 rounded-lg">
           Logout
         </button>
       </div>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex-1 p-8">
 
-        {/* Top Bar */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">
-            Welcome, {user.username} 👋
-          </h1>
-
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-        </div>
+        {/* Top */}
+        <h1 className="text-3xl font-bold">
+          Welcome, {user.username} 👋
+        </h1>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-6 mt-8">
-
-          <div className="bg-white/5 p-6 rounded-xl border border-white/10">
-            <h3 className="text-gray-400">Posts</h3>
-            <p className="text-2xl font-bold mt-2">12</p>
+          <div className="bg-white/5 p-6 rounded-xl">
+            <h3>Posts</h3>
+            <p className="text-2xl">12</p>
           </div>
 
-          <div className="bg-white/5 p-6 rounded-xl border border-white/10">
-            <h3 className="text-gray-400">Followers</h3>
-            <p className="text-2xl font-bold mt-2">340</p>
+          <div className="bg-white/5 p-6 rounded-xl">
+            <h3>Followers</h3>
+            <p className="text-2xl">340</p>
           </div>
 
-          <div className="bg-white/5 p-6 rounded-xl border border-white/10">
-            <h3 className="text-gray-400">Following</h3>
-            <p className="text-2xl font-bold mt-2">180</p>
+          <div className="bg-white/5 p-6 rounded-xl">
+            <h3>Following</h3>
+            <p className="text-2xl">180</p>
           </div>
-
         </div>
 
-        {/* Create Post */}
-        <div className="mt-10 bg-white/5 p-4 rounded-xl border border-white/10">
-          <textarea
-            placeholder="What's on your mind?"
-            className="w-full bg-transparent outline-none text-white resize-none"
-          />
+        {/* Create */}
+        <div className="mt-10 bg-white/5 p-4 rounded-xl">
+          <textarea className="w-full bg-transparent outline-none" />
           <button className="mt-3 bg-blue-600 px-4 py-2 rounded-lg">
             Post
           </button>
@@ -83,19 +72,13 @@ export default function UserDashboard() {
         {/* Feed */}
         <div className="mt-8 space-y-6">
 
-          <div className="mt-8 space-y-6">
-
-            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-              <Post />
-            </div>
-
-            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-              <Post />
-            </div>
-
+          <div className="bg-white/5 p-4 rounded-xl">
+            <Post />
           </div>
 
-
+          <div className="bg-white/5 p-4 rounded-xl">
+            <Post />
+          </div>
 
         </div>
 
@@ -103,4 +86,3 @@ export default function UserDashboard() {
     </div>
   );
 }
-
