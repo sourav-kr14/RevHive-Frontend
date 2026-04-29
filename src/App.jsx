@@ -1,10 +1,8 @@
-// import Home from "./pages/Home";
 import Signup from "./pages/Auth/Signup";
 import Signin from "./pages/Auth/Signin";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import { AdminRoute, UserRoute } from "./routes/ProtectedRoutes";
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 export default function App() {
