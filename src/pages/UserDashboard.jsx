@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
+import Post from "../components/Post";
 export default function UserDashboard() {
   const navigate = useNavigate();
 
@@ -83,19 +83,19 @@ export default function UserDashboard() {
         {/* Feed */}
         <div className="mt-8 space-y-6">
 
-          <div className="bg-white/5 p-6 rounded-xl border border-white/10">
-            <h2 className="font-semibold">First Post</h2>
-            <p className="text-gray-400 mt-2">
-              This is your dashboard feed UI 🔥
-            </p>
+          <div className="mt-8 space-y-6">
+
+            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+              <Post />
+            </div>
+
+            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+              <Post />
+            </div>
+
           </div>
 
-          <div className="bg-white/5 p-6 rounded-xl border border-white/10">
-            <h2 className="font-semibold">Another Post</h2>
-            <p className="text-gray-400 mt-2">
-              Clean modern UI ready for backend integration 🚀
-            </p>
-          </div>
+
 
         </div>
 
@@ -103,3 +103,4 @@ export default function UserDashboard() {
     </div>
   );
 }
+
