@@ -1,6 +1,14 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Home, User, Settings, LogOut, Sparkles } from "lucide-react";
+import {
+  Home,
+  User,
+  Settings,
+  LogOut,
+  Sparkles,
+  MessageCircle,
+} from "lucide-react";
+import { path } from "framer-motion/client";
 
 export default function DashboardSidebar({
   activeNav,
@@ -14,9 +22,15 @@ export default function DashboardSidebar({
     : "RH";
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home },
-    { id: "profile", label: "Profile", icon: User },
-    { id: "settings", label: "Settings", icon: Settings },
+    { id: "dashboard", label: "Dashboard", icon: Home, path: "/" },
+    { id: "profile", label: "Profile", icon: User, path: "/profile" },
+    { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
+    {
+      id: "messaging",
+      label: "Messages",
+      icon: MessageCircle,
+      path: "/messages",
+    },
   ];
 
   const handleLogout = () => {
@@ -68,7 +82,25 @@ export default function DashboardSidebar({
             return (
               <li key={item.id}>
                 <motion.button
-                  onClick={() => setActiveNav(item.id)}
+                  onClick={() => {
+                    setActiveNav(item.id);
+
+                    if (item.id === "messaging") {
+                      navigate("/messages");
+                    }
+
+                    if (item.id === "dashboard") {
+                      navigate("/");
+                    }
+
+                    if (item.id === "profile") {
+                      navigate("/profile");
+                    }
+
+                    if (item.id === "settings") {
+                      navigate("/settings");
+                    }
+                  }}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${

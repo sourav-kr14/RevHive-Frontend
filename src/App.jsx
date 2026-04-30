@@ -8,6 +8,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import { AdminRoute, UserRoute } from "./routes/ProtectedRoutes";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import UserLayout from "./components/userdashboard/UserLayout";
+import MessagingLayout from "./components/messaging/MessagingLayout";
 
 export default function App() {
   return (
@@ -40,6 +41,8 @@ export default function App() {
             </UserRoute>
           }
         />
+
+        <Route path="/messages" element={<MessagingLayout />} />
       </Routes>
     </BrowserRouter>
   );
