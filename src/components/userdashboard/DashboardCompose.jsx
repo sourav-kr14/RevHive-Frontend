@@ -6,6 +6,7 @@ export default function DashboardCompose({
   postText,
   setPostText,
 }) {
+export default function DashboardCompose({ profileData, postText, setPostText }) {
   const initials = profileData.username
     ? profileData.username.slice(0, 2).toUpperCase()
     : "RH";
@@ -101,3 +102,4 @@ export default function DashboardCompose({
     </motion.div>
   );
 }
+ 
