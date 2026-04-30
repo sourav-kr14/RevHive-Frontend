@@ -6,8 +6,7 @@ export default function DashboardCompose({
   postText,
   setPostText,
 }) {
-export default function DashboardCompose({ profileData, postText, setPostText }) {
-  const initials = profileData.username
+  const initials = profileData?.username
     ? profileData.username.slice(0, 2).toUpperCase()
     : "RH";
 
@@ -25,7 +24,6 @@ export default function DashboardCompose({ profileData, postText, setPostText })
       <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 transition-all duration-300 group-focus-within:border-blue-500/40 group-hover:border-white/20">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          {/* Avatar */}
           <motion.div
             whileHover={{ scale: 1.08 }}
             className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold shadow-lg shadow-purple-500/20"
@@ -33,7 +31,6 @@ export default function DashboardCompose({ profileData, postText, setPostText })
             {initials}
           </motion.div>
 
-          {/* Text */}
           <div>
             <p className="text-sm font-medium text-gray-300">
               What’s buzzing in the hive?
@@ -57,18 +54,14 @@ export default function DashboardCompose({ profileData, postText, setPostText })
         <div className="flex items-center justify-between mt-4">
           {/* Actions */}
           <div className="flex gap-2">
-            {[
-              { icon: <Image size={16} /> },
-              { icon: <Link2 size={16} /> },
-              { icon: <Hash size={16} /> },
-            ].map((item, i) => (
+            {[Image, Link2, Hash].map((Icon, i) => (
               <motion.button
                 key={i}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className="w-9 h-9 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 backdrop-blur-md transition-all flex items-center justify-center"
               >
-                {item.icon}
+                <Icon size={16} />
               </motion.button>
             ))}
           </div>
@@ -80,7 +73,6 @@ export default function DashboardCompose({ profileData, postText, setPostText })
             disabled={!postText.trim()}
             className="relative px-6 py-2 rounded-xl text-sm font-semibold overflow-hidden"
           >
-            {/* Gradient Background */}
             <span
               className={`absolute inset-0 transition-all duration-300 ${
                 postText.trim()
@@ -89,12 +81,10 @@ export default function DashboardCompose({ profileData, postText, setPostText })
               }`}
             />
 
-            {/* Glow */}
             {postText.trim() && (
               <span className="absolute inset-0 blur-lg bg-gradient-to-r from-blue-500 to-purple-500 opacity-40" />
             )}
 
-            {/* Text */}
             <span className="relative z-10">Post it ✨</span>
           </motion.button>
         </div>
@@ -102,4 +92,3 @@ export default function DashboardCompose({ profileData, postText, setPostText })
     </motion.div>
   );
 }
- 
