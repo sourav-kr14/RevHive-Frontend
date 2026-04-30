@@ -13,26 +13,32 @@ export default function UserLayout() {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [postText, setPostText] = useState("");
 
-  const user = JSON.parse(localStorage.getItem("user")) || {
-    username: "User",
-    id: null,
-  };
+  // ✅ SAFE PARSE (prevents crash)
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        if (!user.id) throw new Error("User ID not found");
+        // ✅ Fix: don't throw, handle gracefully
+        if (!user || !user.id) {
+          console.warn("User not found in localStorage");
+          setLoading(false);
+          return;
+        }
+
         const response = await api.get(`/auth/profile/${user.id}`);
         setUserData(response.data);
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching user profile:", err);
         setError("Failed to load user profile");
+      } finally {
         setLoading(false);
       }
     };
+
     fetchUserProfile();
-  }, [user.id]);
+  }, [user?.id]);
 
   if (loading) {
     return (
@@ -51,7 +57,7 @@ export default function UserLayout() {
   }
 
   const profileData = userData || {
-    username: user.username,
+    username: user?.username || "User",
     followersCount: 0,
     followingCount: 0,
     postsCount: 0,
