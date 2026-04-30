@@ -1,34 +1,19 @@
-export default function AnalyticsCards({ data }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        gap: "20px",
-        marginBottom: "30px",
-      }}
-    >
-      <Card title="Total Users" value={data.totalUsers} />
-      <Card title="Active Users" value={data.activeUsers} />
-      <Card title="New Users" value={data.newUsers} />
-      <Card title="DAU" value={data.dau} />
-      <Card title="MAU" value={data.mau} />
-    </div>
-  );
-}
+import Card from "./Card";
 
-function Card({ title, value }) {
+export default function AnalyticsCards({ data }) {
+  const cards = [
+    { title: "Total Users", value: data.totalUsers },
+    { title: "Active Users", value: data.activeUsers },
+    { title: "New Users", value: data.newUsers },
+    { title: "Daily Active Users", value: data.dau },
+    { title: "Monthly Active Users", value: data.mau },
+  ];
+
   return (
-    <div
-      style={{
-        padding: "20px",
-        borderRadius: "10px",
-        background: "#1e1e2f",
-        color: "white",
-        width: "150px",
-      }}
-    >
-      <p style={{ fontSize: "14px" }}>{title}</p>
-      <h2>{value}</h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      {cards.map((card) => (
+        <Card key={card.title} {...card} />
+      ))}
     </div>
   );
 }
