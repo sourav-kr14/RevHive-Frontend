@@ -66,7 +66,6 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-[#030712] text-white flex">
-
       {/* Sidebar */}
       <div className="w-64 bg-[#0f172a] p-6 flex flex-col justify-between border-r border-white/10">
         <div>
@@ -81,14 +80,16 @@ export default function UserDashboard() {
           </ul>
         </div>
 
-        <button onClick={handleLogout} className="bg-red-600 py-2 rounded-lg w-full hover:bg-red-700 transition">
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 py-2 rounded-lg w-full hover:bg-red-700 transition"
+        >
           Logout
         </button>
       </div>
 
       {/* Main */}
       <div className="flex-1 p-8">
-
         {/* Top */}
         <h1 className="text-3xl font-bold">
           Welcome, {profileData.username} 👋
@@ -103,12 +104,16 @@ export default function UserDashboard() {
 
           <div className="bg-white/5 p-6 rounded-xl border border-white/10 hover:border-blue-500/50 transition">
             <h3 className="text-gray-400 mb-2">Followers</h3>
-            <p className="text-4xl font-bold">{profileData.followersCount || 0}</p>
+            <p className="text-4xl font-bold">
+              {profileData.followersCount || 0}
+            </p>
           </div>
 
           <div className="bg-white/5 p-6 rounded-xl border border-white/10 hover:border-blue-500/50 transition">
             <h3 className="text-gray-400 mb-2">Following</h3>
-            <p className="text-4xl font-bold">{profileData.followingCount || 0}</p>
+            <p className="text-4xl font-bold">
+              {profileData.followingCount || 0}
+            </p>
           </div>
         </div>
 
@@ -126,7 +131,6 @@ export default function UserDashboard() {
 
         {/* Feed */}
         <div className="mt-8 space-y-6">
-
           <div className="bg-white/5 p-4 rounded-xl border border-white/10">
             <Post />
           </div>
@@ -134,9 +138,7 @@ export default function UserDashboard() {
           <div className="bg-white/5 p-4 rounded-xl border border-white/10">
             <Post />
           </div>
-
         </div>
-
       </div>
     </div>
   );
