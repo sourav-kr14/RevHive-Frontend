@@ -6,11 +6,7 @@ export default function DashboardCompose({
   postText,
   setPostText,
 }) {
-<<<<<<< HEAD:src/components/userdashboard/UserCompose.jsx
-  const initials = profileData?.username
-=======
   const initials = profileData.username
->>>>>>> 1c59d9af2b1f82dec95aee3e282dc1e9b9ae3dcc:src/components/userdashboard/DashboardCompose.jsx
     ? profileData.username.slice(0, 2).toUpperCase()
     : "RH";
 
