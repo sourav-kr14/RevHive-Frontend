@@ -186,7 +186,7 @@ const Signup = () => {
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
                     <input
                       name="password"
-                      type={setShowPassword ? "text" : "password"}
+                      type={showPassword ? "text" : "password"}
                       placeholder="Enter password"
                       onChange={handleChange}
                       required
@@ -209,7 +209,7 @@ const Signup = () => {
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
                     <input
                       name="confirmPassword"
-                      type={setShowPassword ? "text" : "password"}
+                      type={showPassword ? "text" : "password"}
                       placeholder="Enter Password"
                       onChange={handleChange}
                       required
