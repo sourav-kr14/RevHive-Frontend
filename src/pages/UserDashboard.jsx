@@ -59,12 +59,20 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-[#030712] text-white flex">
-      <DashboardSidebar activeNav={activeNav} setActiveNav={setActiveNav} profileData={profileData} />
+      <DashboardSidebar
+        activeNav={activeNav}
+        setActiveNav={setActiveNav}
+        profileData={profileData}
+      />
 
       <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8">
         <DashboardHeader profileData={profileData} />
         <DashboardStats profileData={profileData} />
-        <DashboardCompose profileData={profileData} postText={postText} setPostText={setPostText} />
+        <DashboardCompose
+          profileData={profileData}
+          postText={postText}
+          setPostText={setPostText}
+        />
         <DashboardFeed profileData={profileData} />
       </div>
     </div>
