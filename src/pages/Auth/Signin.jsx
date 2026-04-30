@@ -1,7 +1,7 @@
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 export default function Signin() {
   const [userNameOrEmail, setUserNameOrEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -184,9 +184,12 @@ export default function Signin() {
 
               <p className="text-sm text-gray-500 text-center mt-6">
                 New here?{" "}
-                <span className="text-white font-semibold cursor-pointer hover:text-blue-400 transition-colors underline underline-offset-4 decoration-white/20">
+                <Link
+                  to="/signup"
+                  className="text-white font-semibold cursor-pointer hover:text-blue-400 transition-colors underline underline-offset-4 decoration-white/20"
+                >
                   Create an account
-                </span>
+                </Link>
               </p>
             </form>
           </div>
