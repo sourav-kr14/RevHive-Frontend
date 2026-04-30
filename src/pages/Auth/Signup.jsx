@@ -7,6 +7,8 @@ import {
   Link,
   Calendar,
   ChevronRight,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -22,6 +24,8 @@ const Signup = () => {
     agreeTerms: false,
     subscribeNewsletter: false,
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -182,12 +186,19 @@ const Signup = () => {
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
                     <input
                       name="password"
-                      type="password"
-                      placeholder="••••••••"
+                      type={setShowPassword ? "text" : "password"}
+                      placeholder="Enter password"
                       onChange={handleChange}
                       required
                       className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-700 focus:bg-white/[0.07] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </div>
                 <div className="space-y-2">
