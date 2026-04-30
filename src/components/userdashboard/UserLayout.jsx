@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import api from "../services/api";
-import DashboardSidebar from "../components/userdashboard/DashboardSidebar";
-import DashboardHeader from "../components/userdashboard/DashboardHeader";
-import DashboardStats from "../components/userdashboard/DashboardStats";
-import DashboardCompose from "../components/userdashboard/DashboardCompose";
-import DashboardFeed from "../components/userdashboard/DashboardFeed";
+import api from "../../services/api";
+import DashboardSidebar from "./UserSidebar";
+import DashboardHeader from "./UserHeader";
+import DashboardStats from "./UserStats";
+import DashboardCompose from "./UserCompose";
+import DashboardFeed from "./UserFeed";
 
-export default function UserDashboard() {
+export default function UserLayout() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

@@ -6,20 +6,20 @@ export default function DashboardStats({ profileData }) {
     {
       label: "Posts",
       value: profileData.postsCount || 0,
-      icon: BarChart3,
       gradient: "from-blue-500 to-cyan-500",
+      icon: BarChart3,
     },
     {
       label: "Followers",
       value: profileData.followersCount || 0,
-      icon: Users,
       gradient: "from-purple-500 to-pink-500",
+      icon: Users,
     },
     {
       label: "Following",
       value: profileData.followingCount || 0,
-      icon: UserPlus,
       gradient: "from-emerald-400 to-teal-500",
+      icon: UserPlus,
     },
   ];
 
@@ -34,17 +34,17 @@ export default function DashboardStats({ profileData }) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            whileHover={{ y: -4 }}
+            whileHover={{ y: -5 }}
             className="relative group"
           >
-            {/* Glow */}
+            {/* Glow layer */}
             <div
               className={`absolute -inset-[1px] rounded-2xl bg-gradient-to-r ${s.gradient} opacity-0 group-hover:opacity-30 blur-xl transition-all duration-500`}
             />
 
             {/* Card */}
             <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 transition-all duration-300 group-hover:border-white/20">
-              {/* Top Row */}
+              {/* Header */}
               <div className="flex items-center justify-between mb-5">
                 <p className="text-xs text-gray-500 uppercase tracking-widest font-medium">
                   {s.label}
@@ -66,7 +66,7 @@ export default function DashboardStats({ profileData }) {
                 {s.value.toLocaleString()}
               </motion.p>
 
-              {/* Progress Bar */}
+              {/* Progress */}
               <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
