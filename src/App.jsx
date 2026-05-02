@@ -1,37 +1,53 @@
-// import Home from "./pages/Home";
 import Signup from "./pages/Auth/Signup";
 import Signin from "./pages/Auth/Signin";
-import AdminDashboard from "./pages/AdminDashboard";
-import UserDashboard from "./pages/UserDashboard";
-import { AdminRoute, UserRoute } from "./routes/ProtectedRoutes";
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminReports from "./pages/admin/AdminReports"; // ✅ NEW
+
+import { AdminRoute, UserRoute } from "./routes/ProtectedRoutes";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import UserLayout from "./components/userdashboard/UserLayout";
+import MessagingLayout from "./components/messaging/MessagingLayout";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Signup />} />
+        {/* AUTH */}
+        <Route path="/" element={<Navigate to="/signup" />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<Signin />} />
 
+        {/* ADMIN */}
         <Route
-          path="/admin/dashboard"
+          path="/admin"
           element={
             <AdminRoute>
-              <AdminDashboard />
+              <AdminLayout />
             </AdminRoute>
           }
-        />
+        >
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
 
+          {/* 🔥 NEW ROUTE */}
+          <Route path="reports" element={<AdminReports />} />
+        </Route>
+
+        {/* USER */}
         <Route
           path="/user/dashboard"
           element={
             <UserRoute>
-              <UserDashboard />
+              <UserLayout />
             </UserRoute>
           }
         />
+
+        <Route path="/messages" element={<MessagingLayout />} />
       </Routes>
     </BrowserRouter>
   );
