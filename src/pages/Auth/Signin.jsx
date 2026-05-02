@@ -72,13 +72,13 @@ export default function Signin() {
     <div className="h-screen w-full bg-[#0a0a0f] flex items-center justify-center px-6 relative overflow-hidden">
 
       {/* Animated nebula background */}
-      <div
+      <div 
         className="absolute inset-0 opacity-30"
         style={{
           background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(139,92,246,0.15), transparent 50%)`
         }}
       ></div>
-
+      
       {/* Floating orbs */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl animate-float"></div>
       <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl animate-float-delayed"></div>
@@ -108,7 +108,7 @@ export default function Signin() {
         {/* LEFT SIDE */}
         <div className="relative">
           <div className="absolute -top-32 -left-32 w-72 h-72 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-2xl animate-orbit"></div>
-
+          
           <div className="relative space-y-8">
             {/* Logo */}
             <div className="relative inline-block">
@@ -123,7 +123,7 @@ export default function Signin() {
               </div>
             </div>
 
-            {/* Simple text - changed */}
+            {/* Simple text */}
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-purple-300">
                 <Sparkles size={12} />
@@ -143,7 +143,7 @@ export default function Signin() {
               </p>
             </div>
 
-            {/* Simple features - changed */}
+            {/* Simple features */}
             <div className="space-y-3 pt-4">
               {[
                 { icon: <Zap size={16} />, text: "Real-time", color: "text-yellow-400" },
@@ -159,7 +159,7 @@ export default function Signin() {
               ))}
             </div>
 
-            {/* Simple message - changed */}
+            {/* Simple message */}
             <div className="flex items-center gap-4 pt-2">
               <div className="text-3xl">👋</div>
               <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-300">
@@ -172,15 +172,15 @@ export default function Signin() {
         {/* RIGHT SIDE */}
         <div className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
+          
           <div className="relative bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden">
-
+            
             <div className="absolute inset-0 rounded-3xl" style={{
               background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.1), rgba(59,130,246,0.1), transparent)"
             }}></div>
 
             <div className="relative">
-              {/* Header - simple changed */}
+              {/* Header */}
               <div className="text-center mb-8">
                 <div className="inline-block p-3 rounded-2xl bg-white/5 mb-4">
                   <div className="w-10 h-10 bg-gradient-to-tr from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
@@ -239,7 +239,7 @@ export default function Signin() {
                   </button>
                 </div>
 
-                {/* Login Button - simple changed */}
+                {/* Login Button */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -262,7 +262,7 @@ export default function Signin() {
                   </div>
                 </button>
 
-                {/* Sign up link - simple changed */}
+                {/* Sign up link */}
                 <div className="relative pt-4 text-center">
                   <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
                   <p className="text-sm text-gray-500 pt-4">
@@ -277,7 +277,7 @@ export default function Signin() {
                   </p>
                 </div>
 
-                {/* Demo hint - simple */}
+                {/* Demo hint */}
                 <div className="text-center pt-2">
                   <p className="text-[11px] text-gray-600/50">
                     demo: demo@revhive.com / anything
@@ -286,7 +286,7 @@ export default function Signin() {
               </form>
             </div>
           </div>
-
+          
           <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-full blur-xl"></div>
           <div className="absolute -top-4 -left-4 w-16 h-16 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-xl"></div>
         </div>
