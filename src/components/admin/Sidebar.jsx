@@ -20,6 +20,11 @@ export default function Sidebar() {
         Users
       </Link>
 
+      {/* 🔥 ADD THIS LINE ONLY */}
+      <Link to="/admin/reports" className="mb-4 hover:text-blue-400">
+        Reports
+      </Link>
+
       <button onClick={logout} className="mt-auto bg-red-500 px-4 py-2 rounded">
         Logout
       </button>
