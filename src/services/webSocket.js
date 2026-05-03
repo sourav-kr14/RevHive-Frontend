@@ -1,36 +1,47 @@
 import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+import Stomp from "stompjs";
 
 let stompClient = null;
 
-export const connectWebSocket = (messageRecieved) => {
-  const socket = new SockJS("http://localhost:8080/ws");
+export const connectWebSocket = (token, onMessageReceived) => {
+  const socket = new SockJS("http://localhost:8080/chat");
+  stompClient = Stomp.over(socket);
 
-  stompClient = new Client({
-    webSocketFactory: () => socket,
-    reconnectDelay: 5000,
-    connectHeaders: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+  stompClient.connect(
+    {
+      Authorization: "Bearer " + token,
     },
-    onConnect: () => {
-      console.log("Connection established Successfully");
-      const username = JSON.parse(localStorage.getItem("user"))?.username;
+    () => {
+      console.log("✅ Connected to WebSocket");
 
-      stompClient.subscribe(`/user/${username}/queue/messages`, (message) => {
-        const body = JSON.parse(message.body);
-        messageRecieved(body);
+      // Subscribe to private messages
+      stompClient.subscribe("/user/queue/messages", (message) => {
+        if (message.body) {
+          onMessageReceived(JSON.parse(message.body));
+        }
       });
     },
-  });
-
-  stompClient.activate();
+    (error) => {
+      console.error("❌ WebSocket error:", error);
+    },
+  );
 };
 
-export const sendMessage = (message) => {
-  if (stompClient && stompClient.connected) {
-    stompClient.publish({
-      destination: "/app/chat.send",
-      body: JSON.stringify(message),
-    });
+export const sendMessage = (receiver, content) => {
+  if (stompClient) {
+    stompClient.send(
+      "/app/chat.sendMessage",
+      {},
+      JSON.stringify({
+        receiver,
+        content,
+      }),
+    );
+  }
+};
+
+export const disconnectWebSocket = () => {
+  if (stompClient) {
+    stompClient.disconnect();
   }
 };
