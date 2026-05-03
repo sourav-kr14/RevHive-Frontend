@@ -81,7 +81,7 @@ export default function DashboardSidebar({
             <li key={item.id}>
               <motion.button
                 onClick={() => {
-                  setActiveNav(item.id);
+                  setActiveNav && setActiveNav(item.id);
                   navigate(item.path);
                 }}
                 whileHover={{ scale: 1.02 }}

@@ -4,11 +4,11 @@ import Signin from "./pages/Auth/Signin";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
-import AdminReports from "./pages/admin/AdminReports"; // ✅ NEW
+import AdminReports from "./pages/admin/AdminReports";
 
 import { AdminRoute, UserRoute } from "./routes/ProtectedRoutes";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
+import SettingsLayout from "./components/settings/SettingsLayout";
 import UserLayout from "./components/userdashboard/UserLayout";
 import MessagingLayout from "./components/messaging/MessagingLayout";
 
@@ -48,6 +48,7 @@ export default function App() {
         />
 
         <Route path="/messages" element={<MessagingLayout />} />
+        <Route path="/settings" element={<SettingsLayout />} />
       </Routes>
     </BrowserRouter>
   );
