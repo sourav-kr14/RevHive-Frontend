@@ -1,4 +1,13 @@
-import { Mail, Lock, ArrowRight, Eye, EyeOff, Sparkles, Rocket, Zap } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Rocket,
+  Zap,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "./authService";
@@ -48,7 +57,7 @@ export default function Signin() {
             id: data.id || "",
             username: data.username || "",
             email: data.email || "",
-          })
+          }),
         );
 
         if (data.role === "ADMIN") {
@@ -61,7 +70,7 @@ export default function Signin() {
       }
     } catch (err) {
       setError(
-        err?.response?.data?.message || "Invalid credentials. Try again."
+        err?.response?.data?.message || "Invalid credentials. Try again.",
       );
     } finally {
       setLoading(false);
@@ -70,15 +79,14 @@ export default function Signin() {
 
   return (
     <div className="h-screen w-full bg-[#0a0a0f] flex items-center justify-center px-6 relative overflow-hidden">
-
       {/* Animated nebula background */}
-      <div 
+      <div
         className="absolute inset-0 opacity-30"
         style={{
-          background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(139,92,246,0.15), transparent 50%)`
+          background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(139,92,246,0.15), transparent 50%)`,
         }}
       ></div>
-      
+
       {/* Floating orbs */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl animate-float"></div>
       <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl animate-float-delayed"></div>
@@ -104,11 +112,10 @@ export default function Signin() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
       <div className="max-w-5xl w-full grid lg:grid-cols-2 gap-12 items-center z-10">
-
         {/* LEFT SIDE */}
         <div className="relative">
           <div className="absolute -top-32 -left-32 w-72 h-72 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-2xl animate-orbit"></div>
-          
+
           <div className="relative space-y-8">
             {/* Logo */}
             <div className="relative inline-block">
@@ -146,12 +153,29 @@ export default function Signin() {
             {/* Simple features */}
             <div className="space-y-3 pt-4">
               {[
-                { icon: <Zap size={16} />, text: "Real-time", color: "text-yellow-400" },
-                { icon: <Sparkles size={16} />, text: "Smooth UX", color: "text-purple-400" },
-                { icon: <Rocket size={16} />, text: "Secure", color: "text-blue-400" }
+                {
+                  icon: <Zap size={16} />,
+                  text: "Real-time",
+                  color: "text-yellow-400",
+                },
+                {
+                  icon: <Sparkles size={16} />,
+                  text: "Smooth UX",
+                  color: "text-purple-400",
+                },
+                {
+                  icon: <Rocket size={16} />,
+                  text: "Secure",
+                  color: "text-blue-400",
+                },
               ].map((feature, i) => (
-                <div key={i} className="flex items-center gap-3 group cursor-default">
-                  <div className={`${feature.color} bg-white/5 p-1.5 rounded-lg group-hover:scale-110 transition-transform`}>
+                <div
+                  key={i}
+                  className="flex items-center gap-3 group cursor-default"
+                >
+                  <div
+                    className={`${feature.color} bg-white/5 p-1.5 rounded-lg group-hover:scale-110 transition-transform`}
+                  >
                     {feature.icon}
                   </div>
                   <span className="text-gray-300 text-sm">{feature.text}</span>
@@ -172,12 +196,15 @@ export default function Signin() {
         {/* RIGHT SIDE */}
         <div className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          
+
           <div className="relative bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden">
-            
-            <div className="absolute inset-0 rounded-3xl" style={{
-              background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.1), rgba(59,130,246,0.1), transparent)"
-            }}></div>
+            <div
+              className="absolute inset-0 rounded-3xl"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, rgba(139,92,246,0.1), rgba(59,130,246,0.1), transparent)",
+              }}
+            ></div>
 
             <div className="relative">
               {/* Header */}
@@ -188,11 +215,12 @@ export default function Signin() {
                   </div>
                 </div>
                 <h2 className="text-3xl font-bold text-white mb-2">Sign in</h2>
-                <p className="text-gray-400 text-sm">Welcome back. Enter your details.</p>
+                <p className="text-gray-400 text-sm">
+                  Welcome back. Enter your details.
+                </p>
               </div>
 
               <form onSubmit={handleSignin} className="space-y-5">
-
                 {error && (
                   <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-center animate-shake">
                     {error}
@@ -234,8 +262,12 @@ export default function Signin() {
 
                 {/* Forgot password */}
                 <div className="flex justify-end">
-                  <button type="button" className="text-xs text-gray-500 hover:text-purple-400 transition-colors duration-200">
-                    forgot?
+                  <button
+                    type="button"
+                    onClick={() => navigate("/forgot-password")}
+                    className="text-sm text-gray-500 hover:text-blue-600"
+                  >
+                    Forgot password?
                   </button>
                 </div>
 
@@ -256,7 +288,10 @@ export default function Signin() {
                     ) : (
                       <>
                         <span>Login</span>
-                        <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform duration-200" />
+                        <ArrowRight
+                          size={16}
+                          className="group-hover/btn:translate-x-1 transition-transform duration-200"
+                        />
                       </>
                     )}
                   </div>
@@ -272,7 +307,10 @@ export default function Signin() {
                       onClick={() => navigate("/signup")}
                     >
                       Create account
-                      <ArrowRight size={12} className="group-hover/link:translate-x-0.5 transition-transform duration-200" />
+                      <ArrowRight
+                        size={12}
+                        className="group-hover/link:translate-x-0.5 transition-transform duration-200"
+                      />
                     </span>
                   </p>
                 </div>
@@ -286,7 +324,7 @@ export default function Signin() {
               </form>
             </div>
           </div>
-          
+
           <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-full blur-xl"></div>
           <div className="absolute -top-4 -left-4 w-16 h-16 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-xl"></div>
         </div>
@@ -294,25 +332,52 @@ export default function Signin() {
 
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(-20px) translateX(10px); }
+          0%,
+          100% {
+            transform: translateY(0px) translateX(0px);
+          }
+          50% {
+            transform: translateY(-20px) translateX(10px);
+          }
         }
         @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(15px) translateX(-10px); }
+          0%,
+          100% {
+            transform: translateY(0px) translateX(0px);
+          }
+          50% {
+            transform: translateY(15px) translateX(-10px);
+          }
         }
         @keyframes orbit {
-          0%, 100% { transform: translate(0px, 0px) scale(1); }
-          50% { transform: translate(20px, -20px) scale(1.05); }
+          0%,
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          50% {
+            transform: translate(20px, -20px) scale(1.05);
+          }
         }
         @keyframes twinkle {
-          0%, 100% { opacity: 0.2; }
-          50% { opacity: 0.8; }
+          0%,
+          100% {
+            opacity: 0.2;
+          }
+          50% {
+            opacity: 0.8;
+          }
         }
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-5px);
+          }
+          75% {
+            transform: translateX(5px);
+          }
         }
         .animate-float {
           animation: float 8s ease-in-out infinite;
