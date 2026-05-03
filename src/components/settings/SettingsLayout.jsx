@@ -1,6 +1,7 @@
 import { useState } from "react";
 import SettingsTabs from "./SettingsTab";
 import ProfileSection from "./sections/Profile";
+import ChangePassword from "./sections/ChangePassword";
 
 export default function SettingsLayout() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -16,7 +17,7 @@ export default function SettingsLayout() {
 
             {/* Search */}
             <div className="border rounded-lg px-3 py-2 bg-white text-sm text-gray-500">
-              Search ⌘K
+              Search
             </div>
           </div>
 
@@ -26,6 +27,8 @@ export default function SettingsLayout() {
           {/* CONTENT */}
           <div className="mt-6">
             {activeTab === "profile" && <ProfileSection />}
+
+            {activeTab === "password" && <ChangePassword />}
           </div>
         </div>
       </div>
