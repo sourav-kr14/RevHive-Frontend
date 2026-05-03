@@ -1,4 +1,3 @@
-// components/userdashboard/UserFeed.jsx
 import { motion } from "framer-motion";
 import { Heart, Share2, MoreVertical, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -6,7 +5,7 @@ import { postAPI, followAPI } from "../../services/api";
 import CommentSection from "./CommentSection";
 import EditPostModal from "./EditPostModal";
 
-export default function DashboardFeed({ profileData, refreshTrigger }) {
+export default function UserFeed({ profileData, refreshTrigger }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,10 +13,18 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
   const [menuOpen, setMenuOpen] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
   const [followingStatus, setFollowingStatus] = useState({});
+  const [followLoading, setFollowLoading] = useState({});
+
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    fetchFeed();
-  }, [feedType, refreshTrigger]);
+    isMounted.current = true;
+    if (profileData?.id) fetchFeed();
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, [feedType, refreshTrigger, profileData?.id]);
 
   const fetchFeed = async () => {
     setLoading(true);
@@ -25,6 +32,7 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
 
     try {
       let response;
+
       switch (feedType) {
         case "trending":
           response = await postAPI.getTrending(0, 20);
@@ -43,6 +51,10 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
 
       setPosts(validPosts);
 
+      if (!isMounted.current) return;
+      setPosts(validPosts);
+
+      // ✅ optimized follow status
       if (profileData?.id) {
         for (const post of validPosts) {
           if (post.user?.id && post.user.id !== profileData.id) {
@@ -58,9 +70,9 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
         }
       }
     } catch (err) {
-      setError(err.message || "Failed to load feed");
+      if (isMounted.current) setError(err.message || "Failed to load feed");
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
@@ -69,11 +81,12 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
     if (!post) return;
 
     try {
-      if (post.liked) await postAPI.unlikePost(postId);
-      else await postAPI.likePost(postId);
+      post.liked
+        ? await postAPI.unlikePost(postId)
+        : await postAPI.likePost(postId);
 
-      setPosts(
-        posts.map((p) =>
+      setPosts((prev) =>
+        prev.map((p) =>
           p.id === postId
             ? {
                 ...p,
@@ -86,17 +99,10 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
     } catch {}
   };
 
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Delete this post?")) return;
+  const handleFollowToggle = async (authorId) => {
+    if (!authorId || !profileData?.id) return;
 
-    try {
-      await postAPI.deletePost(postId);
-      setPosts(posts.filter((p) => p.id !== postId));
-      setMenuOpen(null);
-    } catch {
-      alert("Delete failed");
-    }
-  };
+    setFollowLoading((prev) => ({ ...prev, [authorId]: true }));
 
   const handleFollowToggle = async (authorId) => {
     if (!authorId) return; // ✅ FIX
@@ -113,30 +119,32 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
         [authorId]: !prev[authorId],
       }));
     } catch {
-      alert("Follow update failed");
+      alert("Follow failed");
+    } finally {
+      setFollowLoading((prev) => ({ ...prev, [authorId]: false }));
     }
   };
 
-  const handleUpdatePost = (updatedPost) => {
-    setPosts(posts.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm("Delete this post?")) return;
+
+    try {
+      await postAPI.deletePost(postId);
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      setMenuOpen(null);
+    } catch {
+      alert("Delete failed");
+    }
   };
 
   if (loading)
-    return (
-      <div className="text-center py-16 text-gray-500">Loading feed...</div>
-    );
+    return <div className="text-center py-16 text-gray-400">Loading...</div>;
 
   if (error)
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-        <AlertCircle className="mx-auto mb-2 text-red-500" />
-        <p className="text-red-600">{error}</p>
-        <button
-          onClick={fetchFeed}
-          className="mt-3 px-4 py-2 bg-gray-900 text-white rounded-md"
-        >
-          Retry
-        </button>
+      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center text-red-400">
+        <AlertCircle className="mx-auto mb-2" />
+        {error}
       </div>
     );
 
@@ -144,15 +152,15 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         {/* Tabs */}
-        <div className="flex gap-2 mb-4 border-b border-gray-200 pb-2">
+        <div className="flex gap-2 mb-5">
           {["feed", "trending", "my"].map((type) => (
             <button
               key={type}
               onClick={() => setFeedType(type)}
-              className={`px-3 py-1.5 text-sm rounded-md ${
+              className={`px-4 py-1.5 text-sm rounded-lg transition ${
                 feedType === type
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
+                  : "bg-white/5 text-gray-400 hover:text-white"
               }`}
             >
               {type === "feed"
@@ -165,12 +173,13 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
         </div>
 
         {/* Posts */}
-        {posts.length > 0 ? (
-          <div className="flex flex-col gap-4">
-            {posts.map((post) => (
+        <div className="flex flex-col gap-4">
+          {posts.length > 0 ? (
+            posts.map((post) => (
               <motion.div
                 key={post.id}
-                className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                className="bg-white/5 backdrop-blur-xl border border-white/10 
+              rounded-2xl p-5"
               >
                 {/* Header */}
                 <div className="flex justify-between">
@@ -203,51 +212,18 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
                       {followingStatus[post.user?.id] ? "Following" : "Follow"}
                     </button>
                   )}
-
-                  {post.user?.id === profileData?.id && (
-                    <div className="relative">
-                      <button
-                        onClick={() =>
-                          setMenuOpen(menuOpen === post.id ? null : post.id)
-                        }
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-
-                      {menuOpen === post.id && (
-                        <div className="absolute right-0 mt-2 bg-white border rounded-md shadow-md">
-                          <button
-                            onClick={() => setEditingPost(post)}
-                            className="block px-3 py-2 text-sm hover:bg-gray-100"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeletePost(post.id)}
-                            className="block px-3 py-2 text-sm text-red-500 hover:bg-red-50"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 {/* Content */}
-                <p className="mt-3 text-sm text-gray-700">{post.content}</p>
-
-                {post.imageUrl && (
-                  <img
-                    src={post.imageUrl}
-                    className="mt-3 rounded-lg max-h-80 object-cover border"
-                  />
-                )}
+                <p className="mt-3 text-sm text-gray-300">{post.content}</p>
 
                 {/* Actions */}
-                <div className="flex gap-5 mt-3 pt-3 border-t border-gray-200">
+                <div className="flex gap-6 mt-4 pt-3 border-t border-white/10 text-gray-400">
                   <button onClick={() => handleLike(post.id)}>
-                    <Heart size={16} fill={post.liked ? "red" : "none"} />
+                    <Heart
+                      size={16}
+                      className={post.liked ? "text-red-500 fill-red-500" : ""}
+                    />
                   </button>
 
                   <CommentSection
@@ -255,25 +231,25 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
                     currentUserId={profileData?.id}
                   />
 
-                  <button>
-                    <Share2 size={16} />
-                  </button>
+                  <Share2 size={16} />
                 </div>
               </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16 border rounded-xl bg-white">
-            No posts yet
-          </div>
-        )}
+            ))
+          ) : (
+            <div className="text-center py-16 text-gray-500">No posts yet</div>
+          )}
+        </div>
       </motion.div>
 
       {editingPost && (
         <EditPostModal
           post={editingPost}
           onClose={() => setEditingPost(null)}
-          onUpdate={handleUpdatePost}
+          onUpdate={(updated) =>
+            setPosts((prev) =>
+              prev.map((p) => (p.id === updated.id ? updated : p)),
+            )
+          }
         />
       )}
     </>

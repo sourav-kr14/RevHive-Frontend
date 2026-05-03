@@ -36,13 +36,13 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
 
   const handleCreatePost = async () => {
     if (!postText.trim()) {
-      setError("Please enter some content for your post");
+      setError("Enter something first");
       textareaRef.current?.focus();
       return;
     }
 
     if (charCount > 500) {
-      setError("Post content cannot exceed 500 characters");
+      setError("Max 500 chars");
       return;
     }
 
@@ -146,7 +146,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
           onChange={handleTextChange}
           maxLength={500}
         />
-        <span className="absolute bottom-2 right-2 text-xs text-gray-400">
+        <span className="absolute bottom-2 right-2 text-xs text-gray-500">
           {charCount}/500
         </span>
       </div>
@@ -209,7 +209,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
               }}
               className="w-8 h-8 flex items-center justify-center border rounded-md text-gray-600 hover:bg-gray-100"
             >
-              <Icon size={14} />
+              <Icon size={15} />
             </button>
           ))}
         </div>
