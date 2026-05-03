@@ -15,7 +15,7 @@ export default function DashboardStats({ profileData }) {
 
   useEffect(() => {
     if (profileData?.id) fetchStats();
-  }, [profileData]);
+  }, [profileData?.id]); // ✅ FIX
 
   const fetchStats = async () => {
     try {
@@ -25,44 +25,28 @@ export default function DashboardStats({ profileData }) {
       ]);
 
       setStats({
-        postsCount: profileData.postsCount || 0,
-        followersCount: followersRes.data.followersCount || 0,
-        followingCount: followingRes.data.followingCount || 0,
+        postsCount: profileData?.postsCount || 0,
+        followersCount: followersRes.data?.followersCount || 0,
+        followingCount: followingRes.data?.followingCount || 0,
       });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-    }
+    } catch {}
   };
 
   const statItems = [
-    {
-      label: "Posts",
-      value: stats.postsCount,
-      icon: BarChart3,
-      clickable: false,
-    },
+    { label: "Posts", value: stats.postsCount, icon: BarChart3 },
     {
       label: "Followers",
       value: stats.followersCount,
       icon: Users,
-      clickable: true,
       type: "followers",
     },
     {
       label: "Following",
       value: stats.followingCount,
       icon: UserPlus,
-      clickable: true,
       type: "following",
     },
   ];
-
-  const handleStatClick = (stat) => {
-    if (stat.clickable && profileData?.id) {
-      setModalType(stat.type);
-      setShowModal(true);
-    }
-  };
 
   return (
     <>
@@ -76,35 +60,41 @@ export default function DashboardStats({ profileData }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -2 }}
-              onClick={() => handleStatClick(s)}
-              className={`bg-white border border-gray-200 rounded-xl p-4 shadow-sm transition ${
-                s.clickable ? "cursor-pointer hover:bg-gray-50" : ""
-              }`}
+              whileHover={{ y: -3, scale: 1.02 }}
+              onClick={() =>
+                s.type && setModalType(s.type) && setShowModal(true)
+              }
+              className={`relative p-5 rounded-2xl 
+              bg-white/5 backdrop-blur-xl border border-white/10 
+              shadow-[0_0_20px_rgba(139,92,246,0.08)]
+              ${s.type ? "cursor-pointer hover:bg-white/10" : ""}`}
             >
               {/* Top */}
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs text-gray-400 uppercase tracking-wider">
                   {s.label}
                 </p>
 
-                <div className="p-2 rounded-md bg-gray-100">
-                  <Icon size={16} className="text-gray-700" />
+                <div
+                  className="p-2 rounded-lg 
+                bg-gradient-to-br from-purple-500 to-blue-500"
+                >
+                  <Icon size={16} className="text-white" />
                 </div>
               </div>
 
               {/* Value */}
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-2xl font-semibold text-white">
                 {s.value.toLocaleString()}
               </p>
 
-              {/* Simple Progress Line */}
-              <div className="mt-3 h-1 bg-gray-200 rounded-full overflow-hidden">
+              {/* Progress */}
+              <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(s.value, 100)}%` }}
                   transition={{ duration: 0.8 }}
-                  className="h-full bg-gray-900"
+                  className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
                 />
               </div>
             </motion.div>
