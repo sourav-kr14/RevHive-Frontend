@@ -1,10 +1,6 @@
 import { motion } from "framer-motion";
-import { Heart, Share2, MoreVertical, AlertCircle } from "lucide-react";
-<<<<<<< HEAD
+import { Heart, Share2, AlertCircle } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-=======
-import { useEffect, useState } from "react";
->>>>>>> feature/ai-content
 import { postAPI, followAPI } from "../../services/api";
 import CommentSection from "./CommentSection";
 import EditPostModal from "./EditPostModal";
@@ -14,7 +10,6 @@ export default function UserFeed({ profileData, refreshTrigger }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [feedType, setFeedType] = useState("feed");
-  const [menuOpen, setMenuOpen] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
   const [followingStatus, setFollowingStatus] = useState({});
   const [followLoading, setFollowLoading] = useState({});
@@ -48,23 +43,13 @@ export default function UserFeed({ profileData, refreshTrigger }) {
           response = await postAPI.getFeed(0, 20);
       }
 
-<<<<<<< HEAD
-      const validPosts = (response.data.content || []).filter((p) => p?.id);
-=======
-      const postsData = response.data.content || [];
-
-      // ✅ FIX: remove invalid posts
-      const validPosts = postsData.filter((p) => p && p.id);
-
-      setPosts(validPosts);
->>>>>>> feature/ai-content
+      const validPosts = (response.data?.content || []).filter((p) => p?.id);
 
       if (!isMounted.current) return;
       setPosts(validPosts);
 
-      // ✅ optimized follow status
+      // follow status
       if (profileData?.id) {
-<<<<<<< HEAD
         const statusMap = {};
 
         await Promise.all(
@@ -84,20 +69,6 @@ export default function UserFeed({ profileData, refreshTrigger }) {
         );
 
         if (isMounted.current) setFollowingStatus(statusMap);
-=======
-        for (const post of validPosts) {
-          if (post.user?.id && post.user.id !== profileData.id) {
-            const followCheck = await followAPI.isFollowing(
-              profileData.id,
-              post.user.id,
-            );
-            setFollowingStatus((prev) => ({
-              ...prev,
-              [post.user.id]: followCheck.data.isFollowing,
-            }));
-          }
-        }
->>>>>>> feature/ai-content
       }
     } catch (err) {
       if (isMounted.current) setError(err.message || "Failed to load feed");
@@ -130,13 +101,9 @@ export default function UserFeed({ profileData, refreshTrigger }) {
   };
 
   const handleFollowToggle = async (authorId) => {
-<<<<<<< HEAD
     if (!authorId || !profileData?.id) return;
 
     setFollowLoading((prev) => ({ ...prev, [authorId]: true }));
-=======
-    if (!authorId) return; // ✅ FIX
->>>>>>> feature/ai-content
 
     try {
       if (followingStatus[authorId]) {
@@ -153,18 +120,6 @@ export default function UserFeed({ profileData, refreshTrigger }) {
       alert("Follow failed");
     } finally {
       setFollowLoading((prev) => ({ ...prev, [authorId]: false }));
-    }
-  };
-
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Delete this post?")) return;
-
-    try {
-      await postAPI.deletePost(postId);
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
-      setMenuOpen(null);
-    } catch {
-      alert("Delete failed");
     }
   };
 
@@ -209,46 +164,30 @@ export default function UserFeed({ profileData, refreshTrigger }) {
             posts.map((post) => (
               <motion.div
                 key={post.id}
-                className="bg-white/5 backdrop-blur-xl border border-white/10 
-              rounded-2xl p-5"
+                className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5"
               >
                 {/* Header */}
                 <div className="flex justify-between">
                   <div className="flex gap-3">
-<<<<<<< HEAD
                     <div
                       className="w-10 h-10 rounded-full 
                   bg-gradient-to-br from-purple-500 to-blue-500 
                   flex items-center justify-center text-white text-sm font-semibold"
                     >
-=======
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">
->>>>>>> feature/ai-content
                       {post.user?.username?.slice(0, 2)?.toUpperCase() || "NA"}
                     </div>
 
                     <div>
-<<<<<<< HEAD
                       <p className="text-sm font-semibold text-white">
                         @{post.user?.username}
                       </p>
                       <p className="text-xs text-gray-400">
                         {post.createdAt &&
                           new Date(post.createdAt).toLocaleString()}
-=======
-                      <p className="text-sm font-semibold text-gray-900">
-                        @{post.user?.username || "unknown"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {post.createdAt
-                          ? new Date(post.createdAt).toLocaleString()
-                          : ""}
->>>>>>> feature/ai-content
                       </p>
                     </div>
                   </div>
 
-<<<<<<< HEAD
                   {/* Follow */}
                   {post.user?.id && post.user.id !== profileData?.id && (
                     <button
@@ -261,24 +200,20 @@ export default function UserFeed({ profileData, refreshTrigger }) {
                         : followingStatus[post.user.id]
                           ? "Following"
                           : "Follow"}
-=======
-                  {post.user?.id && post.user.id !== profileData?.id && (
-                    <button
-                      onClick={() => handleFollowToggle(post.user?.id)}
-                      className={`px-3 py-1 text-xs rounded-md ${
-                        followingStatus[post.user?.id]
-                          ? "bg-gray-100"
-                          : "bg-gray-900 text-white"
-                      }`}
-                    >
-                      {followingStatus[post.user?.id] ? "Following" : "Follow"}
->>>>>>> feature/ai-content
                     </button>
                   )}
                 </div>
 
                 {/* Content */}
                 <p className="mt-3 text-sm text-gray-300">{post.content}</p>
+
+                {/* Image */}
+                {post.imageUrl && (
+                  <img
+                    src={post.imageUrl}
+                    className="mt-3 rounded-xl max-h-80 object-cover border border-white/10"
+                  />
+                )}
 
                 {/* Actions */}
                 <div className="flex gap-6 mt-4 pt-3 border-t border-white/10 text-gray-400">
