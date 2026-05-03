@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Bell, Mail, Sparkles } from "lucide-react";
+import { Bell, Mail } from "lucide-react";
 
 export default function DashboardHeader({ profileData }) {
   const getGreeting = () => {
@@ -11,24 +11,20 @@ export default function DashboardHeader({ profileData }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="flex items-start justify-between relative"
+      className="flex items-start justify-between"
     >
       {/* LEFT */}
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Sparkles size={14} className="text-purple-400" />
-          <p className="text-xs text-gray-500 uppercase tracking-widest">
-            {getGreeting()}
-          </p>
-        </div>
+        <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+          {getGreeting()}
+        </p>
 
-        <h1 className="text-3xl font-bold text-gray-100 flex items-center gap-2">
+        <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
           {profileData.username}
           <motion.span
-            animate={{ rotate: [0, 20, 0] }}
+            animate={{ rotate: [0, 15, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
             👋
@@ -40,38 +36,28 @@ export default function DashboardHeader({ profileData }) {
         </p>
       </div>
 
-      {/* RIGHT ACTIONS */}
-      <div className="flex gap-3">
-        {/* Notification Button */}
+      {/* RIGHT */}
+      <div className="flex gap-2">
+        {/* Notification */}
         <motion.button
-          whileHover={{ scale: 1.08 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative w-11 h-11 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 text-gray-400 hover:text-blue-400 hover:border-blue-500/30 transition-all flex items-center justify-center"
+          className="relative w-10 h-10 rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-100 flex items-center justify-center"
         >
-          {/* Glow */}
-          <span className="absolute inset-0 rounded-xl bg-blue-500/10 opacity-0 hover:opacity-100 blur-md transition-all" />
+          <Bell size={16} />
 
-          {/* Icon */}
-          <Bell size={18} className="relative z-10" />
-
-          {/* Notification Dot */}
-          <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full shadow-md shadow-blue-500/50" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-gray-900 rounded-full" />
         </motion.button>
 
-        {/* Messages Button */}
+        {/* Messages */}
         <motion.button
-          whileHover={{ scale: 1.08 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative w-11 h-11 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 text-gray-400 hover:text-purple-400 hover:border-purple-500/30 transition-all flex items-center justify-center"
+          className="relative w-10 h-10 rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-100 flex items-center justify-center"
         >
-          {/* Glow */}
-          <span className="absolute inset-0 rounded-xl bg-purple-500/10 opacity-0 hover:opacity-100 blur-md transition-all" />
+          <Mail size={16} />
 
-          {/* Icon */}
-          <Mail size={18} className="relative z-10" />
-
-          {/* Message Dot */}
-          <span className="absolute top-2 right-2 w-2 h-2 bg-purple-500 rounded-full shadow-md shadow-purple-500/50" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-gray-900 rounded-full" />
         </motion.button>
       </div>
     </motion.div>
