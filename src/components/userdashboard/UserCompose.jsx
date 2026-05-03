@@ -14,7 +14,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
   const [error, setError] = useState("");
   const [charCount, setCharCount] = useState(0);
 
-  // ✅ AI states
   const [hashtags, setHashtags] = useState([]);
   const [loadingTags, setLoadingTags] = useState(false);
 
@@ -73,7 +72,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
     }
   };
 
-  // ✅ HASHTAGS
   const generateHashtags = async () => {
     setLoadingTags(true);
     setHashtags([]);
@@ -102,7 +100,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
     setPostText((prev) => prev + " " + tag);
   };
 
-  // ✅ GENERIC AI
   const handleAI = async (type) => {
     setLoadingAI(true);
     setAiType(type);
@@ -231,14 +228,13 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         </button>
       </div>
 
-      {/* ✅ NEW AI TEXT ACTIONS */}
       <div className="flex gap-2 mt-3 flex-wrap">
         {/* Caption */}
         <button
           onClick={() => handleAI("caption")}
           className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
         >
-          ✨ Caption
+          Caption
         </button>
 
         {/* Hashtags (same as icon but text version optional) */}
@@ -246,7 +242,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
           onClick={generateHashtags}
           className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
         >
-          # Tags
+          Tags
         </button>
 
         {/* Summarize */}
@@ -254,7 +250,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
           onClick={() => handleAI("summarize")}
           className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
         >
-          📝 Summary
+          Summary
         </button>
 
         {/* Moderation */}
@@ -262,7 +258,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
           onClick={() => handleAI("moderate")}
           className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
         >
-          ⚠️ Check
+          Check
         </button>
       </div>
     </motion.div>
