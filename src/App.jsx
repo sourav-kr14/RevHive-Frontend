@@ -33,7 +33,6 @@ export default function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
 
-          {/* 🔥 NEW ROUTE */}
           <Route path="reports" element={<AdminReports />} />
         </Route>
 
