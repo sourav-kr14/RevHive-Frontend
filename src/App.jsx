@@ -1,9 +1,9 @@
 import Signup from "./pages/Auth/Signup";
 import Signin from "./pages/Auth/Signin";
 
-import AdminLayout from "./pages/admin/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminUsers from "./pages/admin/AdminUsers";
+import AdminLayout from "./components/admin/layout/AdminLayout";
+import AdminDashboard from "./components/admin/dashboard/AdminDashboard";
+import AdminUsers from "./components/admin/dashboard/AdminUsers";
 import AdminReports from "./pages/admin/AdminReports";
 
 import { AdminRoute, UserRoute } from "./routes/ProtectedRoutes";
