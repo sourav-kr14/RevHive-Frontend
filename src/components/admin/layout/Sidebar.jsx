@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Users, LogOut } from "lucide-react";
+import { GoReport } from "react-icons/go";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -18,6 +19,7 @@ export default function Sidebar() {
   const navItems = [
     { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Users", path: "/admin/users", icon: Users },
+    { name: "Reports", path: "/admin/reports", icon: GoReport },
   ];
 
   return (

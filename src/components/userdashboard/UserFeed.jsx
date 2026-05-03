@@ -1,15 +1,6 @@
 // components/userdashboard/UserFeed.jsx
 import { motion } from "framer-motion";
-import {
-  Heart,
-  Share2,
-  MoreVertical,
-  Edit2,
-  Trash2,
-  UserPlus,
-  UserCheck,
-  AlertCircle,
-} from "lucide-react";
+import { Heart, Share2, MoreVertical, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { postAPI, followAPI } from "../../services/api";
 import CommentSection from "./CommentSection";
@@ -46,10 +37,14 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
       }
 
       const postsData = response.data.content || [];
-      setPosts(postsData);
+
+      // ✅ FIX: remove invalid posts
+      const validPosts = postsData.filter((p) => p && p.id);
+
+      setPosts(validPosts);
 
       if (profileData?.id) {
-        for (const post of postsData) {
+        for (const post of validPosts) {
           if (post.user?.id && post.user.id !== profileData.id) {
             const followCheck = await followAPI.isFollowing(
               profileData.id,
@@ -104,6 +99,8 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
   };
 
   const handleFollowToggle = async (authorId) => {
+    if (!authorId) return; // ✅ FIX
+
     try {
       if (followingStatus[authorId]) {
         await followAPI.unfollowUser(profileData.id, authorId);
@@ -124,13 +121,11 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
     setPosts(posts.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
   };
 
-  // Loading
   if (loading)
     return (
       <div className="text-center py-16 text-gray-500">Loading feed...</div>
     );
 
-  // Error
   if (error)
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
@@ -181,29 +176,31 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
                 <div className="flex justify-between">
                   <div className="flex gap-3">
                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">
-                      {post.user?.username?.slice(0, 2).toUpperCase()}
+                      {post.user?.username?.slice(0, 2)?.toUpperCase() || "NA"}
                     </div>
 
                     <div>
                       <p className="text-sm font-semibold text-gray-900">
-                        @{post.user?.username}
+                        @{post.user?.username || "unknown"}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {new Date(post.createdAt).toLocaleString()}
+                        {post.createdAt
+                          ? new Date(post.createdAt).toLocaleString()
+                          : ""}
                       </p>
                     </div>
                   </div>
 
-                  {post.user?.id !== profileData?.id && (
+                  {post.user?.id && post.user.id !== profileData?.id && (
                     <button
-                      onClick={() => handleFollowToggle(post.user.id)}
+                      onClick={() => handleFollowToggle(post.user?.id)}
                       className={`px-3 py-1 text-xs rounded-md ${
-                        followingStatus[post.user.id]
+                        followingStatus[post.user?.id]
                           ? "bg-gray-100"
                           : "bg-gray-900 text-white"
                       }`}
                     >
-                      {followingStatus[post.user.id] ? "Following" : "Follow"}
+                      {followingStatus[post.user?.id] ? "Following" : "Follow"}
                     </button>
                   )}
 
@@ -255,7 +252,7 @@ export default function DashboardFeed({ profileData, refreshTrigger }) {
 
                   <CommentSection
                     postId={post.id}
-                    currentUserId={profileData.id}
+                    currentUserId={profileData?.id}
                   />
 
                   <button>
