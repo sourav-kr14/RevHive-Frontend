@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Image, Link2, Hash, Loader, AlertCircle, MapPin } from "lucide-react";
 import { useState, useRef } from "react";
 import { postAPI } from "../../services/api";
+import { callAI } from "../../api/ai-content";
 
 export default function DashboardCompose({ profileData, onPostCreated }) {
   const [postText, setPostText] = useState("");
@@ -12,6 +13,14 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
   const [mediaType, setMediaType] = useState("image");
   const [error, setError] = useState("");
   const [charCount, setCharCount] = useState(0);
+
+  const [hashtags, setHashtags] = useState([]);
+  const [loadingTags, setLoadingTags] = useState(false);
+
+  const [aiResult, setAiResult] = useState("");
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [aiType, setAiType] = useState("");
+
   const textareaRef = useRef(null);
 
   const initials = profileData?.username
@@ -52,6 +61,8 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
       setVideoUrl("");
       setShowMediaInput(false);
       setCharCount(0);
+      setHashtags([]);
+      setAiResult("");
 
       onPostCreated && onPostCreated(response.data);
     } catch (error) {
@@ -59,6 +70,53 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
     } finally {
       setIsPosting(false);
     }
+  };
+
+  const generateHashtags = async () => {
+    setLoadingTags(true);
+    setHashtags([]);
+
+    try {
+      const res = await callAI({
+        type: "hashtags",
+        content: postText || "social media post",
+      });
+
+      const tags = res.data.result
+        .split(/\s+/)
+        .filter((t) => t.startsWith("#"))
+        .slice(0, 10);
+
+      setHashtags(tags);
+    } catch {
+      setHashtags([]);
+    }
+
+    setLoadingTags(false);
+  };
+
+  const addTag = (tag) => {
+    if (postText.includes(tag)) return;
+    setPostText((prev) => prev + " " + tag);
+  };
+
+  const handleAI = async (type) => {
+    setLoadingAI(true);
+    setAiType(type);
+    setAiResult("");
+
+    try {
+      const res = await callAI({
+        type,
+        content: postText || "social media post",
+      });
+
+      setAiResult(res.data.result);
+    } catch {
+      setAiResult("Something went wrong");
+    }
+
+    setLoadingAI(false);
   };
 
   return (
@@ -77,7 +135,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         >
           {initials}
         </div>
-
         <div>
           <p className="text-sm font-semibold text-white">
             What’s on your mind?
@@ -97,7 +154,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         </div>
       )}
 
-      {/* Textarea */}
+      {/* TEXTAREA */}
       <div className="relative">
         <textarea
           ref={textareaRef}
@@ -108,7 +165,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
           rows="3"
           value={postText}
           onChange={handleTextChange}
-          disabled={isPosting}
           maxLength={500}
         />
         <span className="absolute bottom-2 right-2 text-xs text-gray-500">
@@ -116,54 +172,63 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         </span>
       </div>
 
-      {/* Media */}
-      {showMediaInput && (
-        <div className="mt-3 space-y-2">
-          <div className="flex gap-2">
-            {["image", "video"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setMediaType(type)}
-                className={`px-3 py-1 text-xs rounded-md transition ${
-                  mediaType === type
-                    ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
-                    : "bg-white/5 text-gray-400"
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-
-          <input
-            type="text"
-            placeholder={`Enter ${mediaType} URL`}
-            value={mediaType === "image" ? imageUrl : videoUrl}
-            onChange={(e) =>
-              mediaType === "image"
-                ? setImageUrl(e.target.value)
-                : setVideoUrl(e.target.value)
-            }
-            className="w-full bg-white/5 border border-white/10 
-            rounded-lg p-2 text-sm text-white placeholder-gray-500 
-            outline-none focus:ring-1 focus:ring-purple-500"
-          />
+      {/* HASHTAGS */}
+      {loadingTags && <p className="text-xs mt-2">Generating hashtags...</p>}
+      {hashtags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {hashtags.map((tag, i) => (
+            <span
+              key={i}
+              onClick={() => addTag(tag)}
+              className="bg-gray-200 px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-300"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
       )}
 
-      {/* Bottom */}
-      <div className="flex items-center justify-between mt-4">
-        {/* Icons */}
+      {/* AI RESULT */}
+      {loadingAI && <p className="text-xs mt-2">Generating {aiType}...</p>}
+
+      {aiResult && aiType !== "moderate" && (
+        <div className="bg-gray-100 p-2 rounded mt-2 text-sm">
+          {aiResult}
+          <button
+            onClick={() => {
+              setPostText(aiResult);
+              setAiResult("");
+            }}
+            className="block mt-1 text-blue-600 text-xs"
+          >
+            Use this
+          </button>
+        </div>
+      )}
+
+      {/* MODERATION */}
+      {aiType === "moderate" && aiResult && (
+        <p
+          className={`mt-2 text-sm ${
+            aiResult.includes("UNSAFE") ? "text-red-500" : "text-green-500"
+          }`}
+        >
+          {aiResult}
+        </p>
+      )}
+
+      {/* ACTION BUTTONS (UNCHANGED + AI BELOW) */}
+      <div className="flex items-center justify-between mt-3">
+        {/* EXISTING ICON BUTTONS */}
         <div className="flex gap-2">
           {[Image, Link2, Hash, MapPin].map((Icon, i) => (
             <button
               key={i}
-              onClick={
-                i === 0 ? () => setShowMediaInput(!showMediaInput) : undefined
-              }
-              className="w-9 h-9 flex items-center justify-center 
-              rounded-lg bg-white/5 border border-white/10 
-              text-gray-400 hover:text-white hover:bg-white/10 transition"
+              onClick={() => {
+                if (i === 0) setShowMediaInput(!showMediaInput);
+                if (i === 2) generateHashtags();
+              }}
+              className="w-8 h-8 flex items-center justify-center border rounded-md text-gray-600 hover:bg-gray-100"
             >
               <Icon size={15} />
             </button>
@@ -180,14 +245,41 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
               : "bg-white/10 text-gray-500"
           }`}
         >
-          {isPosting ? (
-            <span className="flex items-center gap-1">
-              <Loader size={14} className="animate-spin" />
-              Posting
-            </span>
-          ) : (
-            "Post"
-          )}
+          {isPosting ? "Posting..." : "Post"}
+        </button>
+      </div>
+
+      <div className="flex gap-2 mt-3 flex-wrap">
+        {/* Caption */}
+        <button
+          onClick={() => handleAI("caption")}
+          className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
+        >
+          Caption
+        </button>
+
+        {/* Hashtags (same as icon but text version optional) */}
+        <button
+          onClick={generateHashtags}
+          className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
+        >
+          Tags
+        </button>
+
+        {/* Summarize */}
+        <button
+          onClick={() => handleAI("summarize")}
+          className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
+        >
+          Summary
+        </button>
+
+        {/* Moderation */}
+        <button
+          onClick={() => handleAI("moderate")}
+          className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
+        >
+          Check
         </button>
       </div>
     </motion.div>
