@@ -26,6 +26,7 @@ const Signup = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -35,7 +36,6 @@ const Signup = () => {
     });
   };
 
-  const navigate = useNavigate();
   const handleLoginRedirect = (e) => {
     e.preventDefault();
     navigate("/Signin");
@@ -57,9 +57,7 @@ const Signup = () => {
     try {
       const response = await fetch("http://localhost:8080/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: formData.userName,
           email: formData.email,
@@ -69,12 +67,8 @@ const Signup = () => {
         }),
       });
 
-      let data = null;
-
       const text = await response.text();
-      if (text) {
-        data = JSON.parse(text);
-      }
+      const data = text ? JSON.parse(text) : null;
 
       if (!response.ok) {
         alert(data?.message || "Registration failed");
@@ -90,288 +84,187 @@ const Signup = () => {
   };
 
   return (
-    <div className="relative h-screen w-full flex items-center justify-center p-6 overflow-hidden bg-[#030712]">
-      {/* --- PREMIUM BACKGROUND LAYER --- */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[120px] animate-pulse"></div>
-        <div
-          className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[120px] animate-pulse"
-          style={{ animationDelay: "2s" }}
-        ></div>
-        {/* Noise & Grid Overlay */}
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl w-full h-full flex flex-col lg:flex-row items-center justify-center gap-16 overflow-hidden">
-        {/* --- REGISTRATION FORM CARD --- */}
-        <div className="group relative w-full lg:w-[680px]">
-          {/* Outer Glow */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-50 group-hover:opacity-100 transition duration-1000"></div>
-
-          <div className="relative bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]">
-            {/* Top accent line */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/4 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-
-            <div className="mb-6 space-y-3">
-              {/* Brand */}
-              <h1 className="text-3xl font-semibold text-white tracking-tight">
-                RevHive
-              </h1>
-
-              {/* Title */}
-              <h2 className="text-2xl font-bold text-white">
-                Create your account
-              </h2>
-
-              {/* Subtitle */}
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Already part of the community?{" "}
-                <button
-                  type="button"
-                  onClick={handleLoginRedirect}
-                  className="text-blue-400 hover:text-blue-300 font-medium underline underline-offset-4 decoration-blue-500/40 transition"
-                >
-                  Sign in here
-                </button>
-              </p>
-            </div>
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-5 max-h-[65vh] pr-2 overflow-y-auto custom-scrollbar"
-            >
-              {/* Row 1: Username & Email */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] ml-1">
-                    User Name
-                  </label>
-                  <div className="relative group/input">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
-                    <input
-                      name="userName"
-                      type="text"
-                      placeholder="johndoe"
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-700 focus:bg-white/[0.07] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] ml-1">
-                    Email Address
-                  </label>
-                  <div className="relative group/input">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
-                    <input
-                      name="email"
-                      type="email"
-                      placeholder="name@company.com"
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-700 focus:bg-white/[0.07] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 2: Passwords */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] ml-1">
-                    Password
-                  </label>
-                  <div className="relative group/input">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
-                    <input
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter password"
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-700 focus:bg-white/[0.07] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] ml-1">
-                    Confirm Password
-                  </label>
-                  <div className="relative group/input">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
-                    <input
-                      name="confirmPassword"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter Password"
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-700 focus:bg-white/[0.07] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 3: Avatar & DOB */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] ml-1">
-                    Avatar URL
-                  </label>
-                  <div className="relative group/input">
-                    <Link className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
-                    <input
-                      name="avatarUrl"
-                      type="url"
-                      placeholder="https://..."
-                      onChange={handleChange}
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-700 focus:bg-white/[0.07] focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] ml-1">
-                    Date of Birth
-                  </label>
-                  <div className="relative group/input">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
-                    <input
-                      name="dob"
-                      type="date"
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white focus:bg-white/[0.07] focus:border-blue-500/50 outline-none transition-all [color-scheme:dark]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 4: Bio */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] ml-1">
-                  Tell us about yourself
-                </label>
-                <div className="relative group/input">
-                  <FileText className="absolute left-4 top-4 w-4 h-4 text-gray-600 group-focus-within/input:text-blue-500 transition-colors" />
-                  <textarea
-                    name="bio"
-                    rows="2"
-                    placeholder="Brief bio..."
-                    onChange={handleChange}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-700 focus:bg-white/[0.07] focus:border-blue-500/50 outline-none transition-all resize-none"
-                  ></textarea>
-                </div>
-              </div>
-
-              <div className="space-y-4 py-4">
-                <label className="flex items-start gap-4 cursor-pointer group/check">
-                  <div className="relative flex items-center mt-0.5">
-                    <input
-                      type="checkbox"
-                      name="agreeTerms"
-                      checked={formData.agreeTerms}
-                      onChange={handleChange}
-                      className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-white/10 bg-white/5 transition-all checked:bg-blue-600 checked:border-blue-600 focus:outline-none"
-                    />
-                    <div className="absolute text-white opacity-0 peer-checked:opacity-100 left-1 transition-opacity pointer-events-none text-[10px]">
-                      ✓
-                    </div>
-                  </div>
-                  <span className="text-xs text-gray-500 leading-relaxed group-hover/check:text-gray-400 transition-colors">
-                    I agree to the
-                    <a href="#" className="text-blue-400 hover:underline mx-1">
-                      Terms of Service
-                    </a>
-                    and
-                    <a href="#" className="text-blue-400 hover:underline ml-1">
-                      Privacy Policy
-                    </a>
-                    .
-                  </span>
-                </label>
-
-                <label className="flex items-center gap-4 cursor-pointer group/check">
-                  <div className="relative flex items-center">
-                    <input
-                      type="checkbox"
-                      name="subscribeNewsletter"
-                      checked={formData.subscribeNewsletter}
-                      onChange={handleChange}
-                      className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-white/10 bg-white/5 transition-all checked:bg-blue-600 checked:border-blue-600 focus:outline-none"
-                    />
-                    <div className="absolute text-white opacity-0 peer-checked:opacity-100 left-1 transition-opacity pointer-events-none text-[10px]">
-                      ✓
-                    </div>
-                  </div>
-                  <span className="text-xs text-gray-500 group-hover/check:text-gray-400 transition-colors">
-                    Send me monthly product updates and resources.
-                  </span>
-                </label>
-              </div>
-
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+      <div className="max-w-6xl w-full flex flex-col lg:flex-row gap-12 items-center">
+        {/* FORM */}
+        <div className="w-full lg:w-[650px] bg-white border border-gray-200 rounded-3xl p-8 shadow-lg">
+          <div className="mb-6 space-y-2">
+            <h1 className="text-2xl font-semibold text-gray-900">RevHive</h1>
+            <h2 className="text-xl font-bold text-gray-900">
+              Create your account
+            </h2>
+            <p className="text-sm text-gray-600">
+              Already have an account?{" "}
               <button
-                type="submit"
-                className="w-full bg-white text-black font-bold py-4 rounded-xl shadow-[0_20px_40px_-15px_rgba(255,255,255,0.1)] hover:bg-gray-100 transition-all flex items-center justify-center gap-2 group/btn active:scale-[0.98]"
+                onClick={handleLoginRedirect}
+                className="text-blue-600 underline"
               >
-                Create Account
-                <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                Sign in
               </button>
-            </form>
+            </p>
           </div>
-        </div>
 
-        {/* --- BRANDING COLUMN --- */}
-        <div className="hidden lg:flex flex-1 flex-col items-center justify-center animate-float relative text-center">
-          <div className="absolute w-[400px] h-[400px] rounded-full bg-blue-500 opacity-5 blur-[120px] pointer-events-none"></div>
-          <div className="relative z-10 flex flex-col items-center gap-8">
-            <div className="p-4 rounded-[2.5rem] bg-white/[0.03] border border-white/10 shadow-2xl backdrop-blur-md">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-1 rounded-[2rem]">
-                <img
-                  src="/Signup_Illustration.png"
-                  alt="Illustration"
-                  className="w-full h-full object-contain rounded-[1.8rem] bg-[#030712]"
-                />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Username + Email */}
+            <div className="grid md:grid-cols-2 gap-5">
+              <div>
+                <label className="text-xs text-gray-500">Username</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    name="userName"
+                    onChange={handleChange}
+                    required
+                    placeholder="johndoe"
+                    className="w-full pl-10 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-500">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    name="email"
+                    type="email"
+                    onChange={handleChange}
+                    required
+                    placeholder="email@example.com"
+                    className="w-full pl-10 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none"
+                  />
+                </div>
               </div>
             </div>
-            <div className="space-y-4 max-w-sm">
-              <h3 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 tracking-tight">
-                Join the <br /> Community
-              </h3>
-              <p className="text-gray-500 leading-relaxed font-light">
-                Secure your spot in the next generation of collaborative
-                workspaces. Built for scale, designed for you.
-              </p>
+
+            {/* Passwords */}
+            <div className="grid md:grid-cols-2 gap-5">
+              <div>
+                <label className="text-xs text-gray-500">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-10 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-gray-500"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-500">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    name="confirmPassword"
+                    type={showPassword ? "text" : "password"}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-10 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+
+            {/* Avatar + DOB */}
+            <div className="grid md:grid-cols-2 gap-5">
+              <div>
+                <label className="text-xs text-gray-500">Avatar URL</label>
+                <div className="relative">
+                  <Link className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    name="avatarUrl"
+                    onChange={handleChange}
+                    className="w-full pl-10 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-500">DOB</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    name="dob"
+                    type="date"
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-10 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div>
+              <label className="text-xs text-gray-500">Bio</label>
+              <textarea
+                name="bio"
+                rows="2"
+                onChange={handleChange}
+                className="w-full py-3 px-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900"
+              />
+            </div>
+
+            {/* Checkboxes */}
+            <div className="space-y-3 text-sm text-gray-600">
+              <label className="flex gap-2 items-start">
+                <input
+                  type="checkbox"
+                  name="agreeTerms"
+                  onChange={handleChange}
+                  className="mt-1"
+                />
+                I agree to Terms & Privacy Policy
+              </label>
+
+              <label className="flex gap-2">
+                <input
+                  type="checkbox"
+                  name="subscribeNewsletter"
+                  onChange={handleChange}
+                />
+                Send updates
+              </label>
+            </div>
+
+            {/* Button */}
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition flex justify-center items-center gap-2"
+            >
+              Create Account
+              <ChevronRight size={18} />
+            </button>
+          </form>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="hidden lg:flex flex-col items-center text-center max-w-sm">
+          <img
+            src="/Signup_Illustration.png"
+            alt="Illustration"
+            className="rounded-xl mb-6"
+          />
+          <h3 className="text-3xl font-bold text-gray-900">
+            Join the Community
+          </h3>
+          <p className="text-gray-600">
+            Build, collaborate, and grow with modern tools.
+          </p>
         </div>
       </div>
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-          @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } } 
-          .animate-float { animation: float 6s ease-in-out infinite; }
-          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-          .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-          `,
-        }}
-      />
     </div>
   );
 };
