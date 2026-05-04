@@ -1,4 +1,4 @@
-import { Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Key, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -21,64 +21,74 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-md">
+        {/* Icon */}
+        <div className="flex justify-center mb-4">
+          <div className="w-12 h-12 flex items-center justify-center rounded-xl border bg-gray-50">
+            <Key className="text-gray-600" size={20} />
+          </div>
+        </div>
+
+        {/* Heading */}
         <div className="text-center mb-6">
-          <div className="mb-4 text-3xl">🔒</div>
-          <h2 className="text-2xl font-bold text-gray-900">Set new password</h2>
+          <h2 className="text-2xl font-semibold">Set new password</h2>
           <p className="text-gray-500 text-sm">
             Must be different from previous password
           </p>
         </div>
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Password */}
           <div className="relative">
-            <Lock className="absolute left-3 top-3.5 text-gray-400 w-4 h-4" />
             <input
               type={show ? "text" : "password"}
               placeholder="New password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-300 rounded-lg"
+              required
+              className="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-400 outline-none"
             />
+
             <button
               type="button"
               onClick={() => setShow(!show)}
-              className="absolute right-3 top-3 text-gray-500"
+              className="absolute right-3 top-3"
             >
-              {show ? <EyeOff size={16} /> : <Eye size={16} />}
+              {show ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
           {/* Confirm */}
-          <div className="relative">
-            <Lock className="absolute left-3 top-3.5 text-gray-400 w-4 h-4" />
-            <input
-              type={show ? "text" : "password"}
-              placeholder="Confirm password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              className="w-full pl-10 py-3 bg-gray-50 border border-gray-300 rounded-lg"
-            />
-          </div>
+          <input
+            type={show ? "text" : "password"}
+            placeholder="Confirm password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            required
+            className="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-400 outline-none"
+          />
 
           {/* Rules */}
-          <div className="text-sm text-gray-600 space-y-1">
-            <p>• At least 8 characters</p>
-            <p>• One special character</p>
+          <div className="text-xs text-gray-500 space-y-1">
+            <p>✓ At least 8 characters</p>
+            <p>✓ One special character</p>
           </div>
 
-          <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+          {/* Submit */}
+          <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700">
             Reset password
           </button>
 
+          {/* Back */}
           <button
             type="button"
             onClick={() => navigate("/signin")}
-            className="flex items-center justify-center gap-2 text-sm text-gray-600 w-full"
+            className="flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-black w-full"
           >
-            <ArrowLeft size={16} /> Back to login
+            <ArrowLeft size={16} />
+            Back to log in
           </button>
         </form>
       </div>
