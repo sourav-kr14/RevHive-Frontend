@@ -131,7 +131,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         <div
           className="w-11 h-11 rounded-full 
         bg-gradient-to-br from-purple-500 to-blue-500 
-        flex items-center justify-center text-white font-semibold shadow"
+        flex items-center justify-center text-black font-semibold shadow"
         >
           {initials}
         </div>
@@ -173,14 +173,19 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
       </div>
 
       {/* HASHTAGS */}
-      {loadingTags && <p className="text-xs mt-2">Generating hashtags...</p>}
+      {loadingTags && (
+        <p className="text-xs mt-2 text-gray-400">Generating hashtags...</p>
+      )}
+
       {hashtags.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-2">
           {hashtags.map((tag, i) => (
             <span
               key={i}
               onClick={() => addTag(tag)}
-              className="bg-gray-200 px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-300"
+              className="bg-white/5 px-2 py-1 rounded text-xs cursor-pointer 
+              text-cyan-300 border border-cyan-500/20
+              hover:bg-cyan-500/10 hover:shadow-[0_0_8px_#22d3ee]"
             >
               {tag}
             </span>
@@ -189,17 +194,23 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
       )}
 
       {/* AI RESULT */}
-      {loadingAI && <p className="text-xs mt-2">Generating {aiType}...</p>}
+      {loadingAI && (
+        <p className="text-xs mt-2 text-gray-400">Generating {aiType}...</p>
+      )}
 
       {aiResult && aiType !== "moderate" && (
-        <div className="bg-gray-100 p-2 rounded mt-2 text-sm">
+        <div
+          className="bg-white/5 backdrop-blur-md border border-purple-500/20 
+        p-2 rounded mt-2 text-sm text-gray-200 
+        shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+        >
           {aiResult}
           <button
             onClick={() => {
               setPostText(aiResult);
               setAiResult("");
             }}
-            className="block mt-1 text-blue-600 text-xs"
+            className="block mt-1 text-cyan-400 text-xs hover:text-cyan-300"
           >
             Use this
           </button>
@@ -210,16 +221,15 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
       {aiType === "moderate" && aiResult && (
         <p
           className={`mt-2 text-sm ${
-            aiResult.includes("UNSAFE") ? "text-red-500" : "text-green-500"
+            aiResult.includes("UNSAFE") ? "text-red-400" : "text-green-400"
           }`}
         >
           {aiResult}
         </p>
       )}
 
-      {/* ACTION BUTTONS (UNCHANGED + AI BELOW) */}
+      {/* ACTION BUTTONS */}
       <div className="flex items-center justify-between mt-3">
-        {/* EXISTING ICON BUTTONS */}
         <div className="flex gap-2">
           {[Image, Link2, Hash, MapPin].map((Icon, i) => (
             <button
@@ -228,14 +238,16 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
                 if (i === 0) setShowMediaInput(!showMediaInput);
                 if (i === 2) generateHashtags();
               }}
-              className="w-8 h-8 flex items-center justify-center border rounded-md text-gray-600 hover:bg-gray-100"
+              className="w-8 h-8 flex items-center justify-center 
+              border border-white/10 rounded-md text-gray-400 
+              hover:bg-white/10 hover:text-white 
+              hover:shadow-[0_0_8px_rgba(139,92,246,0.5)] transition"
             >
               <Icon size={15} />
             </button>
           ))}
         </div>
 
-        {/* Post Button */}
         <button
           disabled={!postText.trim() || isPosting}
           onClick={handleCreatePost}
@@ -249,35 +261,40 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         </button>
       </div>
 
+      {/* AI BUTTONS */}
       <div className="flex gap-2 mt-3 flex-wrap">
-        {/* Caption */}
         <button
           onClick={() => handleAI("caption")}
-          className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
+          className="px-3 py-1.5 text-xs rounded-md 
+          bg-black text-cyan-400 border border-cyan-500/40
+          hover:bg-cyan-500/10 hover:shadow-[0_0_10px_#22d3ee]"
         >
           Caption
         </button>
 
-        {/* Hashtags (same as icon but text version optional) */}
         <button
           onClick={generateHashtags}
-          className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
+          className="px-3 py-1.5 text-xs rounded-md 
+          bg-black text-pink-400 border border-pink-500/40
+          hover:bg-pink-500/10 hover:shadow-[0_0_10px_#ec4899]"
         >
           Tags
         </button>
 
-        {/* Summarize */}
         <button
           onClick={() => handleAI("summarize")}
-          className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
+          className="px-3 py-1.5 text-xs rounded-md 
+          bg-black text-purple-400 border border-purple-500/40
+          hover:bg-purple-500/10 hover:shadow-[0_0_10px_#a855f7]"
         >
           Summary
         </button>
 
-        {/* Moderation */}
         <button
           onClick={() => handleAI("moderate")}
-          className="px-3 py-1.5 text-xs border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition"
+          className="px-3 py-1.5 text-xs rounded-md 
+          bg-black text-green-400 border border-green-500/40
+          hover:bg-green-500/10 hover:shadow-[0_0_10px_#4ade80]"
         >
           Check
         </button>
