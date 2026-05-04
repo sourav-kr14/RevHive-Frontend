@@ -58,14 +58,14 @@ export default function UserFeed({ profileData, refreshTrigger }) {
               try {
                 const res = await followAPI.isFollowing(
                   profileData.id,
-                  post.user.id,
+                  post.user.id
                 );
                 statusMap[post.user.id] = res.data.isFollowing;
               } catch {
                 statusMap[post.user.id] = false;
               }
             }
-          }),
+          })
         );
 
         if (isMounted.current) setFollowingStatus(statusMap);
@@ -94,8 +94,8 @@ export default function UserFeed({ profileData, refreshTrigger }) {
                 liked: !p.liked,
                 likeCount: (p.likeCount || 0) + (p.liked ? -1 : 1),
               }
-            : p,
-        ),
+            : p
+        )
       );
     } catch {}
   };
@@ -120,6 +120,17 @@ export default function UserFeed({ profileData, refreshTrigger }) {
       alert("Follow failed");
     } finally {
       setFollowLoading((prev) => ({ ...prev, [authorId]: false }));
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm("Delete this post?")) return;
+
+    try {
+      await postAPI.deletePost(postId);
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+    } catch {
+      alert("Delete failed");
     }
   };
 
@@ -152,8 +163,8 @@ export default function UserFeed({ profileData, refreshTrigger }) {
               {type === "feed"
                 ? "For You"
                 : type === "trending"
-                  ? "Trending"
-                  : "My Posts"}
+                ? "Trending"
+                : "My Posts"}
             </button>
           ))}
         </div>
@@ -169,11 +180,7 @@ export default function UserFeed({ profileData, refreshTrigger }) {
                 {/* Header */}
                 <div className="flex justify-between">
                   <div className="flex gap-3">
-                    <div
-                      className="w-10 h-10 rounded-full 
-                  bg-gradient-to-br from-purple-500 to-blue-500 
-                  flex items-center justify-center text-white text-sm font-semibold"
-                    >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-semibold">
                       {post.user?.username?.slice(0, 2)?.toUpperCase() || "NA"}
                     </div>
 
@@ -198,8 +205,8 @@ export default function UserFeed({ profileData, refreshTrigger }) {
                       {followLoading[post.user.id]
                         ? "..."
                         : followingStatus[post.user.id]
-                          ? "Following"
-                          : "Follow"}
+                        ? "Following"
+                        : "Follow"}
                     </button>
                   )}
                 </div>
@@ -234,7 +241,9 @@ export default function UserFeed({ profileData, refreshTrigger }) {
               </motion.div>
             ))
           ) : (
-            <div className="text-center py-16 text-gray-500">No posts yet</div>
+            <div className="text-center py-16 text-gray-500">
+              No posts yet
+            </div>
           )}
         </div>
       </motion.div>
@@ -245,7 +254,7 @@ export default function UserFeed({ profileData, refreshTrigger }) {
           onClose={() => setEditingPost(null)}
           onUpdate={(updated) =>
             setPosts((prev) =>
-              prev.map((p) => (p.id === updated.id ? updated : p)),
+              prev.map((p) => (p.id === updated.id ? updated : p))
             )
           }
         />
