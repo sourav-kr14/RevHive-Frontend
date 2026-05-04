@@ -1,161 +1,108 @@
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import {
-  Home,
-  User,
-  Settings,
+// src/components/userdashboard/UserSidebar.jsx
+import { NavLink, useNavigate } from "react-router-dom";
+import { 
+  Home, 
+  Bell, 
+  MessageCircle, 
+  User, 
+  Settings, 
   LogOut,
-  Sparkles,
-  MessageCircle,
+  Menu,
+  X
 } from "lucide-react";
-import { path } from "framer-motion/client";
+import { useState } from "react";
 
-export default function DashboardSidebar({
-  activeNav,
-  setActiveNav,
-  profileData,
-}) {
+export default function DashboardSidebar({ currentUser }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const initials = profileData.username
-    ? profileData.username.slice(0, 2).toUpperCase()
-    : "RH";
-
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home, path: "/" },
-    { id: "profile", label: "Profile", icon: User, path: "/profile" },
-    { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
-    {
-      id: "messaging",
-      label: "Messages",
-      icon: MessageCircle,
-      path: "/messages",
-    },
-  ];
-
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/signin");
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/signin');
   };
 
+  const navItems = [
+    { path: "/user/dashboard", icon: Home, label: "Feed" },
+    { path: "/notifications", icon: Bell, label: "Notifications" },
+    { path: "/messages", icon: MessageCircle, label: "Messages" },
+    { path: `/profile/${currentUser?.id}`, icon: User, label: "Profile" },
+    { path: "/settings", icon: Settings, label: "Settings" },
+  ];
+
   return (
-    <div className="relative w-72 h-screen p-6 flex flex-col justify-between bg-white/5 backdrop-blur-2xl border-r border-white/10">
-      {/* Glow Layer */}
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-600/10 via-transparent to-blue-600/10 pointer-events-none" />
-
-      <div className="relative flex flex-col gap-8">
-        {/* Brand */}
-        <div className="flex items-center gap-2">
-          <Sparkles className="text-purple-400" size={18} />
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            RevHive
-          </h2>
-        </div>
-
-        {/* Avatar Block */}
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-3 backdrop-blur-xl"
-        >
-          <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold shadow-lg shadow-purple-500/20">
-            {initials}
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-gray-200 truncate">
-              @{profileData.username}
-            </p>
-
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs text-gray-500">Active</span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Navigation */}
-        <ul className="flex flex-col gap-2">
-          {navItems.map((item, i) => {
-            const Icon = item.icon;
-            const isActive = activeNav === item.id;
-
-            return (
-              <li key={item.id}>
-                <motion.button
-                  onClick={() => {
-                    setActiveNav(item.id);
-
-                    if (item.id === "messaging") {
-                      navigate("/messages");
-                    }
-
-                    if (item.id === "dashboard") {
-                      navigate("/");
-                    }
-
-                    if (item.id === "profile") {
-                      navigate("/profile");
-                    }
-
-                    if (item.id === "settings") {
-                      navigate("/settings");
-                    }
-                  }}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${
-                    isActive ? "text-white" : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  {/* Active Glow */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="active-pill"
-                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 border border-blue-500/30"
-                    />
-                  )}
-
-                  {/* Icon */}
-                  <Icon
-                    size={18}
-                    className={`relative z-10 ${
-                      isActive ? "text-blue-400" : ""
-                    }`}
-                  />
-
-                  {/* Label */}
-                  <span className="relative z-10">{item.label}</span>
-
-                  {/* Active Dot */}
-                  {isActive && (
-                    <span className="ml-auto w-2 h-2 rounded-full bg-blue-400 relative z-10 shadow-md shadow-blue-500/50" />
-                  )}
-                </motion.button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-
-      {/* Logout */}
-      <motion.button
-        onClick={handleLogout}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.95 }}
-        className="relative w-full py-3 rounded-xl text-sm font-semibold overflow-hidden"
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded-lg shadow-lg"
       >
-        {/* Gradient */}
-        <span className="absolute inset-0 bg-gradient-to-r from-red-600/80 to-pink-600/80 opacity-90" />
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
-        {/* Glow */}
-        <span className="absolute inset-0 blur-lg bg-red-500/40 opacity-40" />
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-900 border-r border-gray-800 transform transition-transform duration-300 z-40 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="p-6 border-b border-gray-800">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+              RevHive
+            </h1>
+          </div>
 
-        {/* Content */}
-        <span className="relative z-10 flex items-center justify-center gap-2 text-white">
-          <LogOut size={16} />
-          Sign Out
-        </span>
-      </motion.button>
-    </div>
+          {/* Navigation */}
+          <nav className="flex-1 p-4 space-y-2">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
+                    isActive
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                      : "text-gray-400 hover:bg-white/10 hover:text-white"
+                  }`
+                }
+              >
+                <item.icon size={20} />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* User Info & Logout */}
+          <div className="p-4 border-t border-gray-800">
+            {currentUser && (
+              <div className="mb-3 p-3 bg-white/5 rounded-lg">
+                <p className="text-sm font-medium text-white truncate">
+                  {currentUser.username || currentUser.email?.split('@')[0]}
+                </p>
+                <p className="text-xs text-gray-400 truncate">{currentUser.email}</p>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-2 w-full rounded-lg text-red-400 hover:bg-red-500/10 transition-all"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Overlay for mobile */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+    </>
   );
 }

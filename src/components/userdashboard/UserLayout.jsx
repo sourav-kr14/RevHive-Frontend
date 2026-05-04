@@ -1,4 +1,4 @@
-// components/userdashboard/UserLayout.jsx - Update to fetch real stats
+// src/components/userdashboard/UserLayout.jsx
 import { useState, useEffect } from "react";
 import { authAPI, followAPI } from "../../services/api";
 import DashboardSidebar from "./UserSidebar";
@@ -34,6 +34,9 @@ export default function UserLayout() {
         ]);
         
         setUserData({
+          id: user.id,
+          username: user.username || response.data?.username,
+          email: user.email,
           ...response.data,
           followersCount: followersRes.data.followersCount || 0,
           followingCount: followingRes.data.followingCount || 0
@@ -52,12 +55,6 @@ export default function UserLayout() {
 
   const handlePostCreated = (newPost) => {
     setRefreshTrigger(prev => prev + 1);
-    if (userData) {
-      setUserData({
-        ...userData,
-        postsCount: (userData.postsCount || 0) + 1
-      });
-    }
   };
 
   if (loading) {
@@ -79,26 +76,31 @@ export default function UserLayout() {
   const profileData = userData || {
     id: user?.id,
     username: user?.username || "User",
+    email: user?.email || "",
     followersCount: 0,
     followingCount: 0,
     postsCount: 0,
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white flex">
-      <DashboardSidebar profileData={profileData} />
+    <div className="min-h-screen bg-[#030712] text-white">
+      {/* Sidebar - fixed on the left */}
+      <DashboardSidebar currentUser={profileData} />
       
-      <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8">
-        <DashboardHeader profileData={profileData} />
-        <DashboardStats profileData={profileData} />
-        <DashboardCompose
-          profileData={profileData}
-          onPostCreated={handlePostCreated}
-        />
-        <DashboardFeed 
-          profileData={profileData} 
-          refreshTrigger={refreshTrigger}
-        />
+      {/* Main Content - Add margin-left to account for fixed sidebar */}
+      <div className="lg:ml-64 min-h-screen">
+        <div className="p-8 flex flex-col gap-8 max-w-4xl mx-auto">
+          <DashboardHeader profileData={profileData} />
+          <DashboardStats profileData={profileData} />
+          <DashboardCompose
+            profileData={profileData}
+            onPostCreated={handlePostCreated}
+          />
+          <DashboardFeed 
+            profileData={profileData} 
+            refreshTrigger={refreshTrigger}
+          />
+        </div>
       </div>
     </div>
   );
