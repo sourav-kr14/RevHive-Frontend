@@ -10,12 +10,8 @@ export default function AdminUsers() {
     const load = async () => {
       try {
         const res = await getAllUsers();
-
-        console.log("API RESPONSE:", res);
-
-        setUsers(res.data || []);
-      } catch (err) {
-        console.error("Error fetching users:", err);
+        setUsers(res?.data || []);
+      } catch {
         setError("Failed to load users");
       } finally {
         setLoading(false);
@@ -26,42 +22,72 @@ export default function AdminUsers() {
   }, []);
 
   if (loading) {
-    return <p className="text-gray-500">Loading users...</p>;
+    return (
+      <div className="text-gray-400 text-center py-10">Loading users...</div>
+    );
   }
 
   if (error) {
-    return <p className="text-red-500">{error}</p>;
+    return <div className="text-red-400 text-center py-10">{error}</div>;
   }
 
   if (users.length === 0) {
-    return <p className="text-gray-500">No users found</p>;
+    return (
+      <div className="text-gray-400 text-center py-10">No users found</div>
+    );
   }
 
   return (
-    <div className="bg-white border rounded-xl p-4">
-      <h1 className="text-2xl font-semibold mb-4 text-gray-900">Users</h1>
+    <div
+      className="bg-white/5 backdrop-blur-xl border border-white/10 
+    rounded-2xl p-5 shadow-[0_0_20px_rgba(139,92,246,0.08)]"
+    >
+      <h1 className="text-2xl font-semibold mb-5 text-white">Users</h1>
 
-      <table className="w-full text-sm">
-        <thead className="bg-gray-50 text-gray-600">
-          <tr>
-            <th className="px-4 py-2 text-left">ID</th>
-            <th className="px-4 py-2 text-left">Name</th>
-            <th className="px-4 py-2 text-left">Email</th>
-            <th className="px-4 py-2 text-left">Role</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id} className="border-t">
-              <td className="px-4 py-2">{u.id}</td>
-              <td className="px-4 py-2">{u.username}</td>
-              <td className="px-4 py-2">{u.email}</td>
-              <td className="px-4 py-2">{u.role}</td>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          {/* Head */}
+          <thead className="text-gray-400 border-b border-white/10">
+            <tr>
+              <th className="px-4 py-3 text-left">ID</th>
+              <th className="px-4 py-3 text-left">Name</th>
+              <th className="px-4 py-3 text-left">Email</th>
+              <th className="px-4 py-3 text-left">Role</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          {/* Body */}
+          <tbody>
+            {users.map((u) => (
+              <tr
+                key={u.id}
+                className="border-b border-white/5 hover:bg-white/5 transition"
+              >
+                <td className="px-4 py-3 text-gray-300">{u?.id}</td>
+
+                <td className="px-4 py-3 text-white font-medium">
+                  {u?.username || "N/A"}
+                </td>
+
+                <td className="px-4 py-3 text-gray-400">{u?.email || "N/A"}</td>
+
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-2 py-1 text-xs rounded-md
+                    ${
+                      u?.role === "ADMIN"
+                        ? "bg-purple-500/20 text-purple-400"
+                        : "bg-blue-500/20 text-blue-400"
+                    }`}
+                  >
+                    {u?.role || "USER"}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

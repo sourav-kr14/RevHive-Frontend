@@ -12,7 +12,7 @@ export const connectWebSocket = (token, onMessageReceived) => {
       Authorization: "Bearer " + token,
     },
     () => {
-      console.log("✅ Connected to WebSocket");
+      console.log(" Connected to WebSocket");
 
       // Subscribe to private messages
       stompClient.subscribe("/user/queue/messages", (message) => {

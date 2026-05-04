@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { authAPI, followAPI } from "../../services/api";
+
 import DashboardSidebar from "./UserSidebar";
 import DashboardHeader from "./UserHeader";
 import DashboardStats from "./UserStats";
@@ -11,19 +12,26 @@ export default function UserLayout() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [activeNav, setActiveNav] = useState("dashboard");
 
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  // ✅ safe localStorage parsing
+  let user = null;
+  try {
+    const stored = localStorage.getItem("user");
+    user = stored ? JSON.parse(stored) : null;
+  } catch {
+    user = null;
+  }
 
   useEffect(() => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
     const fetchUserProfile = async () => {
       try {
-        if (!user?.id) {
-          setLoading(false);
-          return;
-        }
-
-        const response = await authAPI.getProfile(user.id);
+        const profileRes = await authAPI.getProfile(user.id);
 
         const [followersRes, followingRes] = await Promise.all([
           followAPI.getFollowersCount(user.id),
@@ -31,11 +39,11 @@ export default function UserLayout() {
         ]);
 
         setUserData({
-          ...response.data,
+          ...profileRes.data,
           followersCount: followersRes.data.followersCount || 0,
           followingCount: followingRes.data.followingCount || 0,
         });
-      } catch (err) {
+      } catch {
         setError("Failed to load user profile");
       } finally {
         setLoading(false);
@@ -48,19 +56,19 @@ export default function UserLayout() {
   const handlePostCreated = () => {
     setRefreshTrigger((prev) => prev + 1);
 
-    if (userData) {
-      setUserData({
-        ...userData,
-        postsCount: (userData.postsCount || 0) + 1,
-      });
-    }
+    setUserData((prev) =>
+      prev ? { ...prev, postsCount: (prev.postsCount || 0) + 1 } : prev,
+    );
   };
 
   // Loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading profile...</p>
+      <div
+        className="min-h-screen flex items-center justify-center 
+      bg-gradient-to-b from-[#0b0f1a] to-[#070a12] text-gray-400"
+      >
+        Loading profile...
       </div>
     );
   }
@@ -68,8 +76,11 @@ export default function UserLayout() {
   // Error
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-red-500">{error}</p>
+      <div
+        className="min-h-screen flex items-center justify-center 
+      bg-gradient-to-b from-[#0b0f1a] to-[#070a12] text-red-400"
+      >
+        {error}
       </div>
     );
   }
@@ -83,9 +94,16 @@ export default function UserLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div
+      className="min-h-screen flex 
+    bg-gradient-to-b from-[#0b0f1a] to-[#070a12] text-white"
+    >
       {/* Sidebar */}
-      <DashboardSidebar profileData={profileData} />
+      <DashboardSidebar
+        activeNav={activeNav}
+        setActiveNav={setActiveNav}
+        profileData={profileData}
+      />
 
       {/* Main */}
       <div className="flex-1 flex justify-center">

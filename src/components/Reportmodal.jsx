@@ -1,19 +1,9 @@
 import { useState } from "react";
 import api from "../services/api";
 
-const reasons = [
-  "I don’t like it",
-  "Bullying",
-  "Violence",
-  "Spam",
-];
+const reasons = ["I don’t like it", "Bullying", "Violence", "Spam"];
 
-export default function ReportModal({
-  isOpen,
-  onClose,
-  targetType,
-  targetId,
-}) {
+export default function ReportModal({ isOpen, onClose, targetType, targetId }) {
   const [step, setStep] = useState(1);
 
   if (!isOpen) return null;
@@ -35,7 +25,6 @@ export default function ReportModal({
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
       <div className="bg-[#0f172a] p-6 rounded-xl w-96">
-
         {step === 1 && (
           <>
             <h2 className="mb-4">Report {targetType}</h2>
