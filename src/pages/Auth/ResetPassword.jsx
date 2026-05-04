@@ -1,23 +1,46 @@
-import { Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Lock, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!password || password.length < 8) {
+      alert("Password must be at least 8 characters");
+      return;
+    }
 
     if (password !== confirm) {
       alert("Passwords do not match");
       return;
     }
 
-    alert("Password updated!");
+    try {
+      setLoading(true);
+
+      await axios.post(
+        `http://localhost:8080/api/auth/reset-password?token=${token}&newPassword=${password}`,
+      );
+
+      alert("Password updated successfully!");
+      navigate("/signin");
+    } catch (err) {
+      alert(err.response?.data?.message || "Invalid or expired token");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,8 +92,18 @@ export default function ResetPassword() {
             <p>• One special character</p>
           </div>
 
-          <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
-            Reset password
+          <button
+            disabled={loading}
+            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" size={18} />
+                Updating...
+              </>
+            ) : (
+              "Reset password"
+            )}
           </button>
 
           <button
