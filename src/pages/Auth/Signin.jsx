@@ -2,100 +2,72 @@ import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const Signup = () => {
+const Signin = () => {
   const [formData, setFormData] = useState({
-    userName: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    bio: "",
-    avatarUrl: "",
-    dob: "",
-    agreeTerms: false,
-    subscribeNewsletter: false,
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
-    if (!formData.agreeTerms) {
-      alert("Accept terms");
-      return;
-    }
-
     try {
-      const res = await fetch("http://localhost:8080/api/auth/register", {
+      const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.userName,
-          email: formData.email,
-          password: formData.password,
-          bio: formData.bio,
-          dob: formData.dob,
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) {
-        alert("Failed");
+        alert("Invalid credentials");
         return;
       }
 
-      alert("Success");
-      navigate("/Signin");
+      alert("Login successful");
+      navigate("/dashboard");
     } catch {
       alert("Error");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-md p-6 md:p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-6 md:p-8">
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <img src="/logo.png" alt="logo" className="w-20 h-20" />
+        </div>
+
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-semibold">Create an account</h1>
-          <p className="text-sm text-gray-500">Start your 30-day free trial.</p>
+          <h1 className="text-2xl font-semibold">Welcome back</h1>
+          <p className="text-sm text-gray-500">
+            Enter your credentials to continue
+          </p>
         </div>
 
         {/* Toggle */}
         <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
-          <button className="w-1/2 bg-white py-2 rounded-md shadow text-sm">
-            Sign up
-          </button>
           <button
-            onClick={() => navigate("/Signin")}
+            onClick={() => navigate("/Signup")}
             className="w-1/2 py-2 text-sm text-gray-500"
           >
+            Sign up
+          </button>
+          <button className="w-1/2 bg-white py-2 rounded-md shadow text-sm">
             Log in
           </button>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            name="userName"
-            placeholder="Enter your name"
-            required
-            onChange={handleChange}
-            className="input"
-          />
-
           <input
             name="email"
             type="email"
@@ -105,16 +77,16 @@ const Signup = () => {
             className="input"
           />
 
-          {/* Password */}
           <div className="relative">
             <input
               name="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Create a password"
+              placeholder="Enter your password"
               required
               onChange={handleChange}
               className="input"
             />
+
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -124,69 +96,16 @@ const Signup = () => {
             </button>
           </div>
 
-          <input
-            name="confirmPassword"
-            type={showPassword ? "text" : "password"}
-            placeholder="Confirm password"
-            required
-            onChange={handleChange}
-            className="input"
-          />
-
-          {/* Extra fields */}
-          <input
-            name="avatarUrl"
-            placeholder="Avatar URL"
-            onChange={handleChange}
-            className="input"
-          />
-
-          <input
-            name="dob"
-            type="date"
-            required
-            onChange={handleChange}
-            className="input"
-          />
-
-          <textarea
-            name="bio"
-            placeholder="Bio"
-            rows="2"
-            onChange={handleChange}
-            className="input"
-          />
-
-          {/* Password rules */}
-          <div className="text-xs text-gray-500 space-y-1">
-            <p>✓ Must be at least 8 characters</p>
-            <p>✓ Must contain one special character</p>
-          </div>
-
-          {/* Checkboxes */}
-          <div className="text-sm text-gray-600 space-y-2">
-            <label className="flex gap-2">
-              <input
-                type="checkbox"
-                name="agreeTerms"
-                onChange={handleChange}
-              />
-              Agree to Terms
-            </label>
-
-            <label className="flex gap-2">
-              <input
-                type="checkbox"
-                name="subscribeNewsletter"
-                onChange={handleChange}
-              />
-              Send updates
-            </label>
+          {/* Forgot password */}
+          <div className="text-right text-sm">
+            <span className="text-purple-600 cursor-pointer">
+              Forgot password?
+            </span>
           </div>
 
           {/* Submit */}
           <button className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700">
-            Get started
+            Log in
           </button>
 
           {/* Google */}
@@ -199,22 +118,23 @@ const Signup = () => {
               className="w-4"
               alt=""
             />
-            Sign up with Google
+            Sign in with Google
           </button>
         </form>
 
+        {/* Bottom */}
         <p className="text-center text-sm text-gray-500 mt-5">
-          Already have an account?{" "}
+          Don’t have an account?{" "}
           <span
-            onClick={() => navigate("/Signin")}
+            onClick={() => navigate("/Signup")}
             className="text-purple-600 cursor-pointer"
           >
-            Log in
+            Sign up
           </span>
         </p>
       </div>
 
-      {/* reusable input style */}
+      {/* same input style */}
       <style>{`
         .input {
           width: 100%;
@@ -232,4 +152,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Signin;

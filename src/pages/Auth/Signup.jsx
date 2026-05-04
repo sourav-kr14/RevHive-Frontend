@@ -79,7 +79,6 @@ const Signup = () => {
 
           <h1 className="text-2xl font-semibold">Create an account</h1>
         </div>
-
         {/* Toggle */}
         <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
           <button className="w-1/2 bg-white py-2 rounded-md shadow text-sm">
