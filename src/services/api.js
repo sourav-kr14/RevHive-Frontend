@@ -92,29 +92,19 @@ export const postAPI = {
 // services/api.js - Add/Update followAPI
 export const followAPI = {
   followUser: (followerId, followingId) => 
-    api.post('/v1/follows/follow', null, { 
-      params: { followerId, followingId } 
-    }),
+    api.post('/v1/follows/follow', null, { params: { followerId, followingId } }),
   
   unfollowUser: (followerId, followingId) => 
-    api.delete('/v1/follows/unfollow', { 
-      params: { followerId, followingId } 
-    }),
+    api.delete('/v1/follows/unfollow', { params: { followerId, followingId } }),
   
   isFollowing: (followerId, followingId) => 
-    api.get('/v1/follows/check', { 
-      params: { followerId, followingId } 
-    }),
+    api.get('/v1/follows/check', { params: { followerId, followingId } }),
   
   getFollowers: (userId, page = 0, size = 10) => 
-    api.get(`/v1/follows/users/${userId}/followers`, { 
-      params: { page, size } 
-    }),
+    api.get(`/v1/follows/users/${userId}/followers`, { params: { page, size } }),
   
   getFollowing: (userId, page = 0, size = 10) => 
-    api.get(`/v1/follows/users/${userId}/following`, { 
-      params: { page, size } 
-    }),
+    api.get(`/v1/follows/users/${userId}/following`, { params: { page, size } }),
   
   getFollowersCount: (userId) => 
     api.get(`/v1/follows/users/${userId}/followers/count`),
