@@ -1,16 +1,138 @@
-# React + Vite
+# 🎨 RevHive Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for **RevHive**, a modern social platform with AI-powered tools, real-time chat, and premium features.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠️ Tech Stack
 
-## React Compiler
+* **React.js**
+* **Tailwind CSS**
+* **Framer Motion**
+* **Axios (API calls)**
+* **WebSocket (Real-time chat)**
+* **Firebase (File Uploads)**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 📌 Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* 🔐 Authentication UI (Login / Register / Forgot Password)
+* 🧠 AI Tools
+
+  * Caption Generator
+  * Hashtag Generator
+  * Summarizer
+* 💬 Real-time Chat Interface
+* 👥 Follow-based interaction UI
+* 💎 Premium UI (badges, access control)
+* 📊 Admin Dashboard UI
+* 📁 File Upload UI
+* 🎨 Neon Theme UI
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone Repository
+
+```bash id="zj7x0n"
+git clone https://github.com/your-username/RevHive.git
+cd RevHive/frontend
+```
+
+---
+
+### 2. Install Dependencies
+
+```bash id="l5r7dc"
+npm install
+```
+
+---
+
+### 3. Run Frontend
+
+```bash id="4a4b3u"
+npm run dev
+```
+
+App runs on:
+
+```id="csmk7o"
+http://localhost:5173
+```
+
+---
+
+## 🌐 API Configuration
+
+Update API base URL (inside your config / axios file):
+
+```javascript id="k8rb3k"
+const API = "http://localhost:8080/api";
+```
+
+---
+
+## 💬 WebSocket Configuration
+
+```javascript id="i9e9r2"
+const socket = new WebSocket("ws://localhost:8080/ws");
+```
+
+---
+
+## 🔐 Pages / Routes
+
+* `/login` → Login
+* `/signup` → Register
+* `/forgot-password` → Email input
+* `/reset-password` → Set new password
+* `/dashboard` → Main app
+* `/chat` → Messaging
+
+---
+
+## 🎨 UI Notes
+
+* Built with **Tailwind CSS**
+* Uses **Neon theme**
+* Smooth animations via **Framer Motion**
+* Responsive design
+
+---
+
+## 📂 Project Structure
+
+```id="c4r1hc"
+frontend/
+│
+├── components/     # Reusable UI components
+├── pages/          # Main pages (Login, Dashboard, Chat)
+├── context/        # Global state
+├── services/       # API calls
+├── utils/          # Helpers
+└── App.jsx
+```
+
+---
+
+## 🚧 Future Improvements
+
+* Better UI consistency
+* Dark/Light mode toggle
+* Notifications UI
+* Mobile responsiveness improvements
+
+---
+
+## 👨‍💻 Author
+
+** Team RevHive**
+
+---
+
+## 📜 License
+
+For learning and development purposes.
