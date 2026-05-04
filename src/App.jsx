@@ -11,6 +11,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SettingsLayout from "./components/settings/SettingsLayout";
 import UserLayout from "./components/userdashboard/UserLayout";
 import MessagingLayout from "./components/messaging/MessagingLayout";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import ResetPassword from "./pages/Auth/ResetPassword";
 
 export default function App() {
   return (
@@ -48,6 +50,8 @@ export default function App() {
 
         <Route path="/messages" element={<MessagingLayout />} />
         <Route path="/settings" element={<SettingsLayout />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   );
