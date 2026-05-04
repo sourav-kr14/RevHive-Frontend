@@ -66,7 +66,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
 
       onPostCreated && onPostCreated(response.data);
     } catch (error) {
-      setError(error.response?.data?.message || "Failed to create post");
+      setError(error.response?.data?.message || "Server error");
     } finally {
       setIsPosting(false);
     }
@@ -120,27 +120,48 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
   };
 
   return (
-    <motion.div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      {/* HEADER */}
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white/5 backdrop-blur-xl border border-white/10 
+      rounded-2xl p-5 shadow-[0_0_30px_rgba(139,92,246,0.1)]"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4">
+        <div
+          className="w-11 h-11 rounded-full 
+        bg-gradient-to-br from-purple-500 to-blue-500 
+        flex items-center justify-center text-white font-semibold shadow"
+        >
           {initials}
         </div>
         <div>
-          <p className="text-sm font-semibold">What's buzzing?</p>
-          <p className="text-xs text-gray-500">Share updates or ideas</p>
+          <p className="text-sm font-semibold text-white">
+            What’s on your mind?
+          </p>
+          <p className="text-xs text-gray-400">Share something with the hive</p>
         </div>
       </div>
 
-      {/* ERROR */}
-      {error && <div className="mb-2 text-red-500 text-sm">{error}</div>}
+      {/* Error */}
+      {error && (
+        <div
+          className="mb-3 p-2 rounded-lg flex items-center gap-2 
+        bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+        >
+          <AlertCircle size={14} />
+          {error}
+        </div>
+      )}
 
       {/* TEXTAREA */}
       <div className="relative">
         <textarea
           ref={textareaRef}
-          className="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 text-sm outline-none"
-          placeholder="Share something with the hive…"
+          className="w-full bg-white/5 border border-white/10 
+          rounded-xl p-3 text-sm text-white placeholder-gray-500 
+          outline-none focus:ring-1 focus:ring-purple-500 resize-none"
+          placeholder="Share something..."
           rows="3"
           value={postText}
           onChange={handleTextChange}
@@ -214,14 +235,14 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
           ))}
         </div>
 
-        {/* POST BUTTON */}
+        {/* Post Button */}
         <button
           disabled={!postText.trim() || isPosting}
           onClick={handleCreatePost}
-          className={`px-4 py-2 rounded text-sm ${
+          className={`px-5 py-2 rounded-lg text-sm font-medium transition ${
             postText.trim()
-              ? "bg-black text-white"
-              : "bg-gray-200 text-gray-400"
+              ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg hover:opacity-90"
+              : "bg-white/10 text-gray-500"
           }`}
         >
           {isPosting ? "Posting..." : "Post"}
