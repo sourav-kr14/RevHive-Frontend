@@ -1,7 +1,13 @@
-import api from "../api/api";
+// ✅ import once
+import api from "../services/api";
 
-export const getCurrentUser = () => api.get("/auth/me");
+// ==================== USER ====================
+export const userAPI = {
+  getCurrentUser: () => api.get("/auth/me"),
+};
 
-export const getAnalytics = () => api.get("/admin/analytics");
-
-export const getAllUsers = () => api.get("/admin/users");
+// ==================== ADMIN ===================
+export const adminAPI = {
+  getAnalytics: () => api.get("/admin/analytics"),
+  getAllUsers: () => api.get("/admin/users"),
+};

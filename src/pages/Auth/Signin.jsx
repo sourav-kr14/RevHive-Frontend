@@ -22,16 +22,21 @@ const Signin = () => {
       const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          userNameOrEmail: formData.email,
+          password: formData.password,
+        }),
       });
+      const data = await res.json();
 
       if (!res.ok) {
         alert("Invalid credentials");
         return;
       }
-
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
       alert("Login successful");
-      navigate("/dashboard");
+      navigate("/user/dashboard");
     } catch {
       alert("Error");
     }
