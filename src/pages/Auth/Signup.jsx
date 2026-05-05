@@ -94,7 +94,10 @@ const Signup = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
           <input
             name="userName"
             placeholder="Enter your name"
@@ -161,7 +164,7 @@ const Signup = () => {
             placeholder="Bio"
             rows="2"
             onChange={handleChange}
-            className="input"
+            className="input md:col-span-2"
           />
 
           {/* Checkboxes */}
@@ -186,14 +189,14 @@ const Signup = () => {
           </div>
 
           {/* Submit */}
-          <button className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700">
+          <button className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 md:col-span-2">
             Get started
           </button>
 
           {/* Google */}
           <button
             type="button"
-            className="w-full border py-3 rounded-lg flex justify-center gap-2"
+            className="w-full border py-3 rounded-lg flex justify-center gap-2 md:col-span-2"
           >
             <img
               src="https://www.svgrepo.com/show/475656/google-color.svg"
