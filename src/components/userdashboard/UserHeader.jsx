@@ -13,16 +13,16 @@ export default function DashboardHeader({ profileData }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-start justify-between"
+      className="flex items-center justify-between"
     >
       {/* LEFT */}
       <div>
-        <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+        <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
           {getGreeting()}
         </p>
 
-        <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-          {profileData.username}
+        <h1 className="text-2xl font-semibold text-white flex items-center gap-2">
+          @{profileData?.username || "user"}
           <motion.span
             animate={{ rotate: [0, 15, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
@@ -31,34 +31,33 @@ export default function DashboardHeader({ profileData }) {
           </motion.span>
         </h1>
 
-        <p className="text-sm text-gray-500 mt-1">
-          Here's what's happening in your hive today
+        <p className="text-sm text-gray-400 mt-1">
+          Here’s what’s happening in your hive today
         </p>
       </div>
 
       {/* RIGHT */}
-      <div className="flex gap-2">
-        {/* Notification */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative w-10 h-10 rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-100 flex items-center justify-center"
-        >
-          <Bell size={16} />
+      <div className="flex gap-3">
+        {[Bell, Mail].map((Icon, i) => (
+          <motion.button
+            key={i}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative w-11 h-11 flex items-center justify-center 
+            rounded-xl bg-white/5 border border-white/10 
+            text-gray-400 hover:text-white hover:bg-white/10 
+            backdrop-blur-md transition"
+          >
+            <Icon size={17} />
 
-          <span className="absolute top-2 right-2 w-2 h-2 bg-gray-900 rounded-full" />
-        </motion.button>
-
-        {/* Messages */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative w-10 h-10 rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-100 flex items-center justify-center"
-        >
-          <Mail size={16} />
-
-          <span className="absolute top-2 right-2 w-2 h-2 bg-gray-900 rounded-full" />
-        </motion.button>
+            {/* Notification dot */}
+            <span
+              className="absolute top-2 right-2 w-2 h-2 
+            bg-gradient-to-r from-purple-500 to-blue-500 
+            rounded-full shadow-[0_0_6px_rgba(139,92,246,0.8)]"
+            />
+          </motion.button>
+        ))}
       </div>
     </motion.div>
   );

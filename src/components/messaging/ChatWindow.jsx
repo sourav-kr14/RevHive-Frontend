@@ -29,28 +29,21 @@ export default function ChatWindow({ selectedUser }) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {messages.map((msg, i) => (
-          <div key={i}>
-            <b>{msg.sender}: </b> {msg.content}
-          </div>
-        ))}
+      {/* HEADER */}
+      <div className="p-4 border-b">
+        <h2 className="font-semibold">Getting Started</h2>
+        <p className="text-sm text-gray-500">4 members, 1 online</p>
       </div>
 
-      {/* Messages */}
-      <div className="p-4 flex gap-2">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="flex-1 p-2 bg-gray-800 text-white"
-        />
-
-        <button onClick={handleSend}>Send</button>
+      {/* MESSAGES */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <MessageBubble />
       </div>
 
-      {/* Input */}
-      <MessageInput />
+      {/* INPUT */}
+      <div className="p-3 border-t">
+        <MessageInput />
+      </div>
     </div>
   );
 }
