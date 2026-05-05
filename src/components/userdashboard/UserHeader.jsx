@@ -1,64 +1,102 @@
 import { motion } from "framer-motion";
-import { Bell, Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
 
-export default function DashboardHeader({ profileData }) {
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
-  };
+export default function UserHeader({ activeNav, setActiveNav, profileData }) {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  const navItems = [
+    { id: "dashboard", label: "Dashboard", path: "/" },
+    { id: "profile", label: "Profile", path: "/profile" },
+    { id: "settings", label: "Settings", path: "/settings" },
+    { id: "messaging", label: "Messages", path: "/messages" },
+    { id: "notification", label: "Notifications", path: "/notifications" },
+  ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between"
-    >
-      {/* LEFT */}
-      <div>
-        <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
-          {getGreeting()}
-        </p>
+    <header className="w-full h-16 bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+      <div className="w-full mx-auto px-6 py-4 flex items-center justify-between">
+        {/* Logo */}
+        <div
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <img
+            src="/logo.png"
+            alt="RevHive Logo"
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <h1 className="text-lg font-semibold text-gray-900">RevHive</h1>
+        </div>
 
-        <h1 className="text-2xl font-semibold text-white flex items-center gap-2">
-          @{profileData?.username || "user"}
-          <motion.span
-            animate={{ rotate: [0, 15, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-          >
-            👋
-          </motion.span>
-        </h1>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-10">
+          {navItems.map((item) => {
+            const isActive = activeNav === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  navigate(item.path);
+                }}
+                className={`text-sm font-medium transition 
+                ${isActive ? "text-black" : "text-gray-500 hover:text-black hover:cursor-pointer"}`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
 
-        <p className="text-sm text-gray-400 mt-1">
-          Here’s what’s happening in your hive today
-        </p>
-      </div>
-
-      {/* RIGHT */}
-      <div className="flex gap-3">
-        {[Bell, Mail].map((Icon, i) => (
+        {/* Right Button */}
+        <div className="hidden md:block">
           <motion.button
-            key={i}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="relative w-11 h-11 flex items-center justify-center 
-            rounded-xl bg-white/5 border border-white/10 
-            text-gray-400 hover:text-white hover:bg-white/10 
-            backdrop-blur-md transition"
+            onClick={() => navigate("/profile")}
+            className="px-5 py-2 rounded-xl bg-black text-white text-sm font-medium"
           >
-            <Icon size={17} />
-
-            {/* Notification dot */}
-            <span
-              className="absolute top-2 right-2 w-2 h-2 
-            bg-gradient-to-r from-purple-500 to-blue-500 
-            rounded-full shadow-[0_0_6px_rgba(139,92,246,0.8)]"
-            />
+            @{profileData?.username || "User"}
           </motion.button>
-        ))}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button className="md:hidden" onClick={() => setOpen(!open)}>
+          {open ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
-    </motion.div>
+
+      {/* Mobile Dropdown */}
+      {open && (
+        <div className="md:hidden px-6 pb-4 flex flex-col gap-4 bg-white border-t">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveNav(item.id);
+                navigate(item.path);
+                setOpen(false);
+              }}
+              className="text-left text-gray-700 text-sm"
+            >
+              {item.label}
+            </button>
+          ))}
+
+          <button
+            onClick={() => {
+              localStorage.clear();
+              navigate("/signin");
+            }}
+            className="text-left text-red-500 text-sm"
+          >
+            Sign Out
+          </button>
+        </div>
+      )}
+    </header>
   );
 }
