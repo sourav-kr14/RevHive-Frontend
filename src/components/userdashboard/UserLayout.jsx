@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { authAPI, followAPI } from "../../services/api";
 
-import DashboardSidebar from "./UserSidebar";
+// import DashboardSidebar from "./UserSidebar";
 import DashboardHeader from "./UserHeader";
 import DashboardStats from "./UserStats";
 import DashboardCompose from "./UserCompose";
@@ -14,7 +14,6 @@ export default function UserLayout() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activeNav, setActiveNav] = useState("dashboard");
 
-  // ✅ safe localStorage parsing
   let user = null;
   try {
     const stored = localStorage.getItem("user");
@@ -94,22 +93,15 @@ export default function UserLayout() {
   };
 
   return (
-    <div
-      className="min-h-screen flex 
-    bg-gradient-to-b from-[#0b0f1a] to-[#070a12] text-white"
-    >
-      {/* Sidebar */}
-      <DashboardSidebar
+    <div className="min-h-screen bg-gradient-to-b from-[#0b0f1a] to-[#070a12] text-white">
+      <DashboardHeader
         activeNav={activeNav}
         setActiveNav={setActiveNav}
         profileData={profileData}
       />
 
-      {/* Main */}
-      <div className="flex-1 flex justify-center">
+      <div className="flex justify-center">
         <div className="w-full max-w-5xl px-6 py-6 flex flex-col gap-6">
-          <DashboardHeader profileData={profileData} />
-
           <DashboardStats profileData={profileData} />
 
           <DashboardCompose
