@@ -1,23 +1,46 @@
 import { Key, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!password || password.length < 8) {
+      alert("Password must be at least 8 characters");
+      return;
+    }
 
     if (password !== confirm) {
       alert("Passwords do not match");
       return;
     }
 
-    alert("Password updated!");
+    try {
+      setLoading(true);
+
+      await axios.post(
+        `http://localhost:8080/api/auth/reset-password?token=${token}&newPassword=${password}`,
+      );
+
+      alert("Password updated successfully!");
+      navigate("/signin");
+    } catch (err) {
+      alert(err.response?.data?.message || "Invalid or expired token");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -1,21 +1,42 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+
 export default function AdminHeader() {
+  const filters = ["12 months", "30 days", "7 days", "24 hours"];
+  const [active, setActive] = useState("12 months");
+
   return (
     <div className="flex justify-between items-center">
-      <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+      {/* Title */}
+      <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
 
+      {/* Filters */}
       <div className="flex gap-2">
-        {["12 months", "30 days", "7 days", "24 hours"].map((t) => (
-          <button
+        {filters.map((t) => (
+          <motion.button
             key={t}
-            className="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100"
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setActive(t)}
+            className={`px-3 py-1.5 text-sm rounded-lg transition
+            ${
+              active === t
+                ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
+                : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
+            }`}
           >
             {t}
-          </button>
+          </motion.button>
         ))}
 
-        <button className="px-3 py-1.5 text-sm border rounded-md bg-white">
+        {/* Filter Button */}
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          className="px-3 py-1.5 text-sm rounded-lg 
+          bg-white/5 border border-white/10 
+          text-gray-400 hover:text-white hover:bg-white/10"
+        >
           Filters
-        </button>
+        </motion.button>
       </div>
     </div>
   );
