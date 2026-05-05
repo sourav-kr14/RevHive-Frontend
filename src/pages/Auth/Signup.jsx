@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "sonner";
 const Signup = () => {
   const [formData, setFormData] = useState({
     userName: "",
@@ -30,12 +30,12 @@ const Signup = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords donot match");
       return;
     }
 
     if (!formData.agreeTerms) {
-      alert("Accept terms");
+      toast.warning("Accept terms");
       return;
     }
 
@@ -53,14 +53,23 @@ const Signup = () => {
       });
 
       if (!res.ok) {
-        alert("Failed");
+        toast.error("Failed", {
+          description: "Something went wrong. Try again",
+        });
         return;
       }
 
-      alert("Success");
-      navigate("/Signin");
+      toast.success("Success", {
+        description: "Account created successfully",
+      });
+
+      setTimeout(() => {
+        navigate("/signin");
+      }, 1200);
     } catch {
-      alert("Error");
+      toast.error("Error", {
+        description: "Server not responding",
+      });
     }
   };
 

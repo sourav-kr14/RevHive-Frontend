@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { toast } from "sonner";
 
 export default function Password() {
   const [oldPassword, setOldPassword] = useState("");
@@ -20,7 +21,7 @@ export default function Password() {
         },
       );
 
-      alert("Password updated");
+      toast.success("Password updated");
       setOldPassword("");
       setNewPassword("");
     } catch (err) {

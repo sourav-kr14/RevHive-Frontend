@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 const Signin = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -30,15 +31,15 @@ const Signin = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        alert("Invalid credentials");
+        toast.error("Invalid credentials");
         return;
       }
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
-      alert("Login successful");
+      toast.success("Login successful");
       navigate("/user/dashboard");
     } catch {
-      alert("Error");
+      toast.error("Error");
     }
   };
 

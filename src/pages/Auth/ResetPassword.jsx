@@ -2,6 +2,7 @@ import { Key, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import { toast } from "sonner";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -18,12 +19,12 @@ export default function ResetPassword() {
     e.preventDefault();
 
     if (!password || password.length < 8) {
-      alert("Password must be at least 8 characters");
+      toast.warning("Password must be at least 8 characters");
       return;
     }
 
     if (password !== confirm) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -34,7 +35,7 @@ export default function ResetPassword() {
         `http://localhost:8080/api/auth/reset-password?token=${token}&newPassword=${password}`,
       );
 
-      alert("Password updated successfully!");
+      toast.success("Password updated successfully!");
       navigate("/signin");
     } catch (err) {
       alert(err.response?.data?.message || "Invalid or expired token");
