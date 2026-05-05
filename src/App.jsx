@@ -13,6 +13,8 @@ import UserLayout from "./components/userdashboard/UserLayout";
 import MessagingLayout from "./components/messaging/MessagingLayout";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import ProfileLayout from "./user-profile/ProfileLayout";
+import DashboardPage from "./components/userdashboard/DashboardPage";
 
 export default function App() {
   return (
@@ -39,20 +41,18 @@ export default function App() {
           <Route path="reports" element={<AdminReports />} />
         </Route>
 
-        {/* USER */}
-        <Route
-          path="/user/dashboard"
-          element={
-            <UserRoute>
-              <UserLayout />
-            </UserRoute>
-          }
-        />
-
         <Route path="/messages" element={<MessagingLayout />} />
-        <Route path="/settings" element={<SettingsLayout />} />
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+
+        <Route path="/user" element={<UserLayout />}>
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="profile" element={<ProfileLayout />} />
+          <Route path="settings" element={<SettingsLayout />} />
+        </Route>
+
+        {/* <Route index element={<ProfilePosts />} /> */}
       </Routes>
     </BrowserRouter>
   );
