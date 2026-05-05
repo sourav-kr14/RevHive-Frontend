@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllUsers } from "../../../services/adminService";
+import { adminAPI } from "../../../services/adminService"; // ✅ correct import
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -9,9 +9,10 @@ export default function AdminUsers() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await getAllUsers();
+        const res = await adminAPI.getAllUsers();
         setUsers(res?.data || []);
-      } catch {
+      } catch (err) {
+        console.error(err);
         setError("Failed to load users");
       } finally {
         setLoading(false);
@@ -40,7 +41,7 @@ export default function AdminUsers() {
   return (
     <div
       className="bg-white/5 backdrop-blur-xl border border-white/10 
-    rounded-2xl p-5 shadow-[0_0_20px_rgba(139,92,246,0.08)]"
+      rounded-2xl p-5 shadow-[0_0_20px_rgba(139,92,246,0.08)]"
     >
       <h1 className="text-2xl font-semibold mb-5 text-white">Users</h1>
 
@@ -74,11 +75,11 @@ export default function AdminUsers() {
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 text-xs rounded-md
-                    ${
-                      u?.role === "ADMIN"
-                        ? "bg-purple-500/20 text-purple-400"
-                        : "bg-blue-500/20 text-blue-400"
-                    }`}
+                      ${
+                        u?.role === "ADMIN"
+                          ? "bg-purple-500/20 text-purple-400"
+                          : "bg-blue-500/20 text-blue-400"
+                      }`}
                   >
                     {u?.role || "USER"}
                   </span>
