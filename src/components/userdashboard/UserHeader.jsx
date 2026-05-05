@@ -8,8 +8,8 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
   const [open, setOpen] = useState(false);
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", path: "/" },
-    { id: "profile", label: "Profile", path: "/profile" },
+    { id: "dashboard", label: "Dashboard", path: "/user/dashboard" },
+    { id: "profile", label: "Profile", path: "/user/profile" },
     { id: "settings", label: "Settings", path: "/settings" },
     { id: "messaging", label: "Messages", path: "/messages" },
     { id: "notification", label: "Notifications", path: "/notifications" },
@@ -25,7 +25,7 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
         {/* Logo */}
         <motion.div
           whileHover={{ scale: 1.05 }}
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/user/dashboard")}
           className="flex items-center gap-2 cursor-pointer"
         >
           <img
@@ -74,7 +74,7 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/user/profile")}
             className="px-5 py-2 rounded-xl bg-black text-white text-sm font-medium shadow-sm"
           >
             @{profileData?.username || "User"}
