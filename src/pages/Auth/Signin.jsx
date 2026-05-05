@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 const Signin = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -98,9 +98,12 @@ const Signin = () => {
 
           {/* Forgot password */}
           <div className="text-right text-sm">
-            <span className="text-purple-600 cursor-pointer">
+            <Link
+              to="/forgot-password"
+              className="text-purple-600 cursor-pointer"
+            >
               Forgot password?
-            </span>
+            </Link>
           </div>
 
           {/* Submit */}
@@ -134,7 +137,6 @@ const Signin = () => {
         </p>
       </div>
 
-      {/* same input style */}
       <style>{`
         .input {
           width: 100%;
