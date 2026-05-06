@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { Heart, Share2, AlertCircle } from "lucide-react";
+import { Heart, AlertCircle, MoreHorizontal, Bookmark } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { postAPI, followAPI } from "../../services/api";
+import { postAPI, followAPI, bookmarkAPI } from "@/services/api";
 import CommentSection from "./CommentSection";
 import EditPostModal from "./EditPostModal";
-
+import ReportModal from "../Reportmodal";
 export default function UserFeed({
   profileData,
   refreshTrigger,
@@ -17,8 +17,36 @@ export default function UserFeed({
   const [editingPost, setEditingPost] = useState(null);
   const [followingStatus, setFollowingStatus] = useState({});
   const [followLoading, setFollowLoading] = useState({});
+  const [showReport, setShowReport] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   const isMounted = useRef(true);
+  const handleBookmark = async (postId) => {
+    const post = posts.find((p) => p.id === postId);
+
+    if (!post) return;
+
+    try {
+      if (post.bookmarked) {
+        await bookmarkAPI.removeBookmark(profileData.id, postId);
+      } else {
+        await bookmarkAPI.addBookmark(profileData.id, postId);
+      }
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? {
+                ...p,
+                bookmarked: !p.bookmarked,
+              }
+            : p,
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     isMounted.current = true;
@@ -182,8 +210,10 @@ export default function UserFeed({
               <motion.div
                 key={post.id}
                 whileHover={{ y: -2 }}
-                className="bg-white border border-gray-200 
-                rounded-3xl p-4 sm:p-6 shadow-sm hover:shadow-lg transition-all"
+                className="bg-white/90 backdrop-blur-md 
+border border-gray-100 rounded-[28px] 
+p-4 sm:p-6 shadow-sm hover:shadow-xl 
+transition-all duration-300"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4">
@@ -193,7 +223,9 @@ export default function UserFeed({
                       bg-black text-white flex items-center 
                       justify-center text-sm font-semibold shrink-0"
                     >
-                      {post.user?.username?.slice(0, 2)?.toUpperCase() || "NA"}
+                      {(post.user?.username || profileData?.username)
+                        ?.slice(0, 2)
+                        ?.toUpperCase() || "NA"}
                     </div>
 
                     <div className="min-w-0">
@@ -201,7 +233,7 @@ export default function UserFeed({
                         className="text-sm sm:text-base 
                         font-semibold text-black truncate"
                       >
-                        @{post.user?.username}
+                        @{post.user?.username || profileData?.username}
                       </p>
 
                       <p className="text-xs text-gray-500">
@@ -245,36 +277,74 @@ export default function UserFeed({
                   <img
                     src={post.imageUrl}
                     alt=""
-                    className="mt-4 rounded-2xl max-h-[500px]
-                    object-cover border border-gray-200 w-full"
+                    className="mt-4 rounded-3xl max-h-[520px]
+object-cover border border-gray-100 w-full"
                   />
                 )}
 
                 {/* Actions */}
                 <div
-                  className="flex items-center gap-6 mt-5 
-                  pt-4 border-t border-gray-200 text-gray-600"
+                  className="flex items-center justify-between mt-5 
+  pt-4 border-t border-gray-100"
                 >
-                  <button
-                    onClick={() => handleLike(post.id)}
-                    className="flex items-center gap-2 hover:text-red-500 transition"
-                  >
-                    <Heart
-                      size={18}
-                      className={post.liked ? "text-red-500 fill-red-500" : ""}
-                    />
+                  <div className="flex items-center gap-5 text-gray-500">
+                    {/* Like */}
+                    <button
+                      onClick={() => handleLike(post.id)}
+                      className="flex items-center gap-2 
+      hover:text-red-500 transition group"
+                    >
+                      <Heart
+                        size={19}
+                        className={`transition ${
+                          post.liked
+                            ? "text-red-500 fill-red-500"
+                            : "group-hover:scale-110"
+                        }`}
+                      />
 
-                    <span className="text-sm">{post.likeCount || 0}</span>
-                  </button>
+                      <span className="text-sm font-medium">
+                        {post.likeCount || 0}
+                      </span>
+                    </button>
 
-                  <CommentSection
-                    postId={post.id}
-                    currentUserId={profileData?.id}
-                  />
+                    {/* Comments */}
+                    <div className="flex items-center">
+                      <CommentSection
+                        postId={post.id}
+                        currentUserId={profileData?.id}
+                      />
+                    </div>
+                  </div>
 
-                  <button className="hover:text-black transition">
-                    <Share2 size={18} />
-                  </button>
+                  {/* More Actions */}
+                  <div className="flex items-center gap-2">
+                    {/* Bookmark */}
+                    <button
+                      onClick={() => handleBookmark(post.id)}
+                      className="p-2 rounded-full hover:bg-gray-100 transition-all"
+                    >
+                      <Bookmark
+                        size={20}
+                        className={`transition ${
+                          post.bookmarked
+                            ? "fill-black text-black"
+                            : "text-gray-500"
+                        }`}
+                      />
+                    </button>
+
+                    {/* Report */}
+                    <button
+                      onClick={() => {
+                        setSelectedPost(post.id);
+                        setShowReport(true);
+                      }}
+                      className="p-2 rounded-full hover:bg-gray-100 transition-all"
+                    >
+                      <MoreHorizontal size={20} className="text-gray-500" />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))
@@ -288,6 +358,12 @@ export default function UserFeed({
           )}
         </div>
       </motion.div>
+      <ReportModal
+        isOpen={showReport}
+        onClose={() => setShowReport(false)}
+        targetType="POST"
+        targetId={selectedPost}
+      />
 
       {editingPost && (
         <EditPostModal
