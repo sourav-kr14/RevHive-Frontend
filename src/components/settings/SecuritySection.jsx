@@ -160,15 +160,15 @@ export default function SecuritySection() {
       <div
         className="
       mt-8
-      bg-black
+      bg-white-900
       rounded-3xl
       p-5
-      text-white
+      text-black
       "
       >
         <p className="text-sm font-semibold">Password Tips</p>
 
-        <ul className="mt-3 text-sm text-gray-300 space-y-2">
+        <ul className="mt-3 text-sm text-black space-y-2">
           <li>• Use at least 8 characters</li>
           <li>• Include uppercase and lowercase letters</li>
           <li>• Add numbers and special characters</li>
