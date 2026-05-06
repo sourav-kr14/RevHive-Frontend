@@ -37,7 +37,11 @@ const Signin = () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
       toast.success("Login successful");
-      navigate("/user/dashboard");
+      if (data.role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/user/dashboard");
+      }
     } catch {
       toast.error("Error");
     }
