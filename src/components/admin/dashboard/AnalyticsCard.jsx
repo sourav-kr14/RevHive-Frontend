@@ -5,8 +5,8 @@ export default function AnalyticsCards({ data = {} }) {
     { id: "total", title: "Total Users", value: data?.totalUsers },
     { id: "active", title: "Active Users", value: data?.activeUsers },
     { id: "new", title: "New Users", value: data?.newUsers },
-    { id: "dau", title: "DAU", value: data?.dau },
-    { id: "mau", title: "MAU", value: data?.mau },
+    { id: "dau", title: "Premium Users", value: data?.premiumUsers },
+    { id: "admin", title: "ADMINS", value: data?.admins },
   ];
 
   return (
