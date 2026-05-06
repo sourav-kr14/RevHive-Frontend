@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Bell, Settings, Zap, Search } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
 export default function UserHeader({ activeNav, setActiveNav, profileData }) {
@@ -8,149 +8,125 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
   const [open, setOpen] = useState(false);
 
   const navItems = [
-    { id: "home", label: "Home", path: "/" },
     { id: "dashboard", label: "Dashboard", path: "/user/dashboard" },
-    { id: "projects", label: "Projects", path: "/projects" },
-    { id: "tasks", label: "Tasks", path: "/tasks" },
-    { id: "reporting", label: "Reporting", path: "/reporting" },
-    { id: "users", label: "Users", path: "/users" },
+    { id: "profile", label: "Profile", path: "/user/profile" },
+    { id: "settings", label: "Settings", path: "/settings" },
+    { id: "messaging", label: "Messages", path: "/messages" },
+    { id: "notification", label: "Notifications", path: "/notifications" },
   ];
 
   return (
     <motion.header
-      initial={{ y: -30, opacity: 0 }}
+      initial={{ y: -40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-md"
+      className="w-full h-16 bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50"
     >
-      <div className="h-20 px-8 flex items-center justify-between">
-        {/* LEFT */}
-        <div className="flex items-center gap-10">
-          {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            onClick={() => navigate("/")}
-            className="flex items-center gap-3 cursor-pointer"
-          >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow">
-              <span className="text-white font-bold text-lg">R</span>
-            </div>
+      <div className="w-full px-6 h-full flex items-center justify-between">
+        {/* Logo */}
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          onClick={() => navigate("/user/dashboard")}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <img
+            src="/logo.png"
+            alt="logo"
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <h1 className="text-lg font-semibold text-gray-900">RevHive</h1>
+        </motion.div>
 
-            <h1 className="text-2xl font-bold text-gray-900">RevHive</h1>
-          </motion.div>
+        <nav className="hidden md:flex items-center gap-8">
+          {navItems.map((item) => {
+            const isActive = activeNav === item.id;
 
-          {/* NAV */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => {
-              const isActive = activeNav === item.id;
+            return (
+              <motion.button
+                key={item.id}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  navigate(item.path);
+                }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className={`relative text-sm font-medium transition
+                ${isActive ? "text-black" : "text-gray-500 hover:text-black hover:cursor-pointer"}`}
+              >
+                {item.label}
 
-              return (
-                <motion.button
-                  key={item.id}
-                  whileHover={{ y: -1 }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => {
-                    setActiveNav(item.id);
-                    navigate(item.path);
-                  }}
-                  className={`px-5 py-3 rounded-xl text-[15px] font-semibold transition-all
-                  ${
-                    isActive
-                      ? "bg-gray-100 text-black shadow-sm"
-                      : "text-gray-500 hover:text-black"
-                  }`}
-                >
-                  {item.label}
-                </motion.button>
-              );
-            })}
-          </nav>
-        </div>
+                {isActive && (
+                  <motion.span
+                    layoutId="underline"
+                    className="absolute left-0 -bottom-1 h-[2px] w-full bg-black rounded"
+                  />
+                )}
+              </motion.button>
+            );
+          })}
+        </nav>
 
-        {/* RIGHT */}
-        <div className="hidden lg:flex items-center gap-3">
-          {/* Upgrade */}
+        {/* Right Button */}
+        <motion.div
+          className="hidden md:block"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
           <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 px-5 py-3 border border-gray-300 rounded-2xl bg-white shadow-sm hover:bg-gray-50 transition"
-          >
-            <Zap size={17} />
-            <span className="font-semibold text-sm">Upgrade now</span>
-          </motion.button>
-
-          {/* Search */}
-          <button className="p-3 rounded-xl hover:bg-gray-100 transition">
-            <Search size={20} className="text-gray-500" />
-          </button>
-
-          {/* Settings */}
-          <button
-            onClick={() => navigate("/settings")}
-            className="p-3 rounded-xl hover:bg-gray-100 transition"
-          >
-            <Settings size={20} className="text-gray-500" />
-          </button>
-
-          {/* Notification */}
-          <div className="relative">
-            <button
-              onClick={() => navigate("/notifications")}
-              className="p-3 rounded-xl hover:bg-gray-100 transition"
-            >
-              <Bell size={20} className="text-gray-500" />
-            </button>
-
-            <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-[10px] font-bold">
-              2
-            </div>
-          </div>
-
-          {/* Profile */}
-          <motion.img
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate("/user/profile")}
-            src={profileData?.profilePicture || "https://i.pravatar.cc/100"}
-            alt="profile"
-            className="w-11 h-11 rounded-full object-cover cursor-pointer border border-gray-200"
-          />
-        </div>
+            className="px-5 py-2 rounded-xl bg-black text-white text-sm font-medium shadow-sm"
+          >
+            @{profileData?.username || "User"}
+          </motion.button>
+        </motion.div>
 
-        {/* MOBILE */}
-        <button onClick={() => setOpen(!open)} className="lg:hidden">
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* Mobile Menu Button */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          className="md:hidden"
+          onClick={() => setOpen(!open)}
+        >
+          {open ? <X size={22} /> : <Menu size={22} />}
+        </motion.button>
       </div>
 
-      {/* MOBILE MENU */}
+      {/* Mobile Dropdown */}
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="lg:hidden overflow-hidden border-t bg-white"
+            className="md:hidden px-6 pb-4 flex flex-col gap-4 bg-white border-t overflow-hidden"
           >
-            <div className="flex flex-col gap-2 p-5">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveNav(item.id);
-                    navigate(item.path);
-                    setOpen(false);
-                  }}
-                  className={`text-left px-4 py-3 rounded-xl text-sm font-medium transition
-                  ${
-                    activeNav === item.id
-                      ? "bg-gray-100 text-black"
-                      : "text-gray-600"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+            {navItems.map((item, i) => (
+              <motion.button
+                key={item.id}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: i * 0.05 }}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  navigate(item.path);
+                  setOpen(false);
+                }}
+                className="text-left text-gray-700 text-sm"
+              >
+                {item.label}
+              </motion.button>
+            ))}
+
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                localStorage.clear();
+                navigate("/signin");
+              }}
+              className="text-left text-red-500 text-sm"
+            >
+              Sign Out
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
