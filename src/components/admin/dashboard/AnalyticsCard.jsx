@@ -12,11 +12,7 @@ export default function AnalyticsCards({ data = {} }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       {cards.map((card) => (
-        <Card
-          key={card.id}
-          title={card.title}
-          value={card.value ?? 0} // ✅ safe fallback
-        />
+        <Card key={card.id} title={card.title} value={card.value ?? 0} />
       ))}
     </div>
   );
