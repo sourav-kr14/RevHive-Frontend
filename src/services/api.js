@@ -164,4 +164,17 @@ export const accessPremiumFeature = async () => {
   return res.data;
 };
 
+export const bookmarkAPI = {
+  addBookmark: async (userId, postId) => {
+    return await api.post(`/bookmarks?userId=${userId}&postId=${postId}`);
+  },
+  removeBookmark: async (userId, postId) => {
+    return await api.delete(`/bookmarks?userId=${userId}&postId=${postId}`);
+  },
+
+  getBookmarks: async (userId) => {
+    return await api.get(`/bookmarks?userId=${userId}`);
+  },
+};
+
 export default api;
