@@ -7,9 +7,6 @@ export default function UserLayout() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // sidebar feed state
-  const [feedType, setFeedType] = useState("forYou");
-
   let user = null;
 
   try {
@@ -61,49 +58,13 @@ export default function UserLayout() {
       {/* Header */}
       <DashboardHeader profileData={profileData} />
 
-      <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
-        {/* Sidebar */}
-        <aside className="hidden lg:block w-64">
-          <div className="sticky top-24">
-            <div className="bg-[#111827] border border-white/10 rounded-2xl p-5">
-              <h2 className="text-lg font-semibold mb-5">Explore</h2>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => setFeedType("forYou")}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition ${
-                    feedType === "forYou"
-                      ? "bg-violet-600 text-white"
-                      : "bg-white/5 hover:bg-white/10 text-gray-300"
-                  }`}
-                >
-                  For You
-                </button>
-
-                <button
-                  onClick={() => setFeedType("trending")}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition ${
-                    feedType === "trending"
-                      ? "bg-violet-600 text-white"
-                      : "bg-white/5 hover:bg-white/10 text-gray-300"
-                  }`}
-                >
-                  Trending
-                </button>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main */}
-        <main className="flex-1">
-          <Outlet
-            context={{
-              profileData,
-              feedType,
-            }}
-          />
-        </main>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <Outlet
+          context={{
+            profileData,
+          }}
+        />
       </div>
     </div>
   );
