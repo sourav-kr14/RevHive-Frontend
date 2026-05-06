@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Heart, Share2, AlertCircle } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { useOutletContext } from "react-router-dom";
 import { postAPI, followAPI } from "../../services/api";
 import CommentSection from "./CommentSection";
 import EditPostModal from "./EditPostModal";
@@ -10,11 +9,8 @@ export default function UserFeed({
   profileData,
   refreshTrigger,
   onlyUserPosts = false,
+  feedType = "forYou",
 }) {
-  const outletContext = useOutletContext();
-
-  const sidebarFeedType = outletContext?.feedType || "forYou";
-
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,7 +30,7 @@ export default function UserFeed({
     return () => {
       isMounted.current = false;
     };
-  }, [sidebarFeedType, refreshTrigger, profileData?.id]);
+  }, [feedType, refreshTrigger, profileData?.id]);
 
   const fetchFeed = async () => {
     setLoading(true);
@@ -49,7 +45,7 @@ export default function UserFeed({
       }
 
       // TRENDING
-      else if (sidebarFeedType === "trending") {
+      else if (feedType === "trending") {
         response = await postAPI.getTrending(0, 20);
       }
 
@@ -174,7 +170,7 @@ export default function UserFeed({
           <h2 className="text-2xl font-bold">
             {onlyUserPosts
               ? "My Posts"
-              : sidebarFeedType === "trending"
+              : feedType === "trending"
                 ? "Trending Posts"
                 : "For You"}
           </h2>
