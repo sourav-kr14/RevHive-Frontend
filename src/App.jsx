@@ -19,7 +19,7 @@ import DashboardPage from "./components/userdashboard/DashboardPage";
 export default function App() {
   return (
     <BrowserRouter>
-      <Toaster theme="system" position="top-right" richColors />
+      <Toaster theme="system" position="bottom-right" richColors />
       <Routes>
         {/* AUTH */}
         <Route path="/" element={<Navigate to="/signup" />} />
