@@ -14,6 +14,7 @@ import ForgotPassword from "./pages/Auth/ForgotPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import ProfileLayout from "./user-profile/ProfileLayout";
 import DashboardPage from "./components/userdashboard/DashboardPage";
+import Premium from "./components/userdashboard/Premium";
 import SettingsPage from "./pages/settings/SettingsPage";
 
 export default function App() {
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="profile" element={<ProfileLayout />} />
           <Route path="/user/settings" element={<SettingsPage />} />
         </Route>
+        <Route path="/premium" element={<Premium />} />
 
         {/* <Route index element={<ProfilePosts />} /> */}
       </Routes>

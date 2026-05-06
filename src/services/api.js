@@ -151,4 +151,16 @@ export const shareAPI = {
   getShareCount: (postId) => api.get("/shares/count", { params: { postId } }),
 };
 
+export const accessPremiumFeature = async () => {
+  const token = localStorage.getItem("token");
+
+  const res = await api.get("/premium/upgrade", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
+
 export default api;
