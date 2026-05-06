@@ -67,15 +67,33 @@ export default function ProfileSection() {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-      <div className="flex justify-between items-center mb-8">
+    <div
+      className="
+    bg-white/90 backdrop-blur-md
+    border border-gray-100
+    rounded-[32px]
+    shadow-sm hover:shadow-xl
+    transition-all duration-300
+    p-6 sm:p-8
+    "
+    >
+      {/* Header */}
+      <div
+        className="
+      flex flex-col sm:flex-row
+      sm:items-center
+      sm:justify-between
+      gap-5
+      mb-10
+      "
+      >
         <div>
-          <h2 className="text-2xl font-semibold text-black">
+          <h2 className="text-3xl font-bold tracking-tight text-black">
             Profile Settings
           </h2>
 
-          <p className="text-black text-sm mt-1">
-            Update your profile information
+          <p className="text-gray-500 text-sm mt-2">
+            Manage your personal information and preferences
           </p>
         </div>
 
@@ -83,90 +101,173 @@ export default function ProfileSection() {
           onClick={handleSave}
           disabled={loading}
           className="
-          bg-purple-600
-          hover:bg-purple-700
-          text-black
-          px-5
-          py-2
-          rounded-xl
-          transition
-          "
+        h-11
+        px-6
+        rounded-2xl
+        bg-green-400
+        hover:bg-green-600
+        text-white
+        text-sm
+        font-medium
+        transition-all duration-200
+        active:scale-[0.98]
+        disabled:opacity-50
+        hover:cursor-pointer
+        "
         >
-          {loading ? "Saving..." : "Save"}
+          {loading ? "Saving..." : "Save Changes"}
         </button>
       </div>
 
       <div className="space-y-8">
-        <AvatarUpload />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <InputField
-            label="Username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-          />
-
-          <InputField
-            label="Email"
-            type="email"
-            value={formData.email}
-            disabled
-          />
-
-          <InputField
-            label="Date of Birth"
-            type="date"
-            name="dob"
-            value={formData.dob}
-            onChange={handleChange}
-          />
-
-          <InputField
-            label="Avatar URL"
-            name="avatarUrl"
-            value={formData.avatarUrl}
-            onChange={handleChange}
-          />
+        {/* Avatar */}
+        <div
+          className="
+        border border-gray-100
+        rounded-3xl
+        p-5
+        bg-gray-50/70
+        "
+        >
+          <AvatarUpload />
         </div>
 
-        <div>
-          <label className="text-sm font-medium text-black">Bio</label>
+        {/* Inputs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            className="
+          bg-gray-50/70
+          border border-gray-100
+          rounded-2xl
+          p-4
+          "
+          >
+            <InputField
+              label="Username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div
+            className="
+          bg-gray-50/70
+          border border-gray-100
+          rounded-2xl
+          p-4
+          "
+          >
+            <InputField
+              label="Email"
+              type="email"
+              value={formData.email}
+              disabled
+            />
+          </div>
+
+          <div
+            className="
+          bg-gray-50/70
+          border border-gray-100
+          rounded-2xl
+          p-4
+          "
+          >
+            <InputField
+              label="Date of Birth"
+              type="date"
+              name="dob"
+              value={formData.dob}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div
+            className="
+          bg-gray-50/70
+          border border-gray-100
+          rounded-2xl
+          p-4
+          "
+          >
+            <InputField
+              label="Avatar URL"
+              name="avatarUrl"
+              value={formData.avatarUrl}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        {/* Bio */}
+        <div
+          className="
+        bg-gray-50/70
+        border border-gray-100
+        rounded-3xl
+        p-5
+        "
+        >
+          <label className="text-sm font-semibold text-black">Bio</label>
 
           <textarea
             rows="5"
             name="bio"
             value={formData.bio}
             onChange={handleChange}
-            placeholder="Write something..."
+            placeholder="Write something about yourself..."
             className="
-            w-full
-            mt-2
-            border
-            border-gray-300
-            bg-white
-            text-black
-            rounded-xl
-            px-4
-            py-3
-            outline-none
-            focus:ring-2
-            focus:ring-purple-500
-            placeholder:text-gray-400
-            "
+          w-full
+          mt-3
+          border border-gray-200
+          bg-white
+          rounded-2xl
+          px-4
+          py-3
+          text-black
+          outline-none
+          resize-none
+          transition-all
+          focus:ring-2
+          focus:ring-black
+          placeholder:text-gray-400
+          "
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Newsletter */}
+        <div
+          className="
+        flex items-center justify-between
+        bg-gray-50/70
+        border border-gray-100
+        rounded-2xl
+        px-5
+        py-4
+        "
+        >
+          <div>
+            <p className="text-sm font-semibold text-black">
+              Newsletter Subscription
+            </p>
+
+            <p className="text-xs text-gray-500 mt-1">
+              Receive updates and announcements
+            </p>
+          </div>
+
           <input
             type="checkbox"
             name="subscribeNewsletter"
             checked={formData.subscribeNewsletter}
             onChange={handleChange}
-            className="w-4 h-4 accent-purple-600"
+            className="
+          w-5 h-5
+          accent-black
+          cursor-pointer
+          "
           />
-
-          <label className="text-sm text-black">Subscribe to newsletter</label>
         </div>
       </div>
     </div>
