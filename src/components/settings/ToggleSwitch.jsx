@@ -3,7 +3,7 @@ export default function ToggleSwitch({ enabled, setEnabled }) {
     <button
       onClick={() => setEnabled(!enabled)}
       className={`w-14 h-8 flex items-center rounded-full p-1 transition ${
-        enabled ? "bg-purple-600" : "bg-gray-300"
+        enabled ? "bg-green-600" : "bg-gray-300"
       }`}
     >
       <div
