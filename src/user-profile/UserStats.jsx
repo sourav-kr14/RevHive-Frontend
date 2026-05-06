@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { BarChart3, Users, UserPlus } from "lucide-react";
 import { useState, useEffect } from "react";
-import { followAPI } from "../../services/api";
-import SocialModal from "../common/SocialModal";
+import { followAPI } from "../services/api";
+import SocialModal from "../components/common/SocialModal";
 
 export default function DashboardStats({ profileData }) {
   const [showModal, setShowModal] = useState(false);
@@ -15,7 +15,7 @@ export default function DashboardStats({ profileData }) {
 
   useEffect(() => {
     if (profileData?.id) fetchStats();
-  }, [profileData?.id]); // ✅ FIX
+  }, [profileData?.id]);
 
   const fetchStats = async () => {
     try {
