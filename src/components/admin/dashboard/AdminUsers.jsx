@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { adminAPI } from "../../../services/adminService"; // ✅ correct import
+import { adminAPI } from "../../../services/adminService";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);

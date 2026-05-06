@@ -1,12 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, Crown } from "lucide-react";
 import { GoReport } from "react-icons/go";
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ✅ safe parsing
   let user = { username: "Admin" };
   try {
     const stored = localStorage.getItem("user");
@@ -21,14 +20,19 @@ export default function Sidebar() {
   const navItems = [
     { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Users", path: "/admin/users", icon: Users },
+    { name: "Premium", path: "/admin/premium", icon: Crown },
     { name: "Reports", path: "/admin/reports", icon: GoReport },
   ];
 
   return (
     <div
-      className="w-64 h-screen flex flex-col px-5 py-6 
-    bg-gradient-to-b from-[#0b0f1a] to-[#070a12] 
-    border-r border-white/10 backdrop-blur-xl"
+      className="
+  fixed md:relative z-50
+  w-64 h-screen flex flex-col px-5 py-6
+  bg-gradient-to-b from-[#0b0f1a] to-[#070a12]
+  border-r border-white/10 backdrop-blur-xl
+  transition-all duration-300
+  "
     >
       {/* Logo */}
       <div className="flex items-center gap-3 mb-8">
