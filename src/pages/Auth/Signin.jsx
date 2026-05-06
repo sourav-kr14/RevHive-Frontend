@@ -36,6 +36,7 @@ const Signin = () => {
       }
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
+      localStorage.setItem("user", JSON.stringify(data));
       toast.success("Login successful");
       if (data.role === "ADMIN") {
         navigate("/admin/dashboard");
