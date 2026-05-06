@@ -8,13 +8,13 @@ import AdminReports from "./pages/admin/AdminReports";
 import { Toaster } from "sonner";
 import { AdminRoute, UserRoute } from "./routes/ProtectedRoutes";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import SettingsLayout from "./components/settings/SettingsLayout";
 import UserLayout from "./components/userdashboard/UserLayout";
 import MessagingLayout from "./components/messaging/MessagingLayout";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import ProfileLayout from "./user-profile/ProfileLayout";
 import DashboardPage from "./components/userdashboard/DashboardPage";
+import SettingsPage from "./pages/settings/SettingsPage";
 
 export default function App() {
   return (
@@ -49,7 +49,7 @@ export default function App() {
         <Route path="/user" element={<UserLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="profile" element={<ProfileLayout />} />
-          <Route path="settings" element={<SettingsLayout />} />
+          <Route path="/user/settings" element={<SettingsPage />} />
         </Route>
 
         {/* <Route index element={<ProfilePosts />} /> */}
