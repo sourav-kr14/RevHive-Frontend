@@ -44,7 +44,7 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
               <motion.button
                 key={item.id}
                 onClick={() => {
-                  setActiveNav(item.id);
+                  // setActiveNav(item.id);
                   navigate(item.path);
                 }}
                 whileHover={{ y: -2 }}
