@@ -66,11 +66,32 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
         </nav>
 
         {/* Right Button */}
+        {/* Right Buttons */}
         <motion.div
-          className="hidden md:block"
+          className="hidden md:flex items-center gap-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
+          {profileData?.ispremium ? (
+            <div
+              className="px-4 py-2 rounded-xl 
+    bg-gradient-to-r from-yellow-400 to-orange-500
+    text-white text-sm font-semibold shadow-md"
+            >
+              Premium ⭐
+            </div>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/premium")}
+              className="px-4 py-2 rounded-xl 
+    bg-gradient-to-r from-yellow-400 to-orange-500 
+    text-white text-sm font-semibold shadow-md"
+            >
+              Upgrade ⭐
+            </motion.button>
+          )}
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}

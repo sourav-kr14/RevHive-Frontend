@@ -45,6 +45,7 @@ export default function UserSidebar({ feedType, setFeedType }) {
                   }
                 `}
               >
+                {/* <Sparkles size={18} /> */}
                 <span className="font-medium">For You</span>
               </button>
 
@@ -72,6 +73,7 @@ export default function UserSidebar({ feedType, setFeedType }) {
                   }
                 `}
               >
+                {/* <Flame size={18} /> */}
                 <span className="font-medium">Trending</span>
               </button>
             </div>
