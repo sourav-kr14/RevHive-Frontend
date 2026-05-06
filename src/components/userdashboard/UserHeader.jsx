@@ -10,7 +10,7 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
   const navItems = [
     { id: "dashboard", label: "Dashboard", path: "/user/dashboard" },
     { id: "profile", label: "Profile", path: "/user/profile" },
-    { id: "settings", label: "Settings", path: "/settings" },
+    { id: "settings", label: "Settings", path: "/user/settings" },
     { id: "messaging", label: "Messages", path: "/messages" },
     { id: "notification", label: "Notifications", path: "/notifications" },
   ];
@@ -38,7 +38,7 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
 
         <nav className="hidden md:flex items-center gap-8">
           {navItems.map((item) => {
-            const isActive = activeNav === item.id;
+            const isActive = window.location.pathname === item.path;
 
             return (
               <motion.button
