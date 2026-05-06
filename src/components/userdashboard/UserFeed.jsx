@@ -2,9 +2,11 @@ import { motion } from "framer-motion";
 import { Heart, AlertCircle, MoreHorizontal, Bookmark } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { postAPI, followAPI, bookmarkAPI } from "@/services/api";
+
 import CommentSection from "./CommentSection";
 import EditPostModal from "./EditPostModal";
 import ReportModal from "../Reportmodal";
+
 export default function UserFeed({
   profileData,
   refreshTrigger,
@@ -14,13 +16,21 @@ export default function UserFeed({
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [editingPost, setEditingPost] = useState(null);
+
   const [followingStatus, setFollowingStatus] = useState({});
+
   const [followLoading, setFollowLoading] = useState({});
+
   const [showReport, setShowReport] = useState(false);
+
   const [selectedPost, setSelectedPost] = useState(null);
 
   const isMounted = useRef(true);
+
+  /* ---------------- Bookmark ---------------- */
+
   const handleBookmark = async (postId) => {
     const post = posts.find((p) => p.id === postId);
 
@@ -47,6 +57,8 @@ export default function UserFeed({
       console.error(err);
     }
   };
+
+  /* ---------------- Fetch ---------------- */
 
   useEffect(() => {
     isMounted.current = true;
@@ -116,6 +128,8 @@ export default function UserFeed({
     }
   };
 
+  /* ---------------- Like ---------------- */
+
   const handleLike = async (postId) => {
     const post = posts.find((p) => p.id === postId);
 
@@ -139,6 +153,8 @@ export default function UserFeed({
       );
     } catch {}
   };
+
+  /* ---------------- Follow ---------------- */
 
   const handleFollowToggle = async (authorId) => {
     if (!authorId || !profileData?.id) return;
@@ -169,6 +185,8 @@ export default function UserFeed({
     }
   };
 
+  /* ---------------- States ---------------- */
+
   if (loading) {
     return <div className="text-center py-16 text-gray-500">Loading...</div>;
   }
@@ -176,8 +194,10 @@ export default function UserFeed({
   if (error) {
     return (
       <div
-        className="bg-red-50 border border-red-200 
-        rounded-2xl p-6 text-center text-red-500"
+        className="
+        bg-red-50 border border-red-200
+        rounded-3xl p-6 text-center text-red-500
+        "
       >
         <AlertCircle className="mx-auto mb-2" />
         {error}
@@ -188,9 +208,15 @@ export default function UserFeed({
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        {/* Title */}
-        <div className="mb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-black p-2">
+        {/* Header */}
+        <div className="mb-7 px-1">
+          <h2
+            className=" pt-4
+            text-3xl sm:text-4xl
+            font-bold tracking-tight
+            text-gray-900
+            "
+          >
             {onlyUserPosts
               ? "My Posts"
               : feedType === "trending"
@@ -198,30 +224,46 @@ export default function UserFeed({
                 : "For You"}
           </h2>
 
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 mt-2">
             Explore the latest updates from the community
           </p>
         </div>
 
         {/* Feed */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-6">
           {posts.length > 0 ? (
             posts.map((post) => (
               <motion.div
                 key={post.id}
-                whileHover={{ y: -2 }}
-                className="bg-white/90 backdrop-blur-md 
-border border-gray-100 rounded-[28px] 
-p-4 sm:p-6 shadow-sm hover:shadow-xl 
-transition-all duration-300"
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.25 }}
+                className="
+                group
+                bg-white/95 backdrop-blur-xl
+                border border-gray-100
+                rounded-[32px]
+                p-5 sm:p-6
+                shadow-sm hover:shadow-2xl
+                transition-all duration-500
+                "
               >
-                {/* Header */}
+                {/* Top */}
                 <div className="flex items-start justify-between gap-4">
+                  {/* User */}
                   <div className="flex gap-3 min-w-0">
                     <div
-                      className="w-11 h-11 rounded-full 
-                      bg-black text-white flex items-center 
-                      justify-center text-sm font-semibold shrink-0"
+                      className="
+                      w-12 h-12 rounded-2xl
+                      bg-gradient-to-br
+                      from-orange-400
+                      via-pink-500
+                      to-red-500
+                      text-white
+                      flex items-center
+                      justify-center
+                      text-sm font-bold
+                      shrink-0 shadow-lg
+                      "
                     >
                       {(post.user?.username || profileData?.username)
                         ?.slice(0, 2)
@@ -230,13 +272,28 @@ transition-all duration-300"
 
                     <div className="min-w-0">
                       <p
-                        className="text-sm sm:text-base 
-                        font-semibold text-black truncate"
+                        className="
+                        text-sm sm:text-base
+                        font-semibold
+                        text-gray-900
+                        truncate
+                        flex items-center gap-2
+                        "
                       >
                         @{post.user?.username || profileData?.username}
+                        <span
+                          className="
+                          px-2 py-0.5 rounded-full
+                          bg-orange-100
+                          text-orange-500
+                          text-[10px] font-semibold
+                          "
+                        >
+                          ACTIVE
+                        </span>
                       </p>
 
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 mt-1">
                         {post.createdAt &&
                           new Date(post.createdAt).toLocaleString()}
                       </p>
@@ -248,11 +305,23 @@ transition-all duration-300"
                     <button
                       disabled={followLoading[post.user.id]}
                       onClick={() => handleFollowToggle(post.user.id)}
-                      className={`px-4 py-1.5 text-xs sm:text-sm rounded-full font-medium transition
+                      className={`px-4 py-2 text-xs sm:text-sm rounded-2xl font-semibold transition-all duration-300
                         ${
                           followingStatus[post.user.id]
-                            ? "bg-gray-100 text-black border border-gray-300"
-                            : "bg-black text-white"
+                            ? `
+                              bg-gray-100
+                              text-gray-700
+                              hover:bg-gray-200
+                              `
+                            : `
+                              bg-gradient-to-r
+                              from-orange-400
+                              to-pink-500
+                              text-white
+                              hover:scale-105
+                              hover:shadow-lg
+                              hover:shadow-orange-200
+                              `
                         }`}
                     >
                       {followLoading[post.user.id]
@@ -266,8 +335,10 @@ transition-all duration-300"
 
                 {/* Content */}
                 <p
-                  className="mt-4 text-sm sm:text-base 
-                  text-gray-800 leading-relaxed"
+                  className="
+                  mt-5 text-sm sm:text-[15px]
+                  text-gray-700 leading-relaxed
+                  "
                 >
                   {post.content}
                 </p>
@@ -277,29 +348,45 @@ transition-all duration-300"
                   <img
                     src={post.imageUrl}
                     alt=""
-                    className="mt-4 rounded-3xl max-h-[520px]
-object-cover border border-gray-100 w-full"
+                    className="
+                    mt-5 rounded-[28px]
+                    max-h-[520px]
+                    object-cover
+                    border border-gray-100
+                    w-full
+                    transition-all duration-500
+                    group-hover:scale-[1.01]
+                    "
                   />
                 )}
 
-                {/* Actions */}
+                {/* Bottom */}
                 <div
-                  className="flex items-center justify-between mt-5 
-  pt-4 border-t border-gray-100"
+                  className="
+                  flex items-center justify-between
+                  mt-5 pt-5
+                  border-t border-gray-100
+                  "
                 >
+                  {/* Left */}
                   <div className="flex items-center gap-5 text-gray-500">
                     {/* Like */}
                     <button
                       onClick={() => handleLike(post.id)}
-                      className="flex items-center gap-2 
-      hover:text-red-500 transition group"
+                      className="
+                      flex items-center gap-2
+                      text-gray-500
+                      hover:text-red-500
+                      transition-all duration-300
+                      group/like
+                      "
                     >
                       <Heart
                         size={19}
-                        className={`transition ${
+                        className={`transition-all duration-300 ${
                           post.liked
-                            ? "text-red-500 fill-red-500"
-                            : "group-hover:scale-110"
+                            ? "text-red-500 fill-red-500 scale-110"
+                            : "group-hover/like:scale-125"
                         }`}
                       />
 
@@ -317,18 +404,23 @@ object-cover border border-gray-100 w-full"
                     </div>
                   </div>
 
-                  {/* More Actions */}
+                  {/* Right */}
                   <div className="flex items-center gap-2">
                     {/* Bookmark */}
                     <button
                       onClick={() => handleBookmark(post.id)}
-                      className="p-2 rounded-full hover:bg-gray-100 transition-all"
+                      className="
+                      p-2.5 rounded-2xl
+                      hover:bg-orange-50
+                      transition-all duration-300
+                      hover:scale-110
+                      "
                     >
                       <Bookmark
                         size={20}
-                        className={`transition ${
+                        className={`transition-all duration-300 ${
                           post.bookmarked
-                            ? "fill-black text-black"
+                            ? "fill-orange-500 text-orange-500"
                             : "text-gray-500"
                         }`}
                       />
@@ -340,7 +432,12 @@ object-cover border border-gray-100 w-full"
                         setSelectedPost(post.id);
                         setShowReport(true);
                       }}
-                      className="p-2 rounded-full hover:bg-gray-100 transition-all"
+                      className="
+                      p-2.5 rounded-2xl
+                      hover:bg-gray-100
+                      transition-all duration-300
+                      hover:rotate-90
+                      "
                     >
                       <MoreHorizontal size={20} className="text-gray-500" />
                     </button>
@@ -350,14 +447,40 @@ object-cover border border-gray-100 w-full"
             ))
           ) : (
             <div
-              className="bg-white border border-gray-200 
-              rounded-3xl p-12 text-center text-gray-500"
+              className="
+              bg-white/90 backdrop-blur-xl
+              border border-gray-100
+              rounded-[32px]
+              p-14 text-center
+              shadow-sm
+              "
             >
-              No posts yet
+              <div
+                className="
+                w-16 h-16 mx-auto mb-5
+                rounded-3xl
+                bg-gradient-to-br
+                from-orange-400
+                to-pink-500
+                flex items-center justify-center
+                text-white text-2xl font-bold
+                shadow-lg
+                "
+              ></div>
+
+              <h3 className="text-lg font-semibold text-gray-900">
+                No posts yet
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-2">
+                Start sharing something with the community
+              </p>
             </div>
           )}
         </div>
       </motion.div>
+
+      {/* Report */}
       <ReportModal
         isOpen={showReport}
         onClose={() => setShowReport(false)}
@@ -365,6 +488,7 @@ object-cover border border-gray-100 w-full"
         targetId={selectedPost}
       />
 
+      {/* Edit */}
       {editingPost && (
         <EditPostModal
           post={editingPost}
