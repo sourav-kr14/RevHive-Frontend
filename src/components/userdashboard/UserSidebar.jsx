@@ -25,7 +25,7 @@ export default function UserSidebar({ feedType, setFeedType }) {
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                <Sparkles size={18} />
+                {/* <Sparkles size={18} /> */}
                 <span className="font-medium">For You</span>
               </button>
 
@@ -37,7 +37,7 @@ export default function UserSidebar({ feedType, setFeedType }) {
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                <Flame size={18} />
+                {/* <Flame size={18} /> */}
                 <span className="font-medium">Trending</span>
               </button>
             </div>

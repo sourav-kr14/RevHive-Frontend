@@ -39,18 +39,11 @@ export default function UserFeed({
     try {
       let response;
 
-      // PROFILE PAGE POSTS
       if (onlyUserPosts) {
         response = await postAPI.getMyPosts(0, 20);
-      }
-
-      // TRENDING
-      else if (feedType === "trending") {
+      } else if (feedType === "trending") {
         response = await postAPI.getTrending(0, 20);
-      }
-
-      // FOR YOU
-      else {
+      } else {
         response = await postAPI.getFeed(0, 20);
       }
 
@@ -60,7 +53,6 @@ export default function UserFeed({
 
       setPosts(validPosts);
 
-      // follow status
       if (profileData?.id) {
         const statusMap = {};
 
@@ -150,12 +142,15 @@ export default function UserFeed({
   };
 
   if (loading) {
-    return <div className="text-center py-16 text-gray-400">Loading...</div>;
+    return <div className="text-center py-16 text-gray-500">Loading...</div>;
   }
 
   if (error) {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center text-red-400">
+      <div
+        className="bg-red-50 border border-red-200 
+        rounded-2xl p-6 text-center text-red-500"
+      >
         <AlertCircle className="mx-auto mb-2" />
         {error}
       </div>
@@ -165,38 +160,51 @@ export default function UserFeed({
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        {/* Feed Title */}
-        <div className="mb-5">
-          <h2 className="text-2xl font-bold">
+        {/* Title */}
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-black p-2">
             {onlyUserPosts
               ? "My Posts"
               : feedType === "trending"
                 ? "Trending Posts"
                 : "For You"}
           </h2>
+
+          <p className="text-sm text-gray-500 mt-1">
+            Explore the latest updates from the community
+          </p>
         </div>
 
-        {/* Posts */}
-        <div className="flex flex-col gap-4">
+        {/* Feed */}
+        <div className="flex flex-col gap-5">
           {posts.length > 0 ? (
             posts.map((post) => (
               <motion.div
                 key={post.id}
-                className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5"
+                whileHover={{ y: -2 }}
+                className="bg-white border border-gray-200 
+                rounded-3xl p-4 sm:p-6 shadow-sm hover:shadow-lg transition-all"
               >
                 {/* Header */}
-                <div className="flex justify-between">
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-semibold">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex gap-3 min-w-0">
+                    <div
+                      className="w-11 h-11 rounded-full 
+                      bg-black text-white flex items-center 
+                      justify-center text-sm font-semibold shrink-0"
+                    >
                       {post.user?.username?.slice(0, 2)?.toUpperCase() || "NA"}
                     </div>
 
-                    <div>
-                      <p className="text-sm font-semibold text-white">
+                    <div className="min-w-0">
+                      <p
+                        className="text-sm sm:text-base 
+                        font-semibold text-black truncate"
+                      >
                         @{post.user?.username}
                       </p>
 
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-500">
                         {post.createdAt &&
                           new Date(post.createdAt).toLocaleString()}
                       </p>
@@ -208,7 +216,12 @@ export default function UserFeed({
                     <button
                       disabled={followLoading[post.user.id]}
                       onClick={() => handleFollowToggle(post.user.id)}
-                      className="px-3 py-1 text-xs rounded-md bg-gradient-to-r from-purple-500 to-blue-500 text-white disabled:opacity-50"
+                      className={`px-4 py-1.5 text-xs sm:text-sm rounded-full font-medium transition
+                        ${
+                          followingStatus[post.user.id]
+                            ? "bg-gray-100 text-black border border-gray-300"
+                            : "bg-black text-white"
+                        }`}
                     >
                       {followLoading[post.user.id]
                         ? "..."
@@ -220,24 +233,38 @@ export default function UserFeed({
                 </div>
 
                 {/* Content */}
-                <p className="mt-3 text-sm text-gray-300">{post.content}</p>
+                <p
+                  className="mt-4 text-sm sm:text-base 
+                  text-gray-800 leading-relaxed"
+                >
+                  {post.content}
+                </p>
 
                 {/* Image */}
                 {post.imageUrl && (
                   <img
                     src={post.imageUrl}
                     alt=""
-                    className="mt-3 rounded-xl max-h-80 object-cover border border-white/10 w-full"
+                    className="mt-4 rounded-2xl max-h-[500px]
+                    object-cover border border-gray-200 w-full"
                   />
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-6 mt-4 pt-3 border-t border-white/10 text-gray-400">
-                  <button onClick={() => handleLike(post.id)}>
+                <div
+                  className="flex items-center gap-6 mt-5 
+                  pt-4 border-t border-gray-200 text-gray-600"
+                >
+                  <button
+                    onClick={() => handleLike(post.id)}
+                    className="flex items-center gap-2 hover:text-red-500 transition"
+                  >
                     <Heart
-                      size={16}
+                      size={18}
                       className={post.liked ? "text-red-500 fill-red-500" : ""}
                     />
+
+                    <span className="text-sm">{post.likeCount || 0}</span>
                   </button>
 
                   <CommentSection
@@ -245,12 +272,19 @@ export default function UserFeed({
                     currentUserId={profileData?.id}
                   />
 
-                  <Share2 size={16} />
+                  <button className="hover:text-black transition">
+                    <Share2 size={18} />
+                  </button>
                 </div>
               </motion.div>
             ))
           ) : (
-            <div className="text-center py-16 text-gray-500">No posts yet</div>
+            <div
+              className="bg-white border border-gray-200 
+              rounded-3xl p-12 text-center text-gray-500"
+            >
+              No posts yet
+            </div>
           )}
         </div>
       </motion.div>

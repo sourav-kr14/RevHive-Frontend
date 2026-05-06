@@ -33,17 +33,20 @@ export default function EditPostModal({ post, onClose, onUpdate }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm px-4 py-6">
       <motion.div
         initial={{ opacity: 0, y: 15, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.2 }}
-        className="w-full max-w-xl rounded-2xl bg-white shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl rounded-2xl bg-white border border-gray-200 shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Edit Post</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-black">
+              Edit Post
+            </h2>
+
             <p className="text-sm text-gray-500">Make changes to your post</p>
           </div>
 
@@ -56,7 +59,7 @@ export default function EditPostModal({ post, onClose, onUpdate }) {
         </div>
 
         {/* Body */}
-        <div className="p-5 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           {error && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
               {error}
@@ -68,7 +71,7 @@ export default function EditPostModal({ post, onClose, onUpdate }) {
             onChange={(e) => setContent(e.target.value)}
             rows={5}
             placeholder="What's on your mind?"
-            className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 outline-none resize-none transition focus:border-gray-900 focus:bg-white"
+            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-black outline-none resize-none transition focus:border-black"
           />
 
           <div className="relative">
@@ -82,7 +85,7 @@ export default function EditPostModal({ post, onClose, onUpdate }) {
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Add image URL (optional)"
-              className="w-full rounded-xl border border-gray-300 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:bg-white"
+              className="w-full rounded-xl border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-black outline-none transition focus:border-black"
             />
           </div>
 
@@ -91,17 +94,17 @@ export default function EditPostModal({ post, onClose, onUpdate }) {
               <img
                 src={imageUrl}
                 alt="Preview"
-                className="h-52 w-full object-cover"
+                className="max-h-72 w-full object-cover"
               />
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-5 py-4 bg-gray-50">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 border-t border-gray-200 px-4 sm:px-6 py-4 bg-white">
           <button
             onClick={onClose}
-            className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+            className="w-full sm:w-auto rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-black hover:bg-gray-100 transition"
           >
             Cancel
           </button>
@@ -109,7 +112,7 @@ export default function EditPostModal({ post, onClose, onUpdate }) {
           <button
             onClick={handleSubmit}
             disabled={!content.trim() || isUpdating}
-            className="rounded-xl bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-black transition disabled:opacity-50 flex items-center gap-2"
+            className="w-full sm:w-auto rounded-xl bg-black px-5 py-2 text-sm font-medium text-white hover:bg-gray-900 transition disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isUpdating ? (
               <>
