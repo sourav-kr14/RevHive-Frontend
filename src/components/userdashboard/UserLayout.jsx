@@ -52,8 +52,7 @@ export default function UserLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b0f1a] to-[#070a12] text-white">
-      {/* ✅ Header everywhere */}
+    <div className="min-h-screen bg-white text-black">
       <DashboardHeader
         activeNav={activeNav}
         setActiveNav={setActiveNav}

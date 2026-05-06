@@ -123,114 +123,101 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/5 backdrop-blur-xl border border-white/10 
-      rounded-2xl p-5 shadow-[0_0_30px_rgba(139,92,246,0.1)]"
+      className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm"
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div
-          className="w-11 h-11 rounded-full 
-        bg-gradient-to-br from-purple-500 to-blue-500 
-        flex items-center justify-center text-black font-semibold shadow"
+          className="w-11 h-11 rounded-full bg-gray-900 
+      flex items-center justify-center text-white font-semibold"
         >
           {initials}
         </div>
+
         <div>
-          <p className="text-sm font-semibold text-white">
-            What’s on your mind?
+          <p className="text-sm font-semibold text-gray-900">Create Post</p>
+          <p className="text-xs text-gray-500">
+            Share your thoughts with the community
           </p>
-          <p className="text-xs text-gray-400">Share something with the hive</p>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div
-          className="mb-3 p-2 rounded-lg flex items-center gap-2 
-        bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
-        >
-          <AlertCircle size={14} />
+        <div className="mb-3 p-3 rounded-xl flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm">
+          <AlertCircle size={15} />
           {error}
         </div>
       )}
 
-      {/* TEXTAREA */}
+      {/* Textarea */}
       <div className="relative">
         <textarea
           ref={textareaRef}
-          className="w-full bg-white/5 border border-white/10 
-          rounded-xl p-3 text-sm text-white placeholder-gray-500 
-          outline-none focus:ring-1 focus:ring-purple-500 resize-none"
-          placeholder="Share something..."
-          rows="3"
+          className="w-full rounded-xl border border-gray-300 
+      bg-gray-50 p-4 text-sm text-gray-900 
+      placeholder:text-gray-400 resize-none outline-none
+      focus:border-gray-900 focus:bg-white transition"
+          placeholder="What's on your mind?"
+          rows="4"
           value={postText}
           onChange={handleTextChange}
           maxLength={500}
         />
-        <span className="absolute bottom-2 right-2 text-xs text-gray-500">
+
+        <span className="absolute bottom-3 right-3 text-xs text-gray-400">
           {charCount}/500
         </span>
       </div>
 
-      {/* HASHTAGS */}
-      {loadingTags && (
-        <p className="text-xs mt-2 text-gray-400">Generating hashtags...</p>
-      )}
-
+      {/* Hashtags */}
       {hashtags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-2 mt-3">
           {hashtags.map((tag, i) => (
-            <span
+            <button
               key={i}
               onClick={() => addTag(tag)}
-              className="bg-white/5 px-2 py-1 rounded text-xs cursor-pointer 
-              text-cyan-300 border border-cyan-500/20
-              hover:bg-cyan-500/10 hover:shadow-[0_0_8px_#22d3ee]"
+              className="px-3 py-1 rounded-full bg-gray-100 
+          text-gray-700 text-xs hover:bg-gray-200 transition"
             >
               {tag}
-            </span>
+            </button>
           ))}
         </div>
       )}
 
-      {/* AI RESULT */}
-      {loadingAI && (
-        <p className="text-xs mt-2 text-gray-400">Generating {aiType}...</p>
-      )}
-
+      {/* AI Result */}
       {aiResult && aiType !== "moderate" && (
-        <div
-          className="bg-white/5 backdrop-blur-md border border-purple-500/20 
-        p-2 rounded mt-2 text-sm text-gray-200 
-        shadow-[0_0_12px_rgba(168,85,247,0.15)]"
-        >
-          {aiResult}
+        <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+          <p className="text-sm text-gray-700">{aiResult}</p>
+
           <button
             onClick={() => {
               setPostText(aiResult);
               setAiResult("");
             }}
-            className="block mt-1 text-cyan-400 text-xs hover:text-cyan-300"
+            className="mt-2 text-xs font-medium text-gray-900 hover:underline"
           >
             Use this
           </button>
         </div>
       )}
 
-      {/* MODERATION */}
+      {/* Moderation */}
       {aiType === "moderate" && aiResult && (
         <p
-          className={`mt-2 text-sm ${
-            aiResult.includes("UNSAFE") ? "text-red-400" : "text-green-400"
+          className={`mt-3 text-sm ${
+            aiResult.includes("UNSAFE") ? "text-red-500" : "text-green-600"
           }`}
         >
           {aiResult}
         </p>
       )}
 
-      {/* ACTION BUTTONS */}
-      <div className="flex items-center justify-between mt-3">
-        <div className="flex gap-2">
+      {/* Bottom Actions */}
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+        {/* Left */}
+        <div className="flex items-center gap-2">
           {[Image, Link2, Hash, MapPin].map((Icon, i) => (
             <button
               key={i}
@@ -238,66 +225,55 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
                 if (i === 0) setShowMediaInput(!showMediaInput);
                 if (i === 2) generateHashtags();
               }}
-              className="w-8 h-8 flex items-center justify-center 
-              border border-white/10 rounded-md text-gray-400 
-              hover:bg-white/10 hover:text-white 
-              hover:shadow-[0_0_8px_rgba(139,92,246,0.5)] transition"
+              className="w-9 h-9 rounded-lg border border-gray-200 
+          flex items-center justify-center text-gray-600
+          hover:bg-gray-100 transition"
             >
-              <Icon size={15} />
+              <Icon size={16} />
             </button>
           ))}
         </div>
 
+        {/* Right */}
         <button
           disabled={!postText.trim() || isPosting}
           onClick={handleCreatePost}
-          className={`px-5 py-2 rounded-lg text-sm font-medium transition ${
+          className={`px-5 py-2 rounded-xl text-sm font-medium transition ${
             postText.trim()
-              ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg hover:opacity-90"
-              : "bg-white/10 text-gray-500"
+              ? "bg-gray-900 text-white hover:bg-black"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
         >
-          {isPosting ? "Posting..." : "Post"}
+          {isPosting ? (
+            <span className="flex items-center gap-2">
+              <Loader size={15} className="animate-spin" />
+              Posting...
+            </span>
+          ) : (
+            "Post"
+          )}
         </button>
       </div>
 
-      {/* AI BUTTONS */}
-      <div className="flex gap-2 mt-3 flex-wrap">
-        <button
-          onClick={() => handleAI("caption")}
-          className="px-3 py-1.5 text-xs rounded-md 
-          bg-black text-cyan-400 border border-cyan-500/40
-          hover:bg-cyan-500/10 hover:shadow-[0_0_10px_#22d3ee]"
-        >
-          Caption
-        </button>
-
-        <button
-          onClick={generateHashtags}
-          className="px-3 py-1.5 text-xs rounded-md 
-          bg-black text-pink-400 border border-pink-500/40
-          hover:bg-pink-500/10 hover:shadow-[0_0_10px_#ec4899]"
-        >
-          Tags
-        </button>
-
-        <button
-          onClick={() => handleAI("summarize")}
-          className="px-3 py-1.5 text-xs rounded-md 
-          bg-black text-purple-400 border border-purple-500/40
-          hover:bg-purple-500/10 hover:shadow-[0_0_10px_#a855f7]"
-        >
-          Summary
-        </button>
-
-        <button
-          onClick={() => handleAI("moderate")}
-          className="px-3 py-1.5 text-xs rounded-md 
-          bg-black text-green-400 border border-green-500/40
-          hover:bg-green-500/10 hover:shadow-[0_0_10px_#4ade80]"
-        >
-          Check
-        </button>
+      {/* AI Buttons */}
+      <div className="flex flex-wrap gap-2 mt-4">
+        {[
+          { label: "Caption", type: "caption" },
+          { label: "Tags", type: "hashtags" },
+          { label: "Summary", type: "summarize" },
+          { label: "Check", type: "moderate" },
+        ].map((btn) => (
+          <button
+            key={btn.label}
+            onClick={() =>
+              btn.type === "hashtags" ? generateHashtags() : handleAI(btn.type)
+            }
+            className="px-3 py-1.5 rounded-lg border border-gray-200 
+        text-xs text-gray-700 hover:bg-gray-100 transition"
+          >
+            {btn.label}
+          </button>
+        ))}
       </div>
     </motion.div>
   );
