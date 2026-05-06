@@ -116,6 +116,7 @@ export const postAPI = {
   updatePost: (postId, content) => api.put(`/posts/${postId}`, { content }),
 
   deletePost: (postId) => api.delete(`/posts/${postId}`),
+  getPostsCount: (userId) => api.get(`/posts/user/${userId}/count`),
 };
 
 // ==================== LIKES ====================
