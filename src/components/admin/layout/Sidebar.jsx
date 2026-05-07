@@ -33,7 +33,7 @@ export default function Sidebar() {
     <div
       className="
   fixed md:relative z-50
-  w-64 h-screen flex flex-col px-5 py-6
+  w-64 min-h-screen flex flex-col px-5 py-6
   bg-gradient-to-b from-[#0b0f1a] to-[#070a12]
   border-r border-white/10 backdrop-blur-xl
   transition-all duration-300
