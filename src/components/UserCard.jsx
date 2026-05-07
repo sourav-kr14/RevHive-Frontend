@@ -1,17 +1,35 @@
 import { useState, useEffect } from "react";
-import { followUser, unfollowUser, isFollowing } from "../services/followService";
+import { motion } from "framer-motion";
+import { UserPlus, UserCheck, Loader2 } from "lucide-react";
 
-export default function UserCard({ userId, username, bio, avatarUrl, onFollowChange }) {
+import {
+  followUser,
+  unfollowUser,
+  isFollowing,
+} from "../services/followService";
+
+export default function UserCard({
+  userId,
+  username,
+  bio,
+  avatarUrl,
+  onFollowChange,
+}) {
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hover, setHover] = useState(false);
+
   const currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
 
-  // Check if current user is already following this user
   useEffect(() => {
     const checkFollowStatus = async () => {
-      if (currentUserId && userId !== currentUserId) {
+      if (currentUserId && Number(userId) !== Number(currentUserId)) {
         try {
-          const result = await isFollowing(currentUserId, userId);
+          const result = await isFollowing(
+            Number(currentUserId),
+            Number(userId),
+          );
+
           setFollowing(result);
         } catch (error) {
           console.error("Error checking follow status:", error);
@@ -23,64 +41,104 @@ export default function UserCard({ userId, username, bio, avatarUrl, onFollowCha
   }, [userId, currentUserId]);
 
   const handleFollowClick = async () => {
-    if (!currentUserId) return;
-    if (userId === currentUserId) return; // Can't follow yourself
+    if (!currentUserId || loading) return;
+
+    if (Number(userId) === Number(currentUserId)) return;
 
     setLoading(true);
+
     try {
       if (following) {
-        // Unfollow
-        await unfollowUser(currentUserId, userId);
+        await unfollowUser(Number(currentUserId), Number(userId));
+
         setFollowing(false);
       } else {
-        // Follow
-        await followUser(currentUserId, userId);
+        await followUser(Number(currentUserId), Number(userId));
+
         setFollowing(true);
       }
 
-      // Notify parent to refresh data
       if (onFollowChange) {
         onFollowChange();
       }
     } catch (error) {
       console.error("Error toggling follow:", error);
-      alert("Failed to update follow status");
     } finally {
       setLoading(false);
     }
   };
 
-  // Don't show follow button for own profile
-  if (userId === currentUserId) {
+  // Don't render own card
+  if (Number(userId) === Number(currentUserId)) {
     return null;
   }
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-      <div className="flex items-center gap-3">
-        <img
-          src={avatarUrl || `https://i.pravatar.cc/40?u=${userId}`}
-          alt={username}
-          className="w-10 h-10 rounded-full"
-        />
-        <div>
-          <div className="font-semibold">{username}</div>
-          <div className="text-xs text-gray-400">{bio || "No bio"}</div>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
+      className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.05]"
+    >
+      {/* Left */}
+      <div className="flex items-center gap-3 overflow-hidden">
+        <div className="relative">
+          <img
+            src={avatarUrl || `https://i.pravatar.cc/100?u=${userId}`}
+            alt={username}
+            className="h-12 w-12 rounded-full object-cover ring-2 ring-white/10"
+          />
+
+          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/10 to-purple-500/10" />
+        </div>
+
+        <div className="min-w-0">
+          <h3 className="truncate font-semibold text-white">@{username}</h3>
+
+          <p className="truncate text-xs text-gray-400">
+            {bio || "No bio available"}
+          </p>
         </div>
       </div>
 
-      <button
+      {/* Follow Button */}
+      <motion.button
+        whileHover={{ scale: loading ? 1 : 1.04 }}
+        whileTap={{ scale: loading ? 1 : 0.96 }}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
         onClick={handleFollowClick}
         disabled={loading}
-        className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+        className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${
           following
-            ? "bg-white/10 border border-white/20 hover:bg-white/20 text-white"
-            : "bg-blue-600 hover:bg-blue-700 text-white"
-        } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+            ? "border border-white/10 bg-white/10 text-gray-300 hover:bg-red-500/15 hover:text-red-400"
+            : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:shadow-purple-500/20"
+        } ${loading ? "cursor-not-allowed opacity-70" : ""}`}
       >
-        {loading ? "Loading..." : following ? "Following" : "Follow"}
-      </button>
-    </div>
+        {loading ? (
+          <>
+            <Loader2 size={15} className="animate-spin" />
+            Loading
+          </>
+        ) : following ? (
+          hover ? (
+            <>
+              <UserPlus size={15} />
+              Unfollow
+            </>
+          ) : (
+            <>
+              <UserCheck size={15} />
+              Following
+            </>
+          )
+        ) : (
+          <>
+            <UserPlus size={15} />
+            Follow
+          </>
+        )}
+      </motion.button>
+    </motion.div>
   );
 }
-

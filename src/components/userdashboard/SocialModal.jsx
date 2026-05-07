@@ -1,7 +1,9 @@
 // components/userdashboard/SocialModal.jsx
-import { motion } from "framer-motion";
+
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { X, UserPlus, UserCheck } from "lucide-react";
+import { X, UserPlus, UserCheck, Users } from "lucide-react";
+
 import { followAPI } from "../../services/api";
 
 export default function SocialModal({ userId, type, onClose, currentUserId }) {
@@ -15,26 +17,36 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
 
   const fetchUsers = async () => {
     setLoading(true);
+
     try {
       let response;
+
       if (type === "followers") {
         response = await followAPI.getFollowers(userId);
       } else {
         response = await followAPI.getFollowing(userId);
       }
-      setUsers(response.data.data || []);
-      
-      // Check following status for each user
-      const status = {};
-      for (const user of (response.data.data || [])) {
-        try {
-          const followCheck = await followAPI.isFollowing(currentUserId, user.id);
-          status[user.id] = followCheck.data.isFollowing;
-        } catch (error) {
-          status[user.id] = false;
-        }
-      }
-      setFollowingStatus(status);
+
+      const usersData = response.data.data || [];
+
+      setUsers(usersData);
+
+      const statusEntries = await Promise.all(
+        usersData.map(async (user) => {
+          try {
+            const followCheck = await followAPI.isFollowing(
+              currentUserId,
+              user.id,
+            );
+
+            return [user.id, followCheck.data.isFollowing];
+          } catch {
+            return [user.id, false];
+          }
+        }),
+      );
+
+      setFollowingStatus(Object.fromEntries(statusEntries));
     } catch (error) {
       console.error(`Error fetching ${type}:`, error);
     } finally {
@@ -46,10 +58,18 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
     try {
       if (followingStatus[targetUserId]) {
         await followAPI.unfollowUser(currentUserId, targetUserId);
-        setFollowingStatus({ ...followingStatus, [targetUserId]: false });
+
+        setFollowingStatus((prev) => ({
+          ...prev,
+          [targetUserId]: false,
+        }));
       } else {
         await followAPI.followUser(currentUserId, targetUserId);
-        setFollowingStatus({ ...followingStatus, [targetUserId]: true });
+
+        setFollowingStatus((prev) => ({
+          ...prev,
+          [targetUserId]: true,
+        }));
       }
     } catch (error) {
       console.error("Error toggling follow:", error);
@@ -57,72 +77,158 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       >
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h3 className="text-lg font-semibold">
-            {type === "followers" ? "Followers" : "Following"}
-          </h3>
-          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg">
-            <X size={20} />
-          </button>
-        </div>
+        <motion.div
+          initial={{
+            opacity: 0,
+            scale: 0.92,
+            y: 20,
+          }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+          }}
+          exit={{
+            opacity: 0,
+            scale: 0.95,
+          }}
+          transition={{ duration: 0.25 }}
+          className="w-full max-w-md overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.12)]"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg">
+                <Users size={18} />
+              </div>
 
-        <div className="max-h-96 overflow-y-auto">
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">Loading...</div>
-          ) : users.length > 0 ? (
-            <div className="divide-y divide-white/10">
-              {users.map((user) => (
-                <div key={user.id} className="p-4 flex items-center justify-between hover:bg-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold">
-                      {user.username?.slice(0, 2).toUpperCase()}
+              <div>
+                <h2 className="text-base font-semibold text-gray-900">
+                  {type === "followers" ? "Followers" : "Following"}
+                </h2>
+
+                <p className="text-xs text-gray-500">{users.length} people</p>
+              </div>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="rounded-xl p-2 text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-black"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="max-h-[420px] overflow-y-auto p-3">
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((item) => (
+                  <div
+                    key={item}
+                    className="flex animate-pulse items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-11 w-11 rounded-2xl bg-gray-200" />
+
+                      <div className="space-y-2">
+                        <div className="h-3 w-24 rounded bg-gray-200" />
+                        <div className="h-2 w-32 rounded bg-gray-100" />
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-white">@{user.username}</p>
-                      <p className="text-xs text-gray-500">
-                        {user.bio || "No bio yet"}
-                      </p>
-                    </div>
+
+                    <div className="h-9 w-24 rounded-xl bg-gray-200" />
                   </div>
-                  
-                  {user.id !== currentUserId && (
-                    <button
-                      onClick={() => handleFollowToggle(user.id)}
-                      className={`px-3 py-1 rounded-lg text-sm flex items-center gap-1 ${
-                        followingStatus[user.id]
-                          ? "bg-white/10 text-gray-300 hover:bg-white/20"
-                          : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
-                      }`}
-                    >
-                      {followingStatus[user.id] ? (
-                        <>
-                          <UserCheck size={14} />
-                          Following
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus size={14} />
-                          Follow
-                        </>
-                      )}
-                    </button>
-                  )}
+                ))}
+              </div>
+            ) : users.length > 0 ? (
+              <div className="space-y-3">
+                {users.map((user, index) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{
+                      opacity: 0,
+                      y: 10,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    transition={{
+                      delay: index * 0.04,
+                    }}
+                    className="group flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 p-4 transition-all duration-300 hover:border-gray-200 hover:bg-gray-100"
+                  >
+                    {/* Left */}
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-purple-500 to-blue-500 text-sm font-bold text-white shadow-lg">
+                        {user.username?.slice(0, 2).toUpperCase()}
+                      </div>
+
+                      <div className="min-w-0">
+                        <h3 className="truncate font-semibold text-gray-900">
+                          @{user.username}
+                        </h3>
+
+                        <p className="truncate text-xs text-gray-500">
+                          {user.bio || "No bio available"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Follow Button */}
+                    {user.id !== currentUserId && (
+                      <button
+                        onClick={() => handleFollowToggle(user.id)}
+                        className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                          followingStatus[user.id]
+                            ? "border border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                            : "bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md hover:scale-[1.03] hover:shadow-lg"
+                        }`}
+                      >
+                        <span className="flex items-center gap-1.5">
+                          {followingStatus[user.id] ? (
+                            <>
+                              <UserCheck size={14} />
+                              Following
+                            </>
+                          ) : (
+                            <>
+                              <UserPlus size={14} />
+                              Follow
+                            </>
+                          )}
+                        </span>
+                      </button>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-100 to-blue-100">
+                  <Users size={28} className="text-violet-500" />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              No {type} found
-            </div>
-          )}
-        </div>
+
+                <h3 className="text-lg font-semibold text-gray-800">
+                  No {type} yet
+                </h3>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Users will appear here.
+                </p>
+              </div>
+            )}
+          </div>
+        </motion.div>
       </motion.div>
-    </div>
+    </AnimatePresence>
   );
 }

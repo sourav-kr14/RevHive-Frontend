@@ -23,16 +23,19 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
       } else {
         response = await followAPI.getFollowing(userId, 0, 50);
       }
-      
+
       const usersList = response.data.data || [];
       setUsers(usersList);
-      
+
       // Check following status for each user (if not viewing own list)
       if (currentUserId !== userId) {
         const status = {};
         for (const user of usersList) {
           try {
-            const followCheck = await followAPI.isFollowing(currentUserId, user.id);
+            const followCheck = await followAPI.isFollowing(
+              currentUserId,
+              user.id,
+            );
             status[user.id] = followCheck.data.isFollowing;
           } catch (error) {
             status[user.id] = false;
@@ -71,16 +74,16 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md overflow-hidden"
+          className="bg-white border border-gray-200 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <h3 className="text-lg font-semibold">
+          <div className="flex items-center justify-between p-4 border-b border-gray-100">
+            <h3 className="text-lg font-semibold text-black">
               {type === "followers" ? "Followers" : "Following"}
             </h3>
-            <button 
-              onClick={onClose} 
-              className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-500 hover:text-black"
             >
               <X size={20} />
             </button>
@@ -93,24 +96,29 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
                 <Loader className="animate-spin text-purple-500" size={32} />
               </div>
             ) : users.length > 0 ? (
-              <div className="divide-y divide-white/10">
+              <div className="divide-y divide-gray-100">
                 {users.map((user) => (
-                  <div key={user.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                  <div
+                    key={user.id}
+                    className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  >
                     <div className="flex items-center gap-3">
                       {/* Avatar */}
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold">
                         {user.username?.slice(0, 2).toUpperCase() || "US"}
                       </div>
-                      
+
                       {/* User Info */}
                       <div>
-                        <p className="font-medium text-white">@{user.username}</p>
+                        <p className="font-medium text-gray-900">
+                          @{user.username}
+                        </p>
                         <p className="text-xs text-gray-500">
                           {user.bio || "No bio yet"}
                         </p>
                       </div>
                     </div>
-                    
+
                     {/* Follow Button (if not current user) */}
                     {user.id !== currentUserId && (
                       <button
@@ -118,7 +126,7 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
                         disabled={processingId === user.id}
                         className={`px-3 py-1 rounded-lg text-xs flex items-center gap-1 transition-all ${
                           followingStatus[user.id]
-                            ? "bg-white/10 text-gray-300 hover:bg-red-500/20 hover:text-red-400"
+                            ? "bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-500 hover:text-red-400"
                             : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
                         } ${processingId === user.id ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
@@ -143,9 +151,7 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
             ) : (
               <div className="text-center py-12">
                 <div className="text-5xl mb-3">👥</div>
-                <p className="text-gray-400">
-                  No {type} yet
-                </p>
+                <p className="text-gray-400">No {type} yet</p>
               </div>
             )}
           </div>

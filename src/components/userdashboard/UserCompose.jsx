@@ -85,6 +85,9 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
   const generateHashtags = async () => {
     setLoadingTags(true);
     setHashtags([]);
+    setLoadingAI(true);
+    setAiType("hashtags");
+    setAiResult("");
 
     try {
       const res = await callAI({
@@ -98,11 +101,14 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         .slice(0, 10);
 
       setHashtags(tags);
+      setAiResult(res.data.result);
     } catch {
       setHashtags([]);
+      setAiResult("Something went wrong");
     }
 
     setLoadingTags(false);
+    setLoadingAI(false);
   };
 
   const addTag = (tag) => {
@@ -243,8 +249,56 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         </div>
       )}
 
+      {/* AI Loading */}
+      {loadingAI && (
+        <div
+          className="
+          mt-4 rounded-3xl
+          border border-gray-200
+          bg-gradient-to-br from-gray-50 to-white
+          p-4 overflow-hidden
+          relative
+          "
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent animate-pulse" />
+
+          <div className="relative flex items-start gap-3">
+            <div
+              className="
+              w-10 h-10 rounded-2xl
+              bg-gradient-to-r bg-red-600 bg-orange-400 text-white
+              flex items-center justify-center
+              shadow-md
+              "
+            >
+              <Wand2 size={16} className="animate-pulse  " />
+            </div>
+
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-gray-900">
+                  RevHive AI is thinking...
+                </p>
+
+                <Loader size={14} className="animate-spin text-gray-500" />
+              </div>
+
+              <p className="text-xs text-gray-500 mt-1">
+                Creating smarter content for your post
+              </p>
+
+              <div className="mt-4 space-y-2">
+                <div className="h-3 rounded-full bg-gray-200 animate-pulse w-full" />
+                <div className="h-3 rounded-full bg-gray-200 animate-pulse w-5/6" />
+                <div className="h-3 rounded-full bg-gray-200 animate-pulse w-4/6" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* AI Result */}
-      {aiResult && aiType !== "moderate" && (
+      {!loadingAI && aiResult && aiType !== "moderate" && (
         <div
           className="
           mt-4 rounded-3xl
@@ -289,7 +343,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
       )}
 
       {/* Moderation */}
-      {aiType === "moderate" && aiResult && (
+      {!loadingAI && aiType === "moderate" && aiResult && (
         <p
           className={`mt-4 text-sm font-medium ${
             aiResult.includes("UNSAFE") ? "text-red-500" : "text-green-600"
@@ -380,21 +434,40 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         ].map((btn) => (
           <button
             key={btn.label}
+            disabled={loadingAI}
             onClick={() =>
               btn.type === "hashtags" ? generateHashtags() : handleAI(btn.type)
             }
-            className="
+            className={`
             px-4 py-2 rounded-2xl
             border border-gray-200
-            bg-white
-            text-xs font-medium text-gray-700
-            hover:bg-gray-900
-            hover:text-white
-            hover:-translate-y-0.5
+            text-xs font-medium
             transition-all duration-300
-            "
+            ${
+              loadingAI
+                ? `
+                  bg-gray-100
+                  text-gray-400
+                  cursor-not-allowed
+                  `
+                : `
+                  bg-white
+                  text-gray-700
+                  hover:bg-gray-900
+                  hover:text-white
+                  hover:-translate-y-0.5
+                  `
+            }
+            `}
           >
-            {btn.label}
+            {loadingAI && aiType === btn.type ? (
+              <span className="flex items-center gap-2">
+                <Loader size={13} className="animate-spin" />
+                Loading
+              </span>
+            ) : (
+              btn.label
+            )}
           </button>
         ))}
       </div>
