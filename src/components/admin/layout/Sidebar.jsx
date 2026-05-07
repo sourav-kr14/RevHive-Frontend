@@ -14,7 +14,7 @@ export default function Sidebar() {
 
   const logout = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/signin");
   };
 
   const navItems = [
