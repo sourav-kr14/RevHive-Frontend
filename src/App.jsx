@@ -17,6 +17,7 @@ import DashboardPage from "./components/userdashboard/DashboardPage";
 import Premium from "./components/userdashboard/Premium";
 import SettingsPage from "./pages/settings/SettingsPage";
 import AdminPremium from "./components/admin/dashboard/AdminPremium";
+import AdminSearch from "./components/admin/users/AdminSearch";
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
         >
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="search" element={<AdminSearch />} />
 
           <Route path="reports" element={<AdminReports />} />
           <Route path="premium" element={<AdminPremium />} />
