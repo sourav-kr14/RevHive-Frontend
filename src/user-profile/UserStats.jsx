@@ -1,51 +1,29 @@
 import { motion } from "framer-motion";
 import { BarChart3, Users, UserPlus } from "lucide-react";
-import { useState, useEffect } from "react";
-import { followAPI } from "../services/api";
+import { useState } from "react";
 import SocialModal from "../components/common/SocialModal";
 
-export default function DashboardStats({ profileData }) {
+export default function DashboardStats({
+  userId,
+  postsCount = 0,
+  followersCount = 0,
+  followingCount = 0,
+}) {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(null);
-  const [stats, setStats] = useState({
-    postsCount: 0,
-    followersCount: 0,
-    followingCount: 0,
-  });
 
-  useEffect(() => {
-    if (profileData?.id) fetchStats();
-  }, [profileData?.id]);
-
-  const fetchStats = async () => {
+  const currentUserId = (() => {
     try {
-      const [followersRes, followingRes] = await Promise.all([
-        followAPI.getFollowersCount(profileData.id),
-        followAPI.getFollowingCount(profileData.id),
-      ]);
-
-      setStats({
-        postsCount: profileData?.postsCount || 0,
-        followersCount: followersRes.data?.followersCount || 0,
-        followingCount: followingRes.data?.followingCount || 0,
-      });
-    } catch {}
-  };
+      return JSON.parse(localStorage.getItem("user"))?.id;
+    } catch {
+      return null;
+    }
+  })();
 
   const statItems = [
-    { label: "Posts", value: stats.postsCount, icon: BarChart3 },
-    {
-      label: "Followers",
-      value: stats.followersCount,
-      icon: Users,
-      type: "followers",
-    },
-    {
-      label: "Following",
-      value: stats.followingCount,
-      icon: UserPlus,
-      type: "following",
-    },
+    { label: "Posts", value: postsCount, icon: BarChart3 },
+    { label: "Followers", value: followersCount, icon: Users, type: "followers" },
+    { label: "Following", value: followingCount, icon: UserPlus, type: "following" },
   ];
 
   return (
@@ -53,7 +31,6 @@ export default function DashboardStats({ profileData }) {
       <div className="grid grid-cols-3 gap-4">
         {statItems.map((s, i) => {
           const Icon = s.icon;
-
           return (
             <motion.div
               key={s.label}
@@ -61,38 +38,31 @@ export default function DashboardStats({ profileData }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -3, scale: 1.02 }}
-              onClick={() =>
-                s.type && setModalType(s.type) && setShowModal(true)
-              }
-              className={`relative p-5 rounded-2xl 
-              bg-white/5 backdrop-blur-xl border border-white/10 
-              shadow-[0_0_20px_rgba(139,92,246,0.08)]
-              ${s.type ? "cursor-pointer hover:bg-white/10" : ""}`}
+              onClick={() => {
+                if (s.type) {
+                  setModalType(s.type);
+                  setShowModal(true);
+                }
+              }}
+              className={`relative p-5 rounded-2xl bg-white border border-gray-200 shadow-sm ${s.type ? "cursor-pointer hover:shadow-md hover:border-gray-300 transition-shadow" : ""}`}
             >
-              {/* Top */}
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs text-gray-400 uppercase tracking-wider">
+                <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">
                   {s.label}
                 </p>
-
-                <div
-                  className="p-2 rounded-lg 
-                bg-gradient-to-br from-purple-500 to-blue-500"
-                >
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500">
                   <Icon size={16} className="text-white" />
                 </div>
               </div>
 
-              {/* Value */}
-              <p className="text-2xl font-semibold text-white">
-                {s.value.toLocaleString()}
+              <p className="text-2xl font-bold text-black">
+                {Number(s.value).toLocaleString()}
               </p>
 
-              {/* Progress */}
-              <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(s.value, 100)}%` }}
+                  animate={{ width: `${Math.min(Number(s.value), 100)}%` }}
                   transition={{ duration: 0.8 }}
                   className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
                 />
@@ -102,12 +72,11 @@ export default function DashboardStats({ profileData }) {
         })}
       </div>
 
-      {/* Modal */}
-      {showModal && profileData?.id && (
+      {showModal && userId && (
         <SocialModal
-          userId={profileData.id}
+          userId={userId}
           type={modalType}
-          currentUserId={profileData.id}
+          currentUserId={currentUserId}
           onClose={() => setShowModal(false)}
         />
       )}

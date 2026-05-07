@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { postAPI, followAPI } from "../../services/api";
 import CommentSection from "./CommentSection";
 import EditPostModal from "./EditPostModal";
+import FollowButton from "../common/FollowButton";
 
 export default function UserFeed({
   profileData,
@@ -17,6 +18,18 @@ export default function UserFeed({
   const [editingPost, setEditingPost] = useState(null);
   const [followingStatus, setFollowingStatus] = useState({});
   const [followLoading, setFollowLoading] = useState({});
+
+  // Get current user ID from localStorage (logged-in user, not profileData which could be viewed profile)
+  const currentUserId = (() => {
+    try {
+      const userId = JSON.parse(localStorage.getItem("user"))?.id;
+      console.log("UserFeed currentUserId:", userId);
+      return userId;
+    } catch {
+      console.log("Error getting currentUserId from localStorage");
+      return null;
+    }
+  })();
 
   const isMounted = useRef(true);
 
@@ -47,36 +60,35 @@ export default function UserFeed({
         response = await postAPI.getFeed(0, 20);
       }
 
-      const validPosts = (response.data?.content || []).filter((p) => p?.id);
+      let validPosts = (response.data?.content || []).filter((p) => p?.id);
+
+      console.log("Feed posts loaded:", {
+        count: validPosts.length,
+        firstPostKeys: validPosts[0] ? Object.keys(validPosts[0]) : [],
+        firstPost: validPosts[0],
+      });
+
+      // Normalize: backend returns post.user with id+username after the backend fix.
+      // Keep a fallback chain for forward-compatibility.
+      validPosts = validPosts.map((post) => {
+        const author = post.user || post.author || post.creator || null;
+        const userId = author?.id ?? post.userId ?? post.authorId ?? null;
+        const username =
+          author?.username ||
+          author?.userName ||
+          author?.name ||
+          post.username ||
+          (userId ? `User_${userId}` : "Unknown");
+
+        return {
+          ...post,
+          user: { ...(author || {}), id: userId, username },
+        };
+      });
 
       if (!isMounted.current) return;
 
       setPosts(validPosts);
-
-      if (profileData?.id) {
-        const statusMap = {};
-
-        await Promise.all(
-          validPosts.map(async (post) => {
-            if (post.user?.id && post.user.id !== profileData.id) {
-              try {
-                const res = await followAPI.isFollowing(
-                  profileData.id,
-                  post.user.id,
-                );
-
-                statusMap[post.user.id] = res.data.isFollowing;
-              } catch {
-                statusMap[post.user.id] = false;
-              }
-            }
-          }),
-        );
-
-        if (isMounted.current) {
-          setFollowingStatus(statusMap);
-        }
-      }
     } catch (err) {
       if (isMounted.current) {
         setError(err.message || "Failed to load feed");
@@ -110,35 +122,6 @@ export default function UserFeed({
         ),
       );
     } catch {}
-  };
-
-  const handleFollowToggle = async (authorId) => {
-    if (!authorId || !profileData?.id) return;
-
-    setFollowLoading((prev) => ({
-      ...prev,
-      [authorId]: true,
-    }));
-
-    try {
-      if (followingStatus[authorId]) {
-        await followAPI.unfollowUser(profileData.id, authorId);
-      } else {
-        await followAPI.followUser(profileData.id, authorId);
-      }
-
-      setFollowingStatus((prev) => ({
-        ...prev,
-        [authorId]: !prev[authorId],
-      }));
-    } catch {
-      alert("Follow failed");
-    } finally {
-      setFollowLoading((prev) => ({
-        ...prev,
-        [authorId]: false,
-      }));
-    }
   };
 
   if (loading) {
@@ -211,25 +194,30 @@ export default function UserFeed({
                     </div>
                   </div>
 
-                  {/* Follow */}
-                  {post.user?.id && post.user.id !== profileData?.id && (
-                    <button
-                      disabled={followLoading[post.user.id]}
-                      onClick={() => handleFollowToggle(post.user.id)}
-                      className={`px-4 py-1.5 text-xs sm:text-sm rounded-full font-medium transition
-                        ${
-                          followingStatus[post.user.id]
-                            ? "bg-gray-100 text-black border border-gray-300"
-                            : "bg-black text-white"
-                        }`}
-                    >
-                      {followLoading[post.user.id]
-                        ? "..."
-                        : followingStatus[post.user.id]
-                          ? "Following"
-                          : "Follow"}
-                    </button>
-                  )}
+                  {/* Follow Button */}
+                  <div className="flex flex-col items-end gap-1">
+                    {post.user?.id && currentUserId ? (
+                      <>
+                        <FollowButton
+                          userId={Number(post.user.id)}
+                          currentUserId={Number(currentUserId)}
+                          syncedFollowing={followingStatus[post.user.id]}
+                          onFollowChange={(payload) => {
+                            setFollowingStatus((prev) => ({
+                              ...prev,
+                              [post.user.id]: payload.action === "follow",
+                            }));
+                          }}
+                          size="sm"
+                        />
+                      </>
+                    ) : (
+                      <div className="text-xs text-gray-400">
+                        {!post.user?.id && "No user data"}
+                        {!currentUserId && "Not logged in"}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Content */}
@@ -269,7 +257,7 @@ export default function UserFeed({
 
                   <CommentSection
                     postId={post.id}
-                    currentUserId={profileData?.id}
+                    currentUserId={currentUserId}
                   />
 
                   <button className="hover:text-black transition">

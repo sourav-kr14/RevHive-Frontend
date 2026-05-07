@@ -10,6 +10,8 @@ export default function DashboardPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [feedType, setFeedType] = useState("forYou");
 
+  console.log("✅ DashboardPage RENDERED - showing feed");
+
   const handlePostCreated = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
