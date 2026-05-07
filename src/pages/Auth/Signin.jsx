@@ -36,6 +36,7 @@ const Signin = () => {
       }
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
+      localStorage.setItem("user", JSON.stringify(data));
       toast.success("Login successful");
       if (data.user) {
   localStorage.setItem("user", JSON.stringify(data.user));
@@ -71,7 +72,7 @@ const Signin = () => {
         {/* Toggle */}
         <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
           <button
-            onClick={() => navigate("/Signup")}
+            onClick={() => navigate("/signup")}
             className="w-1/2 py-2 text-sm text-gray-500"
           >
             Sign up

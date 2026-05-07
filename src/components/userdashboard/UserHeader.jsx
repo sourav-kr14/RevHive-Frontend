@@ -41,7 +41,19 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
             alt="logo"
             className="w-10 h-10 rounded-full object-cover"
           />
-          <h1 className="text-lg font-semibold text-gray-900">RevHive</h1>
+          <h1
+            className="
+  text-lg font-bold
+  bg-gradient-to-r
+  from-orange-400
+
+  to-red-500
+  bg-clip-text
+  text-transparent
+  "
+          >
+            RevHive
+          </h1>
         </motion.div>
 
         <nav className="hidden md:flex items-center gap-8">

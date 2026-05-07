@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { BarChart3, Users, UserPlus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SocialModal from "../components/common/SocialModal";
+import { followAPI, postAPI } from "../services/api";
 
 export default function DashboardStats({
   userId,
@@ -12,23 +13,72 @@ export default function DashboardStats({
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(null);
 
-  const currentUserId = (() => {
+  const [stats, setStats] = useState({
+    postsCount: 0,
+    followersCount: 0,
+    followingCount: 0,
+  });
+
+  const fetchStats = async () => {
+    if (!profileData?.id) return;
+
     try {
-      return JSON.parse(localStorage.getItem("user"))?.id;
-    } catch {
-      return null;
+      console.log("PROFILE:", profileData);
+
+      // POSTS COUNT
+      const postsRes = await postAPI.getPostsCount(profileData.id);
+      console.log("POSTS RESPONSE:", postsRes.data);
+
+      // FOLLOWERS
+      const followersRes = await followAPI.getFollowersCount(profileData.id);
+
+      // FOLLOWING
+      const followingRes = await followAPI.getFollowingCount(profileData.id);
+
+      setStats({
+        postsCount: Number(postsRes.data?.postsCount) || 0,
+        followersCount: Number(followersRes.data?.followersCount) || 0,
+        followingCount: Number(followingRes.data?.followingCount) || 0,
+      });
+    } catch (err) {
+      console.log("STATS ERROR:", err);
     }
-  })();
+  };
+
+  useEffect(() => {
+    console.log("PROFILE DATA CHANGED:", profileData);
+
+    fetchStats();
+  }, [profileData]);
+
+  const openModal = (type) => {
+    setModalType(type);
+    setShowModal(true);
+  };
 
   const statItems = [
-    { label: "Posts", value: postsCount, icon: BarChart3 },
-    { label: "Followers", value: followersCount, icon: Users, type: "followers" },
-    { label: "Following", value: followingCount, icon: UserPlus, type: "following" },
+    {
+      label: "Posts",
+      value: stats.postsCount,
+      icon: BarChart3,
+    },
+    {
+      label: "Followers",
+      value: stats.followersCount,
+      icon: Users,
+      type: "followers",
+    },
+    {
+      label: "Following",
+      value: stats.followingCount,
+      icon: UserPlus,
+      type: "following",
+    },
   ];
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {statItems.map((s, i) => {
           const Icon = s.icon;
           return (
@@ -38,31 +88,38 @@ export default function DashboardStats({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -3, scale: 1.02 }}
-              onClick={() => {
-                if (s.type) {
-                  setModalType(s.type);
-                  setShowModal(true);
-                }
-              }}
-              className={`relative p-5 rounded-2xl bg-white border border-gray-200 shadow-sm ${s.type ? "cursor-pointer hover:shadow-md hover:border-gray-300 transition-shadow" : ""}`}
+              onClick={() => s.type && openModal(s.type)}
+              className={`relative p-5 rounded-2xl
+              bg-white/5 backdrop-blur-xl border border-white/10
+              shadow-[0_0_20px_rgba(139,92,246,0.08)]
+              transition-all
+              ${s.type ? "cursor-pointer hover:bg-white/10" : ""}`}
             >
+              {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">
+                <p className="text-xs text-black uppercase tracking-wider">
                   {s.label}
                 </p>
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500">
+
+                <div
+                  className="p-2 rounded-lg
+                  bg-gradient-to-br from-purple-500 to-blue-500"
+                >
                   <Icon size={16} className="text-white" />
                 </div>
               </div>
 
-              <p className="text-2xl font-bold text-black">
-                {Number(s.value).toLocaleString()}
+              {/* Count */}
+              <p className="text-2xl font-semibold text-black">
+                {s.value.toLocaleString()}
               </p>
 
               <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(Number(s.value), 100)}%` }}
+                  animate={{
+                    width: `${Math.min(s.value, 100)}%`,
+                  }}
                   transition={{ duration: 0.8 }}
                   className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
                 />

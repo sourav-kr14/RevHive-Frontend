@@ -117,10 +117,7 @@ export const postAPI = {
     api.put(`/posts/${postId}`, { content, imageUrl }),
 
   deletePost: (postId) => api.delete(`/posts/${postId}`),
-
-  likePost: (postId) => api.post(`/posts/${postId}/like`),
-
-  unlikePost: (postId) => api.delete(`/posts/${postId}/like`),
+  getPostsCount: (userId) => api.get(`/posts/user/${userId}/count`),
 };
 
 // ==================== LIKES ====================
@@ -168,6 +165,24 @@ export const accessPremiumFeature = async () => {
     },
   });
 
+  return res.data;
+};
+
+export const bookmarkAPI = {
+  addBookmark: async (userId, postId) => {
+    return await api.post(`/bookmarks?userId=${userId}&postId=${postId}`);
+  },
+  removeBookmark: async (userId, postId) => {
+    return await api.delete(`/bookmarks?userId=${userId}&postId=${postId}`);
+  },
+
+  getBookmarks: async (userId) => {
+    return await api.get(`/bookmarks?userId=${userId}`);
+  },
+};
+
+export const searchUsers = async (query) => {
+  const res = await api.get(`/users/search?query=${query}`);
   return res.data;
 };
 

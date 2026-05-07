@@ -3,7 +3,7 @@ import UserFeed from "./UserFeed";
 import UserSidebar from "./UserSidebar";
 import { useOutletContext } from "react-router-dom";
 import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 export default function DashboardPage() {
   const { profileData } = useOutletContext();
 
@@ -16,10 +16,22 @@ export default function DashboardPage() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+
+    navigate("/signin");
+  };
+
   return (
     <div className="flex gap-6">
       {/* Sidebar */}
-      <UserSidebar feedType={feedType} setFeedType={setFeedType} />
+      <UserSidebar
+        feedType={feedType}
+        setFeedType={setFeedType}
+        onLogout={handleLogout}
+      />
 
       {/* Main Content */}
       <div className="flex-1">

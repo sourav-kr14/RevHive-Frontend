@@ -1,5 +1,13 @@
 import { motion } from "framer-motion";
-import { Image, Link2, Hash, Loader, AlertCircle, MapPin } from "lucide-react";
+import {
+  Image,
+  Link2,
+  Hash,
+  Loader,
+  AlertCircle,
+  MapPin,
+  Wand2,
+} from "lucide-react";
 import { useState, useRef } from "react";
 import { postAPI } from "../../services/api";
 import { callAI } from "../../api/ai-content";
@@ -29,8 +37,10 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
 
   const handleTextChange = (e) => {
     const text = e.target.value;
+
     setPostText(text);
     setCharCount(text.length);
+
     if (error) setError("");
   };
 
@@ -97,6 +107,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
 
   const addTag = (tag) => {
     if (postText.includes(tag)) return;
+
     setPostText((prev) => prev + " " + tag);
   };
 
@@ -121,30 +132,54 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm"
+      whileHover={{ y: -2 }}
+      className="
+      group
+      bg-white/95 backdrop-blur-xl
+      border border-gray-100
+      rounded-[32px]
+      p-5 sm:p-6
+      shadow-sm hover:shadow-2xl
+      transition-all duration-500
+      "
     >
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-4 mb-5">
         <div
-          className="w-11 h-11 rounded-full bg-gray-900 
-      flex items-center justify-center text-white font-semibold"
+          className="
+          w-12 h-12 rounded-2xl
+          bg-gradient-to-br from-gray-900 to-gray-700
+          flex items-center justify-center
+          text-white font-semibold
+          shadow-md
+          "
         >
           {initials}
         </div>
 
-        <div>
-          <p className="text-sm font-semibold text-gray-900">Create Post</p>
-          <p className="text-xs text-gray-500">
-            Share your thoughts with the community
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-gray-900">Create Post</p>
+          </div>
+
+          <p className="text-xs text-gray-500 mt-0.5">
+            Share something with your community
           </p>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="mb-3 p-3 rounded-xl flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm">
+        <div
+          className="
+          mb-4 p-3 rounded-2xl
+          flex items-center gap-2
+          bg-red-50 border border-red-200
+          text-red-600 text-sm
+          "
+        >
           <AlertCircle size={15} />
           {error}
         </div>
@@ -154,31 +189,53 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
       <div className="relative">
         <textarea
           ref={textareaRef}
-          className="w-full rounded-xl border border-gray-300 
-      bg-gray-50 p-4 text-sm text-gray-900 
-      placeholder:text-gray-400 resize-none outline-none
-      focus:border-gray-900 focus:bg-white transition"
-          placeholder="What's on your mind?"
-          rows="4"
+          className="
+          w-full rounded-3xl
+          border border-gray-200
+          bg-gray-50/70
+          p-5 text-sm text-gray-900
+          placeholder:text-gray-400
+          resize-none outline-none
+          transition-all duration-300
+          focus:bg-white
+          focus:border-gray-400
+          focus:shadow-lg
+          "
+          placeholder="What's happening today?"
+          rows="5"
           value={postText}
           onChange={handleTextChange}
           maxLength={500}
         />
 
-        <span className="absolute bottom-3 right-3 text-xs text-gray-400">
+        <span
+          className={`
+          absolute bottom-4 right-4
+          text-xs font-medium
+          ${charCount > 450 ? "text-red-500" : "text-gray-400"}
+          `}
+        >
           {charCount}/500
         </span>
       </div>
 
       {/* Hashtags */}
       {hashtags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="flex flex-wrap gap-2 mt-4">
           {hashtags.map((tag, i) => (
             <button
               key={i}
               onClick={() => addTag(tag)}
-              className="px-3 py-1 rounded-full bg-gray-100 
-          text-gray-700 text-xs hover:bg-gray-200 transition"
+              className="
+              px-3 py-1.5 rounded-full
+              bg-gray-100
+              text-gray-700
+              text-xs font-medium
+              hover:bg-gray-900
+              hover:text-white
+              hover:scale-105
+              transition-all duration-300
+              "
             >
               {tag}
             </button>
@@ -188,25 +245,53 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
 
       {/* AI Result */}
       {aiResult && aiType !== "moderate" && (
-        <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
-          <p className="text-sm text-gray-700">{aiResult}</p>
+        <div
+          className="
+          mt-4 rounded-3xl
+          border border-gray-200
+          bg-gray-50/80
+          p-4
+          "
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className="
+              w-9 h-9 rounded-xl
+              bg-black text-white
+              flex items-center justify-center
+              shrink-0
+              "
+            >
+              <Wand2 size={16} />
+            </div>
 
-          <button
-            onClick={() => {
-              setPostText(aiResult);
-              setAiResult("");
-            }}
-            className="mt-2 text-xs font-medium text-gray-900 hover:underline"
-          >
-            Use this
-          </button>
+            <div className="flex-1">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {aiResult}
+              </p>
+
+              <button
+                onClick={() => {
+                  setPostText(aiResult);
+                  setAiResult("");
+                }}
+                className="
+                mt-3 text-xs font-semibold
+                text-orange-500 hover:text-orange-600
+                transition
+                "
+              >
+                Use this content
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Moderation */}
       {aiType === "moderate" && aiResult && (
         <p
-          className={`mt-3 text-sm ${
+          className={`mt-4 text-sm font-medium ${
             aiResult.includes("UNSAFE") ? "text-red-500" : "text-green-600"
           }`}
         >
@@ -214,35 +299,65 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         </p>
       )}
 
-      {/* Bottom Actions */}
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-        {/* Left */}
+      {/* Bottom */}
+      <div
+        className="
+        flex items-center justify-between
+        mt-5 pt-5
+        border-t border-gray-100
+        "
+      >
+        {/* Actions */}
         <div className="flex items-center gap-2">
           {[Image, Link2, Hash, MapPin].map((Icon, i) => (
             <button
               key={i}
               onClick={() => {
                 if (i === 0) setShowMediaInput(!showMediaInput);
+
                 if (i === 2) generateHashtags();
               }}
-              className="w-9 h-9 rounded-lg border border-gray-200 
-          flex items-center justify-center text-gray-600
-          hover:bg-gray-100 transition"
+              className="
+              w-10 h-10 rounded-2xl
+              border border-gray-200
+              bg-white
+              flex items-center justify-center
+              text-gray-600
+              hover:bg-black
+              hover:text-white
+              hover:scale-110
+              transition-all duration-300
+              "
             >
-              <Icon size={16} />
+              <Icon size={17} />
             </button>
           ))}
         </div>
 
-        {/* Right */}
+        {/* Post */}
         <button
           disabled={!postText.trim() || isPosting}
           onClick={handleCreatePost}
-          className={`px-5 py-2 rounded-xl text-sm font-medium transition ${
-            postText.trim()
-              ? "bg-gray-900 text-white hover:bg-black"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}
+          className={`
+            px-6 py-2.5 rounded-2xl
+            text-sm font-semibold
+            transition-all duration-300
+            ${
+              postText.trim()
+                ? `
+                 bg-red-500
+                  text-white
+                  hover:scale-105
+                  hover:shadow-xl
+                  hover:shadow-red-200
+                  `
+                : `
+                  bg-gray-200
+                  text-gray-400
+                  cursor-not-allowed
+                  `
+            }
+          `}
         >
           {isPosting ? (
             <span className="flex items-center gap-2">
@@ -256,7 +371,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
       </div>
 
       {/* AI Buttons */}
-      <div className="flex flex-wrap gap-2 mt-4">
+      <div className="flex flex-wrap gap-2 mt-5">
         {[
           { label: "Caption", type: "caption" },
           { label: "Tags", type: "hashtags" },
@@ -268,8 +383,16 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
             onClick={() =>
               btn.type === "hashtags" ? generateHashtags() : handleAI(btn.type)
             }
-            className="px-3 py-1.5 rounded-lg border border-gray-200 
-        text-xs text-gray-700 hover:bg-gray-100 transition"
+            className="
+            px-4 py-2 rounded-2xl
+            border border-gray-200
+            bg-white
+            text-xs font-medium text-gray-700
+            hover:bg-gray-900
+            hover:text-white
+            hover:-translate-y-0.5
+            transition-all duration-300
+            "
           >
             {btn.label}
           </button>

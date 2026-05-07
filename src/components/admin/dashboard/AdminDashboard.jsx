@@ -14,37 +14,9 @@ export default function AdminDashboard() {
       try {
         const res = await adminAPI.getStats();
 
-        const data = res.data;
-
-        setStats([
-          {
-            title: "Total Users",
-            value: data.totalUsers,
-            change: "+12%",
-          },
-          {
-            title: "Active Users",
-            value: data.activeUsers,
-            change: "+8%",
-          },
-          {
-            title: "Premium Users",
-            value: data.premiumUsers,
-            change: "+5%",
-          },
-          {
-            title: "Blocked Users",
-            value: data.blockedUsers,
-            change: "-2%",
-          },
-          {
-            title: "Admins",
-            value: data.admins,
-            change: "+1%",
-          },
-        ]);
+        setStats(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to load dashboard stats", err);
       }
     };
 
@@ -74,15 +46,21 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Cards */}
+      {/* Analytics Cards */}
       <div
         className="bg-white/5 backdrop-blur-xl border border-white/10
         rounded-2xl p-4"
       >
-        {stats && <AnalyticsCards data={stats} />}
+        {stats ? (
+          <AnalyticsCards data={stats} />
+        ) : (
+          <div className="text-gray-400 text-center py-10">
+            Loading stats...
+          </div>
+        )}
       </div>
 
-      {/* Chart */}
+      {/* Growth Chart */}
       <div
         className="bg-white/5 backdrop-blur-xl border border-white/10
         rounded-2xl p-4"

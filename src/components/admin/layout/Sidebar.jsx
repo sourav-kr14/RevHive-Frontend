@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, LogOut, Crown } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, Crown, Search } from "lucide-react";
 import { GoReport } from "react-icons/go";
 
 export default function Sidebar() {
@@ -14,10 +14,15 @@ export default function Sidebar() {
 
   const logout = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/signin");
   };
 
   const navItems = [
+    {
+      name: "Search",
+      path: "/admin/search",
+      icon: Search,
+    },
     { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Users", path: "/admin/users", icon: Users },
     { name: "Premium", path: "/admin/premium", icon: Crown },
@@ -28,7 +33,7 @@ export default function Sidebar() {
     <div
       className="
   fixed md:relative z-50
-  w-64 h-screen flex flex-col px-5 py-6
+  w-64 min-h-screen flex flex-col px-5 py-6
   bg-gradient-to-b from-[#0b0f1a] to-[#070a12]
   border-r border-white/10 backdrop-blur-xl
   transition-all duration-300
