@@ -7,9 +7,17 @@ export default function UserHeader({ activeNav, setActiveNav, profileData }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
+  const currentUserId = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"))?.id;
+    } catch {
+      return null;
+    }
+  })();
+
   const navItems = [
     { id: "dashboard", label: "Dashboard", path: "/user/dashboard" },
-    { id: "profile", label: "Profile", path: "/user/profile" },
+    { id: "profile", label: "Profile", path: `/user/profile/${currentUserId}` },
     { id: "settings", label: "Settings", path: "/user/settings" },
     { id: "messaging", label: "Messages", path: "/messages" },
     { id: "notification", label: "Notifications", path: "/notifications" },

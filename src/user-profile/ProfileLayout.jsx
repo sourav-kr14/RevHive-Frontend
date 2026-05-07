@@ -1,6 +1,9 @@
 import { useOutletContext } from "react-router-dom";
 import DashboardStats from "./UserStats";
 import UserFeed from "@/components/userdashboard/UserFeed";
+import FollowButton from "@/components/common/FollowButton";
+import { authAPI } from "@/services/api";
+import { Loader, AlertCircle } from "lucide-react";
 
 export default function ProfileLayout() {
   const { profileData } = useOutletContext();
@@ -33,13 +36,29 @@ export default function ProfileLayout() {
       </div> 
       */}
 
-      {/* Stats */}
-      <DashboardStats profileData={profileData} />
+      {/* Stats Cards — Posts / Followers / Following */}
+      <DashboardStats
+        userId={profileData?.id}
+        postsCount={profileData?.postsCount ?? 0}
+        followersCount={profileData?.followersCount ?? 0}
+        followingCount={profileData?.followingCount ?? 0}
+      />
 
       {/* User Posts */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-        <UserFeed profileData={profileData} onlyUserPosts={true} />
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm"
+      >
+        <UserFeed
+          profileData={{
+            id: profileData?.id,
+            username: profileData?.username,
+          }}
+          onlyUserPosts={true}
+        />
+      </motion.div>
     </div>
   );
 }

@@ -87,36 +87,35 @@ export default function UserFeed({
         response = await postAPI.getFeed(0, 20);
       }
 
-      const validPosts = (response.data?.content || []).filter((p) => p?.id);
+      let validPosts = (response.data?.content || []).filter((p) => p?.id);
+
+      console.log("Feed posts loaded:", {
+        count: validPosts.length,
+        firstPostKeys: validPosts[0] ? Object.keys(validPosts[0]) : [],
+        firstPost: validPosts[0],
+      });
+
+      // Normalize: backend returns post.user with id+username after the backend fix.
+      // Keep a fallback chain for forward-compatibility.
+      validPosts = validPosts.map((post) => {
+        const author = post.user || post.author || post.creator || null;
+        const userId = author?.id ?? post.userId ?? post.authorId ?? null;
+        const username =
+          author?.username ||
+          author?.userName ||
+          author?.name ||
+          post.username ||
+          (userId ? `User_${userId}` : "Unknown");
+
+        return {
+          ...post,
+          user: { ...(author || {}), id: userId, username },
+        };
+      });
 
       if (!isMounted.current) return;
 
       setPosts(validPosts);
-
-      if (profileData?.id) {
-        const statusMap = {};
-
-        await Promise.all(
-          validPosts.map(async (post) => {
-            if (post.user?.id && post.user.id !== profileData.id) {
-              try {
-                const res = await followAPI.isFollowing(
-                  profileData.id,
-                  post.user.id,
-                );
-
-                statusMap[post.user.id] = res.data.isFollowing;
-              } catch {
-                statusMap[post.user.id] = false;
-              }
-            }
-          }),
-        );
-
-        if (isMounted.current) {
-          setFollowingStatus(statusMap);
-        }
-      }
     } catch (err) {
       if (isMounted.current) {
         setError(err.message || "Failed to load feed");

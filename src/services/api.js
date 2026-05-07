@@ -113,7 +113,8 @@ export const postAPI = {
   getUserPosts: (userId, page = 0, size = 10) =>
     api.get(`/posts/user/${userId}`, { params: { page, size } }),
 
-  updatePost: (postId, content) => api.put(`/posts/${postId}`, { content }),
+  updatePost: (postId, content, imageUrl = null) =>
+    api.put(`/posts/${postId}`, { content, imageUrl }),
 
   deletePost: (postId) => api.delete(`/posts/${postId}`),
   getPostsCount: (userId) => api.get(`/posts/user/${userId}/count`),
@@ -140,6 +141,9 @@ export const commentAPI = {
 
   getComments: (postId, page = 0, size = 10) =>
     api.get(`/comments/post/${postId}`, { params: { page, size } }),
+
+  getCommentCount: (postId) =>
+    api.get(`/comments/post/${postId}/count`),
 
   deleteComment: (commentId) => api.delete(`/comments/${commentId}`),
 };

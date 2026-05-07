@@ -4,7 +4,12 @@ import { useState, useEffect } from "react";
 import SocialModal from "../components/common/SocialModal";
 import { followAPI, postAPI } from "../services/api";
 
-export default function DashboardStats({ profileData }) {
+export default function DashboardStats({
+  userId,
+  postsCount = 0,
+  followersCount = 0,
+  followingCount = 0,
+}) {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(null);
 
@@ -76,7 +81,6 @@ export default function DashboardStats({ profileData }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {statItems.map((s, i) => {
           const Icon = s.icon;
-
           return (
             <motion.div
               key={s.label}
@@ -110,8 +114,7 @@ export default function DashboardStats({ profileData }) {
                 {s.value.toLocaleString()}
               </p>
 
-              {/* Progress */}
-              <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{
@@ -126,12 +129,11 @@ export default function DashboardStats({ profileData }) {
         })}
       </div>
 
-      {/* Modal */}
-      {showModal && profileData?.id && (
+      {showModal && userId && (
         <SocialModal
-          userId={profileData.id}
+          userId={userId}
           type={modalType}
-          currentUserId={profileData.id}
+          currentUserId={currentUserId}
           onClose={() => setShowModal(false)}
         />
       )}

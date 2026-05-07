@@ -53,8 +53,8 @@ export default function App() {
 
         <Route path="/user" element={<UserLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="profile" element={<ProfileLayout />} />
-          <Route path="/user/settings" element={<SettingsPage />} />
+          <Route path="profile/:userId" element={<ProfileLayout />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="/premium" element={<Premium />} />
 
