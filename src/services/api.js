@@ -177,4 +177,9 @@ export const bookmarkAPI = {
   },
 };
 
+export const searchUsers = async (query) => {
+  const res = await api.get(`/users/search?query=${query}`);
+  return res.data;
+};
+
 export default api;
