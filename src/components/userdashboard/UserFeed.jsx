@@ -28,6 +28,13 @@ export default function UserFeed({
   const [selectedPost, setSelectedPost] = useState(null);
 
   const isMounted = useRef(true);
+  const currentUserId = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"))?.id;
+    } catch {
+      return null;
+    }
+  })();
 
   /* ---------------- Bookmark ---------------- */
 
@@ -87,7 +94,37 @@ export default function UserFeed({
         response = await postAPI.getFeed(0, 20);
       }
 
-      const validPosts = (response.data?.content || []).filter((p) => p?.id);
+      let validPosts = (response.data?.content || []).filter((p) => p?.id);
+
+      validPosts = validPosts.map((post) => ({
+        ...post,
+        user: {
+          id: post.user?.id,
+          username: post.user?.username,
+        },
+      }));
+
+      validPosts = validPosts.map((post) => {
+        const author = post.user || post.author || post.creator || null;
+
+        const userId = author?.id ?? post.userId ?? post.authorId ?? null;
+
+        const username =
+          author?.username ||
+          author?.userName ||
+          author?.name ||
+          post.username ||
+          (userId ? `User_${userId}` : "Unknown");
+
+        return {
+          ...post,
+          user: {
+            ...(author || {}),
+            id: userId,
+            username,
+          },
+        };
+      });
 
       if (!isMounted.current) return;
 
@@ -98,7 +135,7 @@ export default function UserFeed({
 
         await Promise.all(
           validPosts.map(async (post) => {
-            if (post.user?.id && post.user.id !== profileData.id) {
+            if (post.user?.id && post.user.id !== currentUserId) {
               try {
                 const res = await followAPI.isFollowing(
                   profileData.id,
@@ -265,9 +302,7 @@ export default function UserFeed({
                       shrink-0 shadow-lg
                       "
                     >
-                      {(post.user?.username || profileData?.username)
-                        ?.slice(0, 2)
-                        ?.toUpperCase() || "NA"}
+                      {post.user?.username?.slice(0, 2)?.toUpperCase() || "NA"}
                     </div>
 
                     <div className="min-w-0">
@@ -280,7 +315,7 @@ export default function UserFeed({
                         flex items-center gap-2
                         "
                       >
-                        @{post.user?.username || profileData?.username}
+                        @{post.user?.username}
                         <span
                           className="
                           px-2 py-0.5 rounded-full
@@ -301,11 +336,12 @@ export default function UserFeed({
                   </div>
 
                   {/* Follow */}
-                  {post.user?.id && post.user.id !== profileData?.id && (
-                    <button
-                      disabled={followLoading[post.user.id]}
-                      onClick={() => handleFollowToggle(post.user.id)}
-                      className={`px-4 py-2 text-xs sm:text-sm rounded-2xl font-semibold transition-all duration-300
+                  {post.user?.id &&
+                    Number(post.user.id) !== Number(currentUserId) && (
+                      <button
+                        disabled={followLoading[post.user.id]}
+                        onClick={() => handleFollowToggle(post.user.id)}
+                        className={`px-4 py-2 text-xs sm:text-sm rounded-2xl font-semibold transition-all duration-300
                         ${
                           followingStatus[post.user.id]
                             ? `
@@ -315,22 +351,22 @@ export default function UserFeed({
                               `
                             : `
                               bg-gradient-to-r
-                              from-orange-400
-                              to-pink-500
+                              from-blue-500
+                              to-blue-800
                               text-white
                               hover:scale-105
                               hover:shadow-lg
                               hover:shadow-orange-200
                               `
                         }`}
-                    >
-                      {followLoading[post.user.id]
-                        ? "..."
-                        : followingStatus[post.user.id]
-                          ? "Following"
-                          : "Follow"}
-                    </button>
-                  )}
+                      >
+                        {followLoading[post.user.id]
+                          ? "..."
+                          : followingStatus[post.user.id]
+                            ? "Following"
+                            : "Follow"}
+                      </button>
+                    )}
                 </div>
 
                 {/* Content */}
@@ -399,7 +435,7 @@ export default function UserFeed({
                     <div className="flex items-center">
                       <CommentSection
                         postId={post.id}
-                        currentUserId={profileData?.id}
+                        currentUserId={currentUserId}
                       />
                     </div>
                   </div>
