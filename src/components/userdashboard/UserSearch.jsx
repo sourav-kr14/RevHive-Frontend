@@ -36,10 +36,24 @@ export default function UserSearch() {
 
   const handleFollowToggle = async (userId, isFollowing) => {
     try {
+      const currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
+
+      if (!currentUserId) return;
+
       if (isFollowing) {
-        await api.delete(`/follow/${userId}`);
+        await api.delete("/v1/follows/unfollow", {
+          params: {
+            followerId: currentUserId,
+            followingId: userId,
+          },
+        });
       } else {
-        await api.post(`/follow/${userId}`);
+        await api.post("/v1/follows/follow", null, {
+          params: {
+            followerId: currentUserId,
+            followingId: userId,
+          },
+        });
       }
 
       setUsers((prev) =>
@@ -246,29 +260,29 @@ export default function UserSearch() {
                       handleFollowToggle(user.id, user.isFollowing)
                     }
                     className={`
-                      px-4 py-2
-                      rounded-full
-                      text-sm font-semibold
-                      transition-all duration-300
-                      ${
-                        user.isFollowing
-                          ? `
-                            bg-gray-100
-                            text-gray-700
-                            hover:bg-red-50
-                            hover:text-red-500
-                          `
-                          : `
-                            bg-gradient-to-r
-                            from-sky-500
-                            to-cyan-500
-                            text-white
-                            shadow-lg
-                            shadow-sky-100
-                            hover:shadow-sky-200
-                          `
-                      }
-                    `}
+    px-4 py-2
+    rounded-full
+    text-sm font-semibold
+    transition-all duration-300
+    ${
+      user.isFollowing
+        ? `
+          bg-gray-100
+          text-gray-700
+          hover:bg-red-50
+          hover:text-red-500
+        `
+        : `
+          bg-gradient-to-r
+          from-sky-500
+          to-cyan-500
+          text-white
+          shadow-lg
+          shadow-sky-100
+          hover:shadow-sky-200
+        `
+    }
+  `}
                   >
                     {user.isFollowing ? "Following" : "Follow"}
                   </motion.button>
