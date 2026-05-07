@@ -26,7 +26,7 @@ export default function UserSearch() {
 
       const res = await api.get(`/users/search?query=${query}`);
 
-      setUsers(res.data || []);
+      setUsers((res.data || []).filter((user) => !user.isFollowing));
     } catch (err) {
       console.log(err);
     } finally {
@@ -56,16 +56,7 @@ export default function UserSearch() {
         });
       }
 
-      setUsers((prev) =>
-        prev.map((user) =>
-          user.id === userId
-            ? {
-                ...user,
-                isFollowing: !isFollowing,
-              }
-            : user,
-        ),
-      );
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
     } catch (err) {
       console.log(err);
     }
