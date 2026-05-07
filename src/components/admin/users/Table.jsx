@@ -19,11 +19,27 @@ export default function UsersTable({ users }) {
             <tr key={user.id} className="border-t">
               {/* User */}
               <td className="px-4 py-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold">
-                  {user.name.slice(0, 2).toUpperCase()}
-                </div>
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.username}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="
+                    w-8 h-8 rounded-full
+                    bg-gray-200 flex items-center
+                    justify-center text-xs font-semibold
+                  "
+                  >
+                    {user.username?.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
 
-                <span className="font-medium text-gray-900">{user.name}</span>
+                <span className="font-medium text-gray-900">
+                  {user.username}
+                </span>
               </td>
 
               {/* Email */}
@@ -36,12 +52,12 @@ export default function UsersTable({ users }) {
               <td className="px-4 py-3">
                 <span
                   className={`text-xs px-2 py-1 rounded-full ${
-                    user.status === "Active"
+                    user.active
                       ? "bg-green-100 text-green-600"
-                      : "bg-gray-100 text-gray-600"
+                      : "bg-red-100 text-red-600"
                   }`}
                 >
-                  {user.status}
+                  {user.active ? "ACTIVE" : "BANNED"}
                 </span>
               </td>
 
