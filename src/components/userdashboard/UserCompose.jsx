@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Image,
   Link2,
@@ -7,6 +7,10 @@ import {
   AlertCircle,
   MapPin,
   Wand2,
+  X,
+  Video,
+  Sparkles,
+  Send,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { postAPI } from "../../services/api";
@@ -34,6 +38,8 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
   const initials = profileData?.username
     ? profileData.username.slice(0, 2).toUpperCase()
     : "RH";
+
+  const avatarUrl = profileData?.avatarUrl || profileData?.avatar || "";
 
   const handleTextChange = (e) => {
     const text = e.target.value;
@@ -114,7 +120,8 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
   const addTag = (tag) => {
     if (postText.includes(tag)) return;
 
-    setPostText((prev) => prev + " " + tag);
+    setPostText((prev) => `${prev.trim()} ${tag}`.trim());
+    setCharCount((prev) => prev + tag.length + 1);
   };
 
   const handleAI = async (type) => {
@@ -136,341 +143,377 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
     setLoadingAI(false);
   };
 
+  const hasMedia =
+    (mediaType === "image" && imageUrl.trim()) ||
+    (mediaType === "video" && videoUrl.trim());
+
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2 }}
-      className="
-      group
-      bg-white/95 backdrop-blur-xl
-      border border-gray-100
-      rounded-[32px]
-      p-5 sm:p-6
-      shadow-sm hover:shadow-2xl
-      transition-all duration-500
-      "
+      className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
     >
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-5">
-        <div
-          className="
-          w-12 h-12 rounded-2xl
-          bg-gradient-to-br from-gray-900 to-gray-700
-          flex items-center justify-center
-          text-white font-semibold
-          shadow-md
-          "
-        >
-          {initials}
-        </div>
-
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-gray-900">Create Post</p>
-          </div>
-
-          <p className="text-xs text-gray-500 mt-0.5">
-            Share something with your community
-          </p>
-        </div>
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div
-          className="
-          mb-4 p-3 rounded-2xl
-          flex items-center gap-2
-          bg-red-50 border border-red-200
-          text-red-600 text-sm
-          "
-        >
-          <AlertCircle size={15} />
-          {error}
-        </div>
-      )}
-
-      {/* Textarea */}
-      <div className="relative">
-        <textarea
-          ref={textareaRef}
-          className="
-          w-full rounded-3xl
-          border border-gray-200
-          bg-gray-50/70
-          p-5 text-sm text-gray-900
-          placeholder:text-gray-400
-          resize-none outline-none
-          transition-all duration-300
-          focus:bg-white
-          focus:border-gray-400
-          focus:shadow-lg
-          "
-          placeholder="What's happening today?"
-          rows="5"
-          value={postText}
-          onChange={handleTextChange}
-          maxLength={500}
-        />
-
-        <span
-          className={`
-          absolute bottom-4 right-4
-          text-xs font-medium
-          ${charCount > 450 ? "text-red-500" : "text-gray-400"}
-          `}
-        >
-          {charCount}/500
-        </span>
-      </div>
-
-      {/* Hashtags */}
-      {hashtags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-4">
-          {hashtags.map((tag, i) => (
-            <button
-              key={i}
-              onClick={() => addTag(tag)}
-              className="
-              px-3 py-1.5 rounded-full
-              bg-gray-100
-              text-gray-700
-              text-xs font-medium
-              hover:bg-gray-900
-              hover:text-white
-              hover:scale-105
-              transition-all duration-300
-              "
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* AI Loading */}
-      {loadingAI && (
-        <div
-          className="
-          mt-4 rounded-3xl
-          border border-gray-200
-          bg-gradient-to-br from-gray-50 to-white
-          p-4 overflow-hidden
-          relative
-          "
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent animate-pulse" />
-
-          <div className="relative flex items-start gap-3">
-            <div
-              className="
-              w-10 h-10 rounded-2xl
-              bg-gradient-to-r bg-red-600 bg-orange-400 text-white
-              flex items-center justify-center
-              shadow-md
-              "
-            >
-              <Wand2 size={16} className="animate-pulse  " />
-            </div>
-
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-gray-900">
-                  RevHive AI is thinking...
-                </p>
-
-                <Loader size={14} className="animate-spin text-gray-500" />
-              </div>
-
-              <p className="text-xs text-gray-500 mt-1">
-                Creating smarter content for your post
-              </p>
-
-              <div className="mt-4 space-y-2">
-                <div className="h-3 rounded-full bg-gray-200 animate-pulse w-full" />
-                <div className="h-3 rounded-full bg-gray-200 animate-pulse w-5/6" />
-                <div className="h-3 rounded-full bg-gray-200 animate-pulse w-4/6" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AI Result */}
-      {!loadingAI && aiResult && aiType !== "moderate" && (
-        <div
-          className="
-          mt-4 rounded-3xl
-          border border-gray-200
-          bg-gray-50/80
-          p-4
-          "
-        >
-          <div className="flex items-start gap-3">
-            <div
-              className="
-              w-9 h-9 rounded-xl
-              bg-black text-white
-              flex items-center justify-center
-              shrink-0
-              "
-            >
-              <Wand2 size={16} />
-            </div>
-
-            <div className="flex-1">
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {aiResult}
-              </p>
-
-              <button
-                onClick={() => {
-                  setPostText(aiResult);
-                  setAiResult("");
-                }}
-                className="
-                mt-3 text-xs font-semibold
-                text-orange-500 hover:text-orange-600
-                transition
-                "
-              >
-                Use this content
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Moderation */}
-      {!loadingAI && aiType === "moderate" && aiResult && (
-        <p
-          className={`mt-4 text-sm font-medium ${
-            aiResult.includes("UNSAFE") ? "text-red-500" : "text-green-600"
-          }`}
-        >
-          {aiResult}
-        </p>
-      )}
-
-      {/* Bottom */}
-      <div
-        className="
-        flex items-center justify-between
-        mt-5 pt-5
-        border-t border-gray-100
-        "
-      >
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          {[Image, Link2, Hash, MapPin].map((Icon, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                if (i === 0) setShowMediaInput(!showMediaInput);
-
-                if (i === 2) generateHashtags();
-              }}
-              className="
-              w-10 h-10 rounded-2xl
-              border border-gray-200
-              bg-white
-              flex items-center justify-center
-              text-gray-600
-              hover:bg-black
-              hover:text-white
-              hover:scale-110
-              transition-all duration-300
-              "
-            >
-              <Icon size={17} />
-            </button>
-          ))}
-        </div>
-
-        {/* Post */}
-        <button
-          disabled={!postText.trim() || isPosting}
-          onClick={handleCreatePost}
-          className={`
-            px-6 py-2.5 rounded-2xl
-            text-sm font-semibold
-            transition-all duration-300
-            ${
-              postText.trim()
-                ? `
-                 bg-red-500
-                  text-white
-                  hover:scale-105
-                  hover:shadow-xl
-                  hover:shadow-red-200
-                  `
-                : `
-                  bg-gray-200
-                  text-gray-400
-                  cursor-not-allowed
-                  `
-            }
-          `}
-        >
-          {isPosting ? (
-            <span className="flex items-center gap-2">
-              <Loader size={15} className="animate-spin" />
-              Posting...
-            </span>
+      <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={profileData?.username || "User"}
+              className="h-11 w-11 rounded-xl object-cover"
+            />
           ) : (
-            "Post"
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-sm font-bold text-white">
+              {initials}
+            </div>
           )}
-        </button>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-slate-950">Create post</p>
+            <p className="truncate text-xs text-slate-500">
+              Share an update with your RevHive community
+            </p>
+          </div>
+
+          <div className="hidden items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-500 sm:flex">
+            <Sparkles size={14} className="text-fuchsia-600" />
+            AI assisted
+          </div>
+        </div>
       </div>
 
-      {/* AI Buttons */}
-      <div className="flex flex-wrap gap-2 mt-5">
-        {[
-          { label: "Caption", type: "caption" },
-          { label: "Tags", type: "hashtags" },
-          { label: "Summary", type: "summarize" },
-          { label: "Check", type: "moderate" },
-        ].map((btn) => (
-          <button
-            key={btn.label}
-            disabled={loadingAI}
-            onClick={() =>
-              btn.type === "hashtags" ? generateHashtags() : handleAI(btn.type)
-            }
-            className={`
-            px-4 py-2 rounded-2xl
-            border border-gray-200
-            text-xs font-medium
-            transition-all duration-300
-            ${
-              loadingAI
-                ? `
-                  bg-gray-100
-                  text-gray-400
-                  cursor-not-allowed
-                  `
-                : `
-                  bg-white
-                  text-gray-700
-                  hover:bg-gray-900
-                  hover:text-white
-                  hover:-translate-y-0.5
-                  `
-            }
-            `}
+      <div className="px-5 py-4 sm:px-6">
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="mb-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
+            >
+              <AlertCircle size={15} />
+              {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            className="min-h-[148px] w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 pr-16 text-[15px] leading-6 text-slate-950 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+            placeholder="What's happening in your world?"
+            rows="5"
+            value={postText}
+            onChange={handleTextChange}
+            maxLength={500}
+          />
+
+          <span
+            className={`absolute bottom-3 right-4 text-xs font-bold ${
+              charCount > 450 ? "text-red-500" : "text-slate-400"
+            }`}
           >
-            {loadingAI && aiType === btn.type ? (
-              <span className="flex items-center gap-2">
-                <Loader size={13} className="animate-spin" />
-                Loading
-              </span>
+            {charCount}/500
+          </span>
+        </div>
+
+        <AnimatePresence>
+          {showMediaInput && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex rounded-xl bg-white p-1 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => setMediaType("image")}
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold ${
+                        mediaType === "image"
+                          ? "bg-slate-950 text-white"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      <Image size={14} />
+                      Image
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setMediaType("video")}
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold ${
+                        mediaType === "video"
+                          ? "bg-slate-950 text-white"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      <Video size={14} />
+                      Video
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowMediaInput(false)}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700"
+                    aria-label="Close media input"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <input
+                  type="url"
+                  value={mediaType === "image" ? imageUrl : videoUrl}
+                  onChange={(e) =>
+                    mediaType === "image"
+                      ? setImageUrl(e.target.value)
+                      : setVideoUrl(e.target.value)
+                  }
+                  placeholder={
+                    mediaType === "image"
+                      ? "Paste image URL"
+                      : "Paste video URL"
+                  }
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                />
+
+                {hasMedia && mediaType === "image" && (
+                  <img
+                    src={imageUrl}
+                    alt=""
+                    className="mt-3 max-h-64 w-full rounded-xl object-cover"
+                  />
+                )}
+
+                {hasMedia && mediaType === "video" && (
+                  <video
+                    src={videoUrl}
+                    controls
+                    className="mt-3 max-h-64 w-full rounded-xl bg-black object-cover"
+                  />
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {hashtags.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {hashtags.map((tag, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => addTag(tag)}
+                className="rounded-full bg-fuchsia-50 px-3 py-1.5 text-xs font-bold text-fuchsia-700 transition hover:bg-fuchsia-600 hover:text-white"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <AnimatePresence>
+          {loadingAI && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              className="mt-4 rounded-2xl border border-fuchsia-100 bg-gradient-to-br from-fuchsia-50 to-white p-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-white">
+                  <Wand2 size={16} className="animate-pulse" />
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-slate-950">
+                      RevHive AI is working
+                    </p>
+                    <Loader size={14} className="animate-spin text-slate-500" />
+                  </div>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    Polishing your content for better engagement
+                  </p>
+
+                  <div className="mt-4 space-y-2">
+                    <div className="h-2.5 w-full rounded-full bg-slate-200 animate-pulse" />
+                    <div className="h-2.5 w-5/6 rounded-full bg-slate-200 animate-pulse" />
+                    <div className="h-2.5 w-4/6 rounded-full bg-slate-200 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {!loadingAI && aiResult && aiType !== "moderate" && (
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-white">
+                <Wand2 size={16} />
+              </div>
+
+              <div className="flex-1">
+                <p className="text-sm leading-6 text-slate-700">{aiResult}</p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPostText(aiResult);
+                    setCharCount(aiResult.length);
+                    setAiResult("");
+                  }}
+                  className="mt-3 text-xs font-bold text-fuchsia-700 hover:text-fuchsia-800"
+                >
+                  Use this content
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!loadingAI && aiType === "moderate" && aiResult && (
+          <div
+            className={`mt-4 rounded-xl px-3 py-2 text-sm font-bold ${
+              aiResult.includes("UNSAFE")
+                ? "bg-red-50 text-red-600"
+                : "bg-emerald-50 text-emerald-600"
+            }`}
+          >
+            {aiResult}
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowMediaInput(!showMediaInput)}
+              className={`tool-btn ${showMediaInput ? "tool-active" : ""}`}
+            >
+              <Image size={17} />
+              Media
+            </button>
+
+            <button type="button" className="tool-btn">
+              <Link2 size={17} />
+              Link
+            </button>
+
+            <button
+              type="button"
+              onClick={generateHashtags}
+              disabled={loadingTags || loadingAI}
+              className="tool-btn disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loadingTags ? (
+                <Loader size={17} className="animate-spin" />
+              ) : (
+                <Hash size={17} />
+              )}
+              Tags
+            </button>
+
+            <button type="button" className="tool-btn">
+              <MapPin size={17} />
+              Location
+            </button>
+          </div>
+
+          <button
+            type="button"
+            disabled={!postText.trim() || isPosting}
+            onClick={handleCreatePost}
+            className={`flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold transition ${
+              postText.trim() && !isPosting
+                ? "bg-slate-950 text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)] hover:-translate-y-0.5 hover:bg-slate-800"
+                : "cursor-not-allowed bg-slate-200 text-slate-400"
+            }`}
+          >
+            {isPosting ? (
+              <>
+                <Loader size={16} className="animate-spin" />
+                Posting
+              </>
             ) : (
-              btn.label
+              <>
+                <Send size={16} />
+                Post
+              </>
             )}
           </button>
-        ))}
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {[
+            { label: "Improve caption", type: "caption" },
+            { label: "Generate tags", type: "hashtags" },
+            { label: "Summarize", type: "summarize" },
+            { label: "Safety check", type: "moderate" },
+          ].map((btn) => (
+            <button
+              key={btn.label}
+              type="button"
+              disabled={loadingAI}
+              onClick={() =>
+                btn.type === "hashtags"
+                  ? generateHashtags()
+                  : handleAI(btn.type)
+              }
+              className={`rounded-full border px-3 py-1.5 text-xs font-bold transition ${
+                loadingAI
+                  ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-fuchsia-200 hover:bg-fuchsia-50 hover:text-fuchsia-700"
+              }`}
+            >
+              {loadingAI && aiType === btn.type ? (
+                <span className="flex items-center gap-2">
+                  <Loader size={13} className="animate-spin" />
+                  Working
+                </span>
+              ) : (
+                btn.label
+              )}
+            </button>
+          ))}
+        </div>
       </div>
-    </motion.div>
+
+      <style>{`
+        .tool-btn {
+          display: inline-flex;
+          height: 40px;
+          align-items: center;
+          gap: 8px;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          background: #ffffff;
+          padding: 0 12px;
+          color: #475569;
+          font-size: 13px;
+          font-weight: 700;
+          transition: all 0.2s ease;
+        }
+
+        .tool-btn:hover {
+          border-color: #d4d4d8;
+          background: #f8fafc;
+          color: #0f172a;
+        }
+
+        .tool-active {
+          border-color: #f0abfc;
+          background: #fdf4ff;
+          color: #a21caf;
+        }
+      `}</style>
+    </motion.section>
   );
 }
