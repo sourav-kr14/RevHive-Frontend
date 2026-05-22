@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "http://localhost:8081/api",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -121,27 +121,55 @@ export const postAPI = {
 
 // ==================== LIKES ====================
 export const likeAPI = {
-  addLike: (userId, postId) =>
-    api.post("/likes", null, { params: { userId, postId } }),
-
-  removeLike: (userId, postId) =>
-    api.delete("/likes", { params: { userId, postId } }),
-
-  getLikeCount: (postId) => api.get("/likes/count", { params: { postId } }),
-
-  isLiked: (userId, postId) =>
-    api.get("/likes/status", { params: { userId, postId } }),
+  addLike: (userId, postId) => 
+    api.post("/likes", null, { 
+      params: { 
+        userId: userId, 
+        postId: String(postId) 
+      } 
+    }),
+  
+  removeLike: (userId, postId) => 
+    api.delete("/likes", { 
+      params: { 
+        userId: userId, 
+        postId: String(postId) 
+      } 
+    }),
+  
+  getLikeCount: (postId) => 
+    api.get("/likes/count", { 
+      params: { 
+        postId: String(postId) 
+      } 
+    }),
+  
+  isLiked: (userId, postId) => 
+    api.get("/likes/status", { 
+      params: { 
+        userId: userId, 
+        postId: String(postId) 
+      } 
+    }),
 };
-
 // ==================== COMMENTS ====================
 export const commentAPI = {
-  addComment: (postId, userId, content) =>
+  addComment: (postId, userId, content) => 
     api.post("/comments", { postId, userId, content }),
-
-  getComments: (postId, page = 0, size = 10) =>
+  
+  getComments: (postId, page = 0, size = 10) => 
     api.get(`/comments/post/${postId}`, { params: { page, size } }),
-
-  deleteComment: (commentId) => api.delete(`/comments/${commentId}`),
+  
+  deleteComment: (commentId) => 
+    api.delete(`/comments/${commentId}`),
+  
+  // ✅ Add the missing getCommentCount method
+  getCommentCount: (postId) => 
+    api.get(`/comments/count/${postId}`),
+  
+  // Optional: Add update comment method
+  updateComment: (commentId, content) => 
+    api.put(`/comments/${commentId}`, content)
 };
 
 // ==================== SHARES ====================

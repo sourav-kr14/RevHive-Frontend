@@ -13,7 +13,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { postAPI, followAPI, bookmarkAPI } from "@/services/api";
+import { postAPI, followAPI, bookmarkAPI, likeAPI } from "@/services/api"; // ✅ Added likeAPI
 
 import CommentSection from "./CommentSection";
 import EditPostModal from "./EditPostModal";
@@ -34,6 +34,7 @@ export default function UserFeed({
   const [followLoading, setFollowLoading] = useState({});
   const [showReport, setShowReport] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [likeLoading, setLikeLoading] = useState({}); // ✅ Track loading per post
 
   const isMounted = useRef(true);
 
@@ -175,28 +176,85 @@ export default function UserFeed({
     }
   };
 
+  // ✅ FIXED: Use likeAPI instead of postAPI
   const handleLike = async (postId) => {
     const post = posts.find((p) => p.id === postId);
-
-    if (!post) return;
+    
+    if (!post || !currentUserId) return;
+    
+    // Prevent multiple clicks while processing
+    if (likeLoading[postId]) return;
+    
+    // Set loading state
+    setLikeLoading(prev => ({ ...prev, [postId]: true }));
+    
+    // Store previous state for rollback
+    const previousLiked = post.liked;
+    const previousCount = post.likeCount || 0;
+    
+    // Optimistic update
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              liked: !p.liked,
+              likeCount: (p.likeCount || 0) + (p.liked ? -1 : 1),
+            }
+          : p,
+      ),
+    );
 
     try {
-      post.liked
-        ? await postAPI.unlikePost(postId)
-        : await postAPI.likePost(postId);
-
+      if (!previousLiked) {
+        // Add like
+        await likeAPI.addLike(currentUserId, postId);
+      } else {
+        // Remove like
+        await likeAPI.removeLike(currentUserId, postId);
+      }
+      
+      // Optional: Fetch updated like count from server
+      try {
+        const countResponse = await likeAPI.getLikeCount(postId);
+        const newCount = countResponse.data?.count || countResponse.data || 0;
+        
+        // Update with server count to ensure accuracy
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === postId
+              ? { ...p, likeCount: newCount }
+              : p,
+          ),
+        );
+      } catch (countError) {
+        console.error("Error fetching like count:", countError);
+      }
+      
+    } catch (error) {
+      // Rollback on error
+      console.error("Error toggling like:", error);
       setPosts((prev) =>
         prev.map((p) =>
           p.id === postId
             ? {
                 ...p,
-                liked: !p.liked,
-                likeCount: (p.likeCount || 0) + (p.liked ? -1 : 1),
+                liked: previousLiked,
+                likeCount: previousCount,
               }
             : p,
         ),
       );
-    } catch {}
+      
+      // Show user-friendly error
+      if (error.response?.status === 401) {
+        alert("Please login to like posts");
+      } else {
+        alert("Failed to like/unlike post. Please try again.");
+      }
+    } finally {
+      setLikeLoading(prev => ({ ...prev, [postId]: false }));
+    }
   };
 
   const handleFollowToggle = async (authorId) => {
@@ -415,28 +473,36 @@ export default function UserFeed({
                   <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-3 sm:px-6">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 sm:gap-3">
+                        {/* ✅ FIXED Like Button with loading state */}
                         <button
                           onClick={() => handleLike(post.id)}
+                          disabled={likeLoading[post.id]}
                           className={`social-action ${
                             post.liked
                               ? "bg-red-50 text-red-500"
                               : "text-slate-500 hover:bg-red-50 hover:text-red-500"
-                          }`}
+                          } ${likeLoading[post.id] ? "opacity-50 cursor-not-allowed" : ""}`}
                         >
-                          <Heart
-                            size={18}
-                            className={post.liked ? "fill-red-500" : ""}
-                          />
+                          {likeLoading[post.id] ? (
+                            <Loader size={16} className="animate-spin" />
+                          ) : (
+                            <Heart
+                              size={18}
+                              className={post.liked ? "fill-red-500" : ""}
+                            />
+                          )}
                           <span>{post.likeCount || 0}</span>
                         </button>
 
-                        <div className="social-action text-slate-500 hover:bg-cyan-50 hover:text-cyan-600">
-                          <MessageCircle size={18} />
-                          <CommentSection
-                            postId={post.id}
-                            currentUserId={currentUserId}
-                          />
-                        </div>
+                        {/* CommentSection with its own icon - no extra icon here */}
+                        <CommentSection
+                          postId={post.id}
+                          currentUserId={currentUserId}
+                          onCommentAdded={() => {
+                            // Refresh comment count only
+                            // You can add logic here if needed
+                          }}
+                        />
 
                         <button className="social-action text-slate-500 hover:bg-emerald-50 hover:text-emerald-600">
                           <Repeat2 size={18} />
@@ -520,10 +586,16 @@ export default function UserFeed({
           font-size: 13px;
           font-weight: 800;
           transition: all 0.2s ease;
+          cursor: pointer;
         }
 
         .social-action:hover {
           transform: translateY(-1px);
+        }
+        
+        .social-action:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
         }
       `}</style>
     </>
