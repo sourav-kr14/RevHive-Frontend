@@ -137,15 +137,15 @@ const Signup = () => {
     "Share moments, build your circle, and discover what people are talking about.";
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#eef4ff] text-slate-950">
-      <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="h-screen w-full overflow-hidden bg-[#eef4ff] text-slate-950">
+      <div className="relative h-screen w-full overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#f8fbff_0%,#eef4ff_36%,#fff1f8_100%)]" />
         <div className="absolute left-[-10%] top-[-15%] h-[520px] w-[520px] rounded-full bg-cyan-300/35 blur-[90px]" />
         <div className="absolute bottom-[-18%] right-[-10%] h-[620px] w-[620px] rounded-full bg-fuchsia-300/35 blur-[100px]" />
         <div className="absolute left-[38%] top-[22%] h-[340px] w-[340px] rounded-full bg-indigo-300/25 blur-[90px]" />
 
-        <div className="relative z-10 grid min-h-screen w-full xl:grid-cols-[1.1fr_0.9fr]">
-          <section className="relative hidden overflow-hidden px-10 py-8 xl:flex xl:flex-col xl:justify-between">
+        <div className="relative z-10 grid h-screen w-full xl:grid-cols-[1.1fr_0.9fr]">
+          <section className="relative hidden overflow-hidden px-8 py-5 xl:flex xl:flex-col xl:justify-between">
             <div className="absolute inset-0 bg-white/25 backdrop-blur-[2px]" />
 
             <div className="relative z-10 flex items-center justify-between">
@@ -153,11 +153,11 @@ const Signup = () => {
                 <img
                   src="/logo.png"
                   alt="Logo"
-                  className="h-12 w-12 rounded-2xl bg-white p-1 object-contain shadow-sm"
+                  className="h-18 w-18 rounded-2xl"
                 />
                 <div>
-                  <p className="text-base font-semibold text-slate-950">
-                    Your Social App
+                  <p className="bg-gradient-to-r from-orange-400 via-rose-500 to-pink-500 bg-clip-text text-lg font-bold text-transparent">
+                    RevHive
                   </p>
                   <p className="text-xs text-slate-500">
                     Connect. Create. Belong.
@@ -172,20 +172,20 @@ const Signup = () => {
 
             <div className="relative z-10 grid grid-cols-[0.9fr_1.1fr] gap-8">
               <div className="flex flex-col justify-center">
-                <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-sm font-semibold text-fuchsia-700 shadow-sm backdrop-blur">
+                <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-sm font-semibold text-fuchsia-700 shadow-sm backdrop-blur">
                   Your next digital circle starts here
                 </div>
 
-                <h1 className="max-w-xl text-6xl font-semibold leading-[1.02] tracking-tight text-slate-950">
+                <h1 className="max-w-xl text-5xl font-semibold leading-[1.02] tracking-tight text-slate-950">
                   Meet people who match your energy.
                 </h1>
 
-                <p className="mt-5 max-w-lg text-base leading-7 text-slate-600">
+                <p className="mt-3 max-w-lg text-base leading-7 text-slate-600">
                   Share posts, follow creators, start conversations, and turn
                   everyday moments into a social feed worth coming back to.
                 </p>
 
-                <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
+                <div className="mt-6 grid max-w-xl grid-cols-3 gap-5">
                   <div className="rounded-2xl border border-white/70 bg-white/55 p-4 shadow-sm backdrop-blur">
                     <Users size={20} className="mb-3 text-fuchsia-600" />
                     <p className="text-xl font-semibold text-slate-950">48k</p>
@@ -301,9 +301,9 @@ const Signup = () => {
             </div>
           </section>
 
-          <main className="flex min-h-screen items-center justify-center px-4 py-5 sm:px-6 lg:px-10">
-            <div className="w-full max-w-2xl rounded-[1.6rem] border border-white/70 bg-white/85 p-5 shadow-[0_24px_90px_rgba(79,70,229,0.18)] backdrop-blur-xl sm:p-6">
-              <div className="mb-5 flex items-center justify-between gap-4">
+          <main className="flex h-screen items-center justify-center px-4 py-2 sm:px-5 lg:px-6 overflow-hidden">
+            <div className="w-full max-w-2xl rounded-[1.4rem] border border-white/70 bg-white/85 p-4 shadow-[0_24px_90px_rgba(79,70,229,0.18)] backdrop-blur-xl sm:p-6">
+              <div className="mb-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 xl:hidden">
                   <img
                     src="/logo.png"
@@ -329,7 +329,7 @@ const Signup = () => {
                 </button>
               </div>
 
-              <div className="mb-5">
+              <div className="mb-4">
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700">
                   Join the community
                 </div>
@@ -344,7 +344,7 @@ const Signup = () => {
                 </p>
               </div>
 
-              <div className="mb-5 grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
+              <div className="mb-4 grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
                 <button
                   type="button"
                   className="rounded-xl bg-white py-2.5 text-sm font-bold text-slate-950 shadow-sm"
@@ -479,11 +479,11 @@ const Signup = () => {
                     rows="2"
                     value={formData.bio}
                     onChange={handleChange}
-                    className="input h-20 resize-none py-3"
+                    className="input h-16 resize-none py-2"
                   />
                 </div>
 
-                <div className="sm:col-span-2 grid gap-2 text-sm text-slate-600">
+                <div className="sm:col-span-2 grid gap-2 pt-1 text-sm text-slate-600">
                   <label className="flex items-start gap-2">
                     <input
                       type="checkbox"
@@ -513,14 +513,14 @@ const Signup = () => {
 
                 <button
                   type="submit"
-                  className="sm:col-span-2 rounded-xl bg-blue-500 py-3 text-sm font-bold text-white shadow-[0_14px_30px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:bg-blue-600 hover:cursor-pointer"
+                  className="sm:col-span-2 rounded-xl bg-blue-500 py-2.5 text-sm font-bold text-white shadow-[0_14px_30px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:bg-blue-600 hover:cursor-pointer"
                 >
                   Create account
                 </button>
 
                 <button
                   type="button"
-                  className="sm:col-span-2 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                  className="sm:col-span-2 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
                 >
                   <img
                     src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -538,7 +538,7 @@ const Signup = () => {
       <style>{`
         .label {
           display: block;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
           color: #334155;
           font-size: 13px;
           font-weight: 700;
@@ -546,7 +546,7 @@ const Signup = () => {
 
         .input {
           width: 100%;
-          height: 44px;
+          height: 40px;
           border: 1px solid #e2e8f0;
           border-radius: 12px;
           background: #ffffff;
@@ -583,7 +583,7 @@ const Signup = () => {
         }
 
         .error {
-          margin-top: 4px;
+          margin-top: 6px;
           color: #ef4444;
           font-size: 12px;
           line-height: 1.25;
