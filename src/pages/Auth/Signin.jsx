@@ -73,198 +73,82 @@ const Signin = () => {
         <div className="absolute left-[38%] top-[22%] h-[340px] w-[340px] rounded-full bg-indigo-300/25 blur-[90px]" />
 
         <div className="relative z-10 grid min-h-screen w-full xl:grid-cols-[1.05fr_0.95fr]">
-          <section className="relative hidden overflow-hidden px-10 py-8 xl:flex xl:flex-col">
-            <div className="absolute inset-0 bg-white/25 backdrop-blur-[2px]" />
+          <section className="relative hidden overflow-hidden xl:flex xl:items-center xl:justify-center">
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
 
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="relative z-10 max-w-lg px-10">
+              <div className="mb-8 flex items-center gap-3">
                 <img
                   src="/logo.png"
                   alt="Logo"
-                  className="h-12 w-12 rounded-2xl bg-white p-1 object-contain shadow-sm"
+                  className="h-14 w-14 rounded-2xl bg-white p-1 object-contain shadow-sm"
                 />
+
                 <div>
-                  <p className="text-base font-semibold text-slate-950">
-                    Your Social App
+                  <p className="bg-gradient-to-r from-orange-400 via-rose-500 to-pink-500 bg-clip-text text-2xl font-bold text-transparent">
+                    RevHive
                   </p>
-                  <p className="text-xs text-slate-500">
-                    Your world, still moving
+
+                  <p className="text-sm text-slate-500">
+                    Connect. Create. Belong.
                   </p>
                 </div>
               </div>
+              <h1 className="bg-gradient-to-r from-[#ff7b00] via-[#ff3d81] to-[#7c4dff] bg-clip-text text-6xl font-semibold leading-[1.05] tracking-tight text-transparent">
+                Stay connected with your people.
+              </h1>
 
-              <div className="rounded-full border border-white/70 bg-white/60 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm backdrop-blur">
-                12.4k live now
-              </div>
-            </div>
+              {/* <p className="mt-5 max-w-md text-base leading-7 text-slate-600">
+                Continue sharing moments, chatting with friends, and exploring
+                your community.
+              </p> */}
 
-            <div className="relative z-10 grid flex-1 grid-cols-[0.85fr_1.15fr] items-center gap-8">
-              <div>
-                <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-sm font-semibold text-fuchsia-700 shadow-sm backdrop-blur">
-                  Pick up where you left off
-                </div>
-
-                <h1 className="max-w-xl text-6xl font-semibold leading-[1.02] tracking-tight text-slate-950">
-                  Your circle has been active.
-                </h1>
-
-                <p className="mt-5 max-w-lg text-base leading-7 text-slate-600">
-                  New posts, replies, reactions, and messages are waiting for
-                  you. Log in and catch the best moments before they move on.
-                </p>
-
-                <div className="mt-8 grid max-w-xl grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-white/70 bg-white/55 p-4 shadow-sm backdrop-blur">
-                    <Bell size={20} className="mb-3 text-fuchsia-600" />
-                    <p className="text-xl font-semibold text-slate-950">28</p>
-                    <p className="text-xs text-slate-500">new notifications</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/70 bg-white/55 p-4 shadow-sm backdrop-blur">
-                    <MessageCircle
-                      size={20}
-                      className="mb-3 text-fuchsia-600"
-                    />
-                    <p className="text-xl font-semibold text-slate-950">14</p>
-                    <p className="text-xs text-slate-500">unread messages</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/70 bg-white/55 p-4 shadow-sm backdrop-blur">
-                    <TrendingUp size={20} className="mb-3 text-fuchsia-600" />
-                    <p className="text-xl font-semibold text-slate-950">7</p>
-                    <p className="text-xs text-slate-500">trending topics</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/70 bg-white/55 p-4 shadow-sm backdrop-blur">
-                    <Users size={20} className="mb-3 text-fuchsia-600" />
-                    <p className="text-xl font-semibold text-slate-950">93</p>
-                    <p className="text-xs text-slate-500">friends online</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative">
-                <div className="absolute left-14 top-10 h-[480px] w-[360px] rounded-[2rem] bg-fuchsia-300/35 blur-3xl" />
-
-                <div className="relative mx-auto max-w-md rounded-[2rem] border border-white/70 bg-white/50 p-4 shadow-[0_24px_80px_rgba(79,70,229,0.18)] backdrop-blur-xl">
-                  <div className="rounded-[1.5rem] bg-white p-4 shadow-sm">
-                    <div className="mb-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-bold text-slate-950">
-                          Activity waiting
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          Since your last visit
-                        </p>
-                      </div>
-
-                      <div className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-                        Live
-                      </div>
+              <div className="mt-10 rounded-[2rem] border border-white/70 bg-white/50 p-6 shadow-[0_24px_80px_rgba(79,70,229,0.15)] backdrop-blur-xl">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 rounded-2xl bg-white/70 p-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600">
+                      <Heart size={20} />
                     </div>
 
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600">
-                          <Heart size={18} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-slate-900">
-                            8 people reacted to your post
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            Your weekend photo is getting love
-                          </p>
-                        </div>
-                        <span className="text-xs font-medium text-slate-400">
-                          2m
-                        </span>
-                      </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Share your moments
+                      </p>
 
-                      <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100 text-cyan-600">
-                          <MessageCircle size={18} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-slate-900">
-                            Aarav sent a message
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            “Are you joining the group live?”
-                          </p>
-                        </div>
-                        <span className="text-xs font-medium text-slate-400">
-                          8m
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-600">
-                          <Flame size={18} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-slate-900">
-                            #CampusTalk is trending
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            24k posts from your network
-                          </p>
-                        </div>
-                        <span className="text-xs font-medium text-slate-400">
-                          now
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 rounded-2xl bg-slate-950 p-4 text-white">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold">Your reach</p>
-                          <p className="text-xs text-white/50">Past 24 hours</p>
-                        </div>
-
-                        <TrendingUp size={20} className="text-fuchsia-300" />
-                      </div>
-
-                      <div className="mt-4 flex items-end gap-2">
-                        <div className="h-10 flex-1 rounded-t-lg bg-white/20" />
-                        <div className="h-16 flex-1 rounded-t-lg bg-fuchsia-400" />
-                        <div className="h-12 flex-1 rounded-t-lg bg-white/20" />
-                        <div className="h-20 flex-1 rounded-t-lg bg-cyan-300" />
-                        <div className="h-14 flex-1 rounded-t-lg bg-white/20" />
-                        <div className="h-24 flex-1 rounded-t-lg bg-fuchsia-300" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-3 gap-3">
-                    <div className="rounded-2xl border border-white/70 bg-white/65 p-3 text-center shadow-sm">
-                      <AtSign
-                        size={18}
-                        className="mx-auto mb-2 text-fuchsia-600"
-                      />
-                      <p className="text-xs font-bold text-slate-800">
-                        Mentions
+                      <p className="text-xs text-slate-500">
+                        Post updates, photos and stories
                       </p>
                     </div>
+                  </div>
 
-                    <div className="rounded-2xl border border-white/70 bg-white/65 p-3 text-center shadow-sm">
-                      <ImagePlus
-                        size={18}
-                        className="mx-auto mb-2 text-fuchsia-600"
-                      />
-                      <p className="text-xs font-bold text-slate-800">
-                        New posts
-                      </p>
+                  <div className="flex items-center gap-4 rounded-2xl bg-white/70 p-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-100 text-cyan-600">
+                      <MessageCircle size={20} />
                     </div>
 
-                    <div className="rounded-2xl border border-white/70 bg-white/65 p-3 text-center shadow-sm">
-                      <ShieldCheck
-                        size={18}
-                        className="mx-auto mb-2 text-fuchsia-600"
-                      />
-                      <p className="text-xs font-bold text-slate-800">
-                        Protected
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Chat instantly
+                      </p>
+
+                      <p className="text-xs text-slate-500">
+                        Stay close with real-time messaging
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 rounded-2xl bg-white/70 p-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-600">
+                      <Users size={20} />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Build your community
+                      </p>
+
+                      <p className="text-xs text-slate-500">
+                        Discover and connect with others
                       </p>
                     </div>
                   </div>
@@ -302,17 +186,17 @@ const Signin = () => {
               </div>
 
               <div className="mb-5">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700">
+                {/* <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700">
                   Welcome back
-                </div>
+                </div> */}
 
                 <h2 className="text-3xl font-semibold tracking-tight text-slate-950">
                   Log in to your circle
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                {/* <p className="mt-1 text-sm text-slate-500">
                   Continue exploring posts, messages, and people you follow.
-                </p>
+                </p> */}
               </div>
 
               <div className="mb-5 grid grid-cols-2 rounded-2xl bg-slate-100 p-1">

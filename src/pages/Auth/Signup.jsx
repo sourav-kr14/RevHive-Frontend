@@ -172,9 +172,9 @@ const Signup = () => {
 
             <div className="relative z-10 grid grid-cols-[0.9fr_1.1fr] gap-8">
               <div className="flex flex-col justify-center">
-                <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-sm font-semibold text-fuchsia-700 shadow-sm backdrop-blur">
+                {/* <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-sm font-semibold text-fuchsia-700 shadow-sm backdrop-blur">
                   Your next digital circle starts here
-                </div>
+                </div> */}
 
                 <h1 className="max-w-xl text-5xl font-semibold leading-[1.02] tracking-tight text-slate-950">
                   Meet people who match your energy.
@@ -330,9 +330,9 @@ const Signup = () => {
               </div>
 
               <div className="mb-4">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700">
+                {/* <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700">
                   Join the community
-                </div>
+                </div> */}
 
                 <h2 className="text-3xl font-semibold tracking-tight text-slate-950">
                   Create your profile
