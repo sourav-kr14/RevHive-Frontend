@@ -24,12 +24,6 @@ export default function DashboardStats({ userId }) {
     }
   })();
 
-  useEffect(() => {
-    if (!userId) return;
-
-    fetchStats();
-  }, [userId]);
-
   const fetchStats = async () => {
     try {
       const postsRes = await postAPI.getPostsCount(userId);
@@ -49,6 +43,13 @@ export default function DashboardStats({ userId }) {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    Promise.resolve().then(() => fetchStats());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const openModal = (type) => {
     setModalType(type);

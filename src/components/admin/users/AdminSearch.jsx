@@ -7,18 +7,6 @@ export default function AdminSearch() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      if (query.trim()) {
-        fetchUsers();
-      } else {
-        setUsers([]);
-      }
-    }, 300);
-
-    return () => clearTimeout(delay);
-  }, [query]);
-
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -32,6 +20,19 @@ export default function AdminSearch() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      if (query.trim()) {
+        fetchUsers();
+      } else {
+        setUsers([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-[#0B1120] p-6">

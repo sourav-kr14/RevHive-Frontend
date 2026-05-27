@@ -1,17 +1,5 @@
 import { useState } from "react";
-import {
-  Eye,
-  EyeOff,
-  Bell,
-  MessageCircle,
-  TrendingUp,
-  Heart,
-  Users,
-  ImagePlus,
-  Flame,
-  AtSign,
-  ShieldCheck,
-} from "lucide-react";
+import { Eye, EyeOff, MessageCircle, Heart, Users } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -32,7 +20,7 @@ const Signin = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:8081/api/auth/login", {
+      const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -41,12 +29,14 @@ const Signin = () => {
         }),
       });
 
-      const data = await res.json();
+      const responseData = await res.json();
 
       if (!res.ok) {
         toast.error("Invalid credentials");
         return;
       }
+
+      const data = responseData.data;
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);

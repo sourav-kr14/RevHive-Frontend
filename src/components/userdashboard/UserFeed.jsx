@@ -4,7 +4,6 @@ import {
   AlertCircle,
   MoreHorizontal,
   Bookmark,
-  MessageCircle,
   Repeat2,
   Share2,
   Sparkles,
@@ -87,18 +86,6 @@ export default function UserFeed({
     }
   };
 
-  useEffect(() => {
-    isMounted.current = true;
-
-    if (profileData?.id) {
-      fetchFeed();
-    }
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, [feedType, refreshTrigger, profileData?.id]);
-
   const fetchFeed = async () => {
     setLoading(true);
     setError(null);
@@ -114,7 +101,9 @@ export default function UserFeed({
         response = await postAPI.getFeed(0, 20);
       }
 
-      let validPosts = (response.data?.content || []).filter((p) => p?.id);
+      let validPosts = (response.data?.data?.data?.content || []).filter(
+        (p) => p?.id,
+      );
 
       validPosts = validPosts.map((post) => {
         const author = post.user || post.author || post.creator || null;
@@ -144,7 +133,7 @@ export default function UserFeed({
       if (profileData?.id) {
         const statusMap = {};
 
-        await Promise.all(
+        await Promise.allSettled(
           validPosts.map(async (post) => {
             if (post.user?.id && post.user.id !== currentUserId) {
               try {
@@ -176,22 +165,35 @@ export default function UserFeed({
     }
   };
 
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (profileData?.id) {
+      Promise.resolve().then(() => fetchFeed());
+    }
+
+    return () => {
+      isMounted.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [feedType, refreshTrigger, profileData?.id]);
+
   // ✅ FIXED: Use likeAPI instead of postAPI
   const handleLike = async (postId) => {
     const post = posts.find((p) => p.id === postId);
-    
+
     if (!post || !currentUserId) return;
-    
+
     // Prevent multiple clicks while processing
     if (likeLoading[postId]) return;
-    
+
     // Set loading state
-    setLikeLoading(prev => ({ ...prev, [postId]: true }));
-    
+    setLikeLoading((prev) => ({ ...prev, [postId]: true }));
+
     // Store previous state for rollback
     const previousLiked = post.liked;
     const previousCount = post.likeCount || 0;
-    
+
     // Optimistic update
     setPosts((prev) =>
       prev.map((p) =>
@@ -213,24 +215,21 @@ export default function UserFeed({
         // Remove like
         await likeAPI.removeLike(currentUserId, postId);
       }
-      
+
       // Optional: Fetch updated like count from server
       try {
         const countResponse = await likeAPI.getLikeCount(postId);
         const newCount = countResponse.data?.count || countResponse.data || 0;
-        
+
         // Update with server count to ensure accuracy
         setPosts((prev) =>
           prev.map((p) =>
-            p.id === postId
-              ? { ...p, likeCount: newCount }
-              : p,
+            p.id === postId ? { ...p, likeCount: newCount } : p,
           ),
         );
       } catch (countError) {
         console.error("Error fetching like count:", countError);
       }
-      
     } catch (error) {
       // Rollback on error
       console.error("Error toggling like:", error);
@@ -245,7 +244,7 @@ export default function UserFeed({
             : p,
         ),
       );
-      
+
       // Show user-friendly error
       if (error.response?.status === 401) {
         alert("Please login to like posts");
@@ -253,7 +252,7 @@ export default function UserFeed({
         alert("Failed to like/unlike post. Please try again.");
       }
     } finally {
-      setLikeLoading(prev => ({ ...prev, [postId]: false }));
+      setLikeLoading((prev) => ({ ...prev, [postId]: false }));
     }
   };
 

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-export default function UserHeader({ activeNav, setActiveNav, profileData }) {
+export default function UserHeader({ setActiveNav, profileData }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);

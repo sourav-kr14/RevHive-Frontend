@@ -9,12 +9,12 @@ export default function MessagingLayout() {
     <div className="flex h-screen">
       {/* LEFT SIDEBAR */}
       <div className="w-xs border-r">
-        <ChatList />
+        <ChatList setSelectedUser={setSelectedUser} />
       </div>
 
       {/* RIGHT CHAT */}
       <div className="w-3/4 flex flex-col">
-        <ChatWindow />
+        <ChatWindow selectedUser={selectedUser} />
       </div>
     </div>
   );

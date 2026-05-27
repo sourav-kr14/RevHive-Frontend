@@ -101,8 +101,11 @@ export default function ResetPassword() {
           </div>
 
           {/* Submit */}
-          <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700">
-            Reset password
+          <button
+            disabled={loading}
+            className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50"
+          >
+            {loading ? "Resetting..." : "Reset password"}
           </button>
 
           {/* Back */}

@@ -1,12 +1,13 @@
-import { useState } from "react";
 import { Send } from "lucide-react";
 
-export default function MessageInput() {
-  const [text, setText] = useState("");
-
+export default function MessageInput({ text, setText, handleSend }) {
   const sendMessage = () => {
-    console.log(text);
-    setText("");
+    if (handleSend) {
+      handleSend();
+    } else {
+      console.log(text);
+      if (setText) setText("");
+    }
   };
 
   return (
@@ -15,8 +16,8 @@ export default function MessageInput() {
         type="text"
         className="flex-1 bg-white/10 rounded-xl px-4 py-2 outline-none"
         placeholder="Type a message..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
+        value={text || ""}
+        onChange={(e) => setText && setText(e.target.value)}
       />
 
       <button onClick={sendMessage} className="bg-purple-600 p-2 rounded-xl">

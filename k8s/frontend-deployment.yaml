@@ -19,8 +19,8 @@ spec:
 
     spec:
       containers:
-        - name: frontend
-          image: YOUR_DOCKER_USERNAME/revhive-frontend:latest
+        - name: frontends
+          image: krsourav14/frontends:latest
 
           ports:
             - containerPort: 3000

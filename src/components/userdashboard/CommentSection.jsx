@@ -3,7 +3,7 @@ import { Send, Trash2, MessageCircle } from "lucide-react";
 
 import { useState, useEffect } from "react";
 
-import api, { commentAPI } from "../../services/api";
+import { commentAPI } from "../../services/api";
 
 export default function CommentSection({
   postId,
@@ -22,16 +22,6 @@ export default function CommentSection({
   const [commentCount, setCommentCount] = useState(0);
 
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (showComments) {
-      fetchComments();
-    }
-  }, [showComments, postId]);
-
-  useEffect(() => {
-    fetchCommentCount();
-  }, [postId]);
 
   const fetchCommentCount = async () => {
     try {
@@ -62,6 +52,18 @@ export default function CommentSection({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (showComments) {
+      Promise.resolve().then(() => fetchComments());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showComments, postId]);
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchCommentCount());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postId]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) {

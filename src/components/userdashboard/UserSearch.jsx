@@ -8,18 +8,6 @@ export default function UserSearch() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      if (query.trim()) {
-        fetchUsers();
-      } else {
-        setUsers([]);
-      }
-    }, 350);
-
-    return () => clearTimeout(delay);
-  }, [query]);
-
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -33,6 +21,19 @@ export default function UserSearch() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      if (query.trim()) {
+        fetchUsers();
+      } else {
+        setUsers([]);
+      }
+    }, 350);
+
+    return () => clearTimeout(delay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   const handleFollowToggle = async (userId, isFollowing) => {
     try {

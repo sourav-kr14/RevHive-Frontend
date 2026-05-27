@@ -4,7 +4,6 @@ import InputField from "./InputField";
 import { settingsAPI } from "../../services/settingsApi";
 import { toast } from "sonner";
 import {
-  Save,
   ShieldCheck,
   Mail,
   CalendarDays,
@@ -28,10 +27,6 @@ export default function ProfileSection() {
     subscribeNewsletter: false,
   });
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
   const fetchUser = async () => {
     try {
       const data = await settingsAPI.getCurrentUser();
@@ -48,6 +43,10 @@ export default function ProfileSection() {
       toast.error("Failed to load profile");
     }
   };
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchUser());
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

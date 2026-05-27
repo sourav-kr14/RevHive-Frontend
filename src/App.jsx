@@ -6,7 +6,7 @@ import AdminDashboard from "./components/admin/dashboard/AdminDashboard";
 import AdminUsers from "./components/admin/dashboard/AdminUsers";
 import AdminReports from "./components/admin/users/AdminReports";
 import { Toaster } from "sonner";
-import { AdminRoute, UserRoute } from "./routes/ProtectedRoutes";
+import { AdminRoute } from "./routes/ProtectedRoutes";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import UserLayout from "./components/userdashboard/UserLayout";
 import MessagingLayout from "./components/messaging/MessagingLayout";

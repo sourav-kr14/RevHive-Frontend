@@ -5,11 +5,14 @@ export const useAuth = () => {
   const navigate = useNavigate();
 
   const login = async (credentials) => {
-    const data = await loginUser(credentials);
+    const response = await loginUser(credentials);
+
+    const data = response.data.data;
+
     localStorage.setItem("token", data.token);
     localStorage.setItem("role", data.role);
 
-    if (data.role == "ADMIN") {
+    if (data.role === "ADMIN") {
       navigate("/admin/dashboard");
     } else {
       navigate("/user/dashboard");

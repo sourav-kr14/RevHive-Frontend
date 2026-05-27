@@ -12,12 +12,6 @@ export default function FollowButton({
   const [loading, setLoading] = useState(false);
   const [hover, setHover] = useState(false);
 
-  useEffect(() => {
-    if (userId && currentUserId && Number(userId) !== Number(currentUserId)) {
-      checkFollowStatus();
-    }
-  }, [userId, currentUserId]);
-
   const checkFollowStatus = async () => {
     try {
       const response = await api.get("/v1/follows/check", {
@@ -32,6 +26,13 @@ export default function FollowButton({
       console.error("Error checking follow status:", error);
     }
   };
+
+  useEffect(() => {
+    if (userId && currentUserId && Number(userId) !== Number(currentUserId)) {
+      Promise.resolve().then(() => checkFollowStatus());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, currentUserId]);
 
   const handleFollowToggle = async () => {
     if (loading) return;

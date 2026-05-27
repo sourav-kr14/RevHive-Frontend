@@ -5,7 +5,6 @@ import DashboardHeader from "./UserHeader";
 
 export default function UserLayout() {
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   let user = null;
 
@@ -16,9 +15,12 @@ export default function UserLayout() {
     user = null;
   }
 
+  const [loading, setLoading] = useState(() => {
+    return !!user?.id;
+  });
+
   useEffect(() => {
     if (!user?.id) {
-      setLoading(false);
       return;
     }
 
@@ -26,15 +28,25 @@ export default function UserLayout() {
       try {
         const profileRes = await authAPI.getProfile(user.id);
 
-        const [followersRes, followingRes] = await Promise.all([
+        const [followersRes, followingRes] = await Promise.allSettled([
           followAPI.getFollowersCount(user.id),
           followAPI.getFollowingCount(user.id),
         ]);
 
+        const followersCount =
+          followersRes.status === "fulfilled"
+            ? followersRes.value.data.followersCount || 0
+            : 0;
+
+        const followingCount =
+          followingRes.status === "fulfilled"
+            ? followingRes.value.data.followingCount || 0
+            : 0;
+
         setUserData({
           ...profileRes.data,
-          followersCount: followersRes.data.followersCount || 0,
-          followingCount: followingRes.data.followingCount || 0,
+          followersCount,
+          followingCount,
         });
       } finally {
         setLoading(false);

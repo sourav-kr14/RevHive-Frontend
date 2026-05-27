@@ -10,10 +10,6 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
   const [followingStatus, setFollowingStatus] = useState({});
   const [processingId, setProcessingId] = useState(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [userId, type]);
-
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -37,7 +33,7 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
               user.id,
             );
             status[user.id] = followCheck.data.isFollowing;
-          } catch (error) {
+          } catch {
             status[user.id] = false;
           }
         }
@@ -49,6 +45,11 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchUsers());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, type]);
 
   const handleFollowToggle = async (targetUserId) => {
     setProcessingId(targetUserId);

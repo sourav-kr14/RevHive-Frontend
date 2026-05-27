@@ -10,7 +10,9 @@ export default function Sidebar() {
   try {
     const stored = localStorage.getItem("user");
     user = stored ? JSON.parse(stored) : user;
-  } catch {}
+  } catch (e) {
+    console.warn(e);
+  }
 
   const logout = () => {
     localStorage.clear();
