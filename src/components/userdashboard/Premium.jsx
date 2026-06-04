@@ -13,7 +13,7 @@ export default function Premium() {
       const res = await api.post("/premium/upgrade");
 
       // save new premium token
-      localStorage.setItem("token", res.data);
+      localStorage.setItem("token", res.data.data);
 
       toast.success("Congratulations! You are now Premium ⭐");
 

@@ -85,6 +85,7 @@ export default function UserLayout() {
         <Outlet
           context={{
             profileData,
+            setUserData,
           }}
         />
       </main>

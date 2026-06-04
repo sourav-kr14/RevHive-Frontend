@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AvatarUpload from "./AvatarUpload";
 import InputField from "./InputField";
 import { settingsAPI } from "../../services/settingsApi";
+import { followAPI } from "../../services/api";
 import { toast } from "sonner";
 import {
   ShieldCheck,
@@ -15,7 +16,7 @@ import {
   Eye,
 } from "lucide-react";
 
-export default function ProfileSection() {
+export default function ProfileSection({ profileData, setUserData }) {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -25,20 +26,48 @@ export default function ProfileSection() {
     avatarUrl: "",
     dob: "",
     subscribeNewsletter: false,
+    followers: 0,
+    following: 0,
   });
 
   const fetchUser = async () => {
     try {
-      const data = await settingsAPI.getCurrentUser();
+      const response = await settingsAPI.getCurrentUser();
+      const data = response.data; // Extract the unwrapped user profile from API Gateway wrapper
 
-      setFormData({
-        username: data.username || "",
-        email: data.email || "",
-        bio: data.bio || "",
-        avatarUrl: data.avatarUrl || "",
-        dob: data.dob || "",
-        subscribeNewsletter: data.subscribeNewsletter || false,
-      });
+      if (data) {
+        let followersCount = 0;
+        let followingCount = 0;
+        const targetUserId = data.id || data.userId || profileData?.id;
+
+        // Fetch actual followers/following counts from the social-service (source of truth)
+        if (targetUserId) {
+          try {
+            const followersRes = await followAPI.getFollowersCount(targetUserId);
+            followersCount = followersRes.data?.followersCount || 0;
+          } catch (e) {
+            console.warn("Failed to fetch followers count from social-service:", e);
+          }
+
+          try {
+            const followingRes = await followAPI.getFollowingCount(targetUserId);
+            followingCount = followingRes.data?.followingCount || 0;
+          } catch (e) {
+            console.warn("Failed to fetch following count from social-service:", e);
+          }
+        }
+
+        setFormData({
+          username: data.username || "",
+          email: data.email || "",
+          bio: data.bio || "",
+          avatarUrl: data.avatarUrl || "",
+          dob: data.dob || "",
+          subscribeNewsletter: data.subscribeNewsletter || false,
+          followers: followersCount,
+          following: followingCount,
+        });
+      }
     } catch {
       toast.error("Failed to load profile");
     }
@@ -60,14 +89,38 @@ export default function ProfileSection() {
   const handleSave = async () => {
     try {
       setLoading(true);
+      console.log(formData);
 
-      await settingsAPI.updateProfile({
+      const updateData = {
         username: formData.username,
         bio: formData.bio,
         avatarUrl: formData.avatarUrl,
         dob: formData.dob,
         subscribeNewsletter: formData.subscribeNewsletter,
-      });
+      };
+
+      await settingsAPI.updateProfile(updateData);
+
+      // Sync the layout context dynamically
+      if (setUserData) {
+        setUserData((prev) => ({
+          ...prev,
+          ...updateData,
+          avatar: formData.avatarUrl, // also map to avatar key to be fully safe
+        }));
+      }
+
+      // Sync local storage user
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        try {
+          const userObj = JSON.parse(stored);
+          userObj.username = formData.username;
+          localStorage.setItem("user", JSON.stringify(userObj));
+        } catch (e) {
+          console.error("Failed to update user in localStorage", e);
+        }
+      }
 
       toast.success("Profile updated");
     } catch {
@@ -281,12 +334,16 @@ export default function ProfileSection() {
 
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <p className="text-lg font-bold text-slate-950">0</p>
+                <p className="text-lg font-bold text-slate-950">
+                  {formData.followers}
+                </p>
                 <p className="text-xs font-medium text-slate-500">Followers</p>
               </div>
 
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <p className="text-lg font-bold text-slate-950">0</p>
+                <p className="text-lg font-bold text-slate-950">
+                  {formData.following}
+                </p>
                 <p className="text-xs font-medium text-slate-500">Following</p>
               </div>
             </div>

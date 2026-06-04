@@ -9,9 +9,10 @@ export default function AdminPremium() {
     const loadPremiumUsers = async () => {
       try {
         const res = await adminAPI.getAllUsers();
+        const usersList = Array.isArray(res.data) ? res.data : (res.data?.data || []);
 
         // filter premium users
-        const premiumUsers = (res?.data || []).filter(
+        const premiumUsers = usersList.filter(
           (u) =>
             u.role === "PREMIUM" || u.premium === true || u.is_premium === 1,
         );
@@ -87,7 +88,7 @@ export default function AdminPremium() {
                 </td>
 
                 <td className="px-4 py-3 text-gray-400">
-                  {u.premium_expiry || "No Expiry"}
+                  {u.premiumExpiry || u.premium_expiry || "No Expiry"}
                 </td>
               </tr>
             ))}

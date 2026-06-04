@@ -10,7 +10,8 @@ export default function AdminUsers() {
     const load = async () => {
       try {
         const res = await adminAPI.getAllUsers();
-        setUsers(res?.data || []);
+        const usersList = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        setUsers(usersList);
       } catch (err) {
         console.error(err);
         setError("Failed to load users");

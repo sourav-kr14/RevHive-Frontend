@@ -10,5 +10,5 @@ export const userAPI = {
 export const adminAPI = {
   getAnalytics: () => api.get("/admin/analytics"),
   getAllUsers: () => api.get("/admin/users"),
-  getStats: () => api.get("/admin/stats"),
+  getStats: (timeframe) => api.get("/admin/stats", { params: { timeframe } }),
 };

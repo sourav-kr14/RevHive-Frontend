@@ -3,7 +3,7 @@ import {
   connectWebSocket,
   sendMessage,
   disconnectWebSocket,
-} from "../services/websocket";
+} from "../services/webSocket";
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);

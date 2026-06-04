@@ -14,24 +14,46 @@ export default function ReportModal({ isOpen, onClose, targetType, targetId }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  console.log("targetId:", targetId);
+  console.log("targetType:", targetType);
   const handleReport = async (reason) => {
     try {
       setLoading(true);
 
-      await api.post("/reports", {
-        targetType,
-        targetId,
+      let userId = 0;
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          const userObj = JSON.parse(storedUser);
+          userId = userObj.id || userObj.userId || 0;
+        }
+      } catch (e) {
+        console.warn("Failed to parse user from localStorage", e);
+      }
+
+      const reportData = {
+        reporterId: userId,
+        postId: targetId,
         reason,
-      });
+        description: "",
+        status: "PENDING",
+      };
+
+      console.log("userId:", localStorage.getItem("userId"));
+      console.log("reportData:", reportData);
+
+      const response = await api.post("/v1/reports", reportData);
+
+      console.log("SUCCESS:", response.data);
 
       setStep(2);
     } catch (err) {
-      console.error(err);
+      console.error("Report Error:", err);
+      console.error("Response:", err.response?.data);
     } finally {
       setLoading(false);
     }
   };
-
   const handleClose = () => {
     setStep(1);
     onClose();

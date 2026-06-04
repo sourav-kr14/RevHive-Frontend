@@ -6,7 +6,7 @@ metadata:
   namespace: revhive
 
 spec:
-  replicas: 2
+  replicas: 1
 
   selector:
     matchLabels:
@@ -19,10 +19,10 @@ spec:
 
     spec:
       containers:
-        - name: frontends
-          image: krsourav14/frontends:latest
+        - name: frontend
+          image: krsourav14/frontend:latest
 
           ports:
-            - containerPort: 3000
+            - containerPort: 80
 
           imagePullPolicy: Always

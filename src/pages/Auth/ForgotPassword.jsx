@@ -1,14 +1,34 @@
 import { Key, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import { toast } from "sonner";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Reset link sent!");
+    if (!email) return;
+
+    try {
+      setLoading(true);
+      await api.post("/auth/forgot-password", { email });
+      toast.success("OTP sent to your email!");
+      setTimeout(() => {
+        navigate("/reset-password", {
+          state: { email },
+        });
+      }, 1200);
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to request password reset"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,8 +63,11 @@ export default function ForgotPassword() {
             />
           </div>
 
-          <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700">
-            Reset password
+          <button
+            disabled={loading}
+            className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50"
+          >
+            {loading ? "Sending reset OTP..." : "Reset password"}
           </button>
 
           {/* Back */}

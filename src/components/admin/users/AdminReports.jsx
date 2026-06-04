@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, ShieldAlert, CalendarDays, User } from "lucide-react";
 import api from "@/services/api";
+import { toast } from "sonner";
 
 export default function AdminReports() {
   const [reports, setReports] = useState([]);
@@ -9,8 +10,8 @@ export default function AdminReports() {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const res = await api.get("/reports/admin");
-        setReports(res.data);
+        const res = await api.get("/v1/reports");
+        setReports(Array.isArray(res.data) ? res.data : (res.data?.data || []));
       } catch (err) {
         console.log(err);
       } finally {
@@ -20,6 +21,17 @@ export default function AdminReports() {
 
     fetchReports();
   }, []);
+
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await api.put(`/v1/reports/${id}/status?status=${status}`);
+      // Refresh reports
+      const res = await api.get("/v1/reports");
+      setReports(Array.isArray(res.data) ? res.data : (res.data?.data || []));
+    } catch (err) {
+      console.error("Failed to update report status", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0B1120] p-6">
@@ -110,7 +122,23 @@ export default function AdminReports() {
                           text-purple-300
                         "
                       >
-                        {r.targetType}
+                        {r.targetType || "POST"}
+                      </span>
+
+                      <span
+                        className={`
+                          px-3 py-1 rounded-full
+                          text-xs font-medium border
+                          ${
+                            r.status === "PENDING"
+                              ? "bg-red-500/10 border-red-500/20 text-red-400"
+                              : r.status === "RESOLVED"
+                                ? "bg-green-500/10 border-green-500/20 text-green-400"
+                                : "bg-gray-500/10 border-gray-500/20 text-gray-400"
+                          }
+                        `}
+                      >
+                        {r.status || "PENDING"}
                       </span>
                     </div>
 
@@ -143,7 +171,7 @@ export default function AdminReports() {
               {/* Content */}
               <div className="grid md:grid-cols-2 gap-5">
                 {/* Target */}
-                <div
+                {/* <div
                   className="
                   rounded-2xl
                   bg-white/5
@@ -158,7 +186,7 @@ export default function AdminReports() {
                   <h3 className="text-white font-semibold break-all">
                     {r.targetId}
                   </h3>
-                </div>
+                </div> */}
 
                 {/* Reason */}
                 <div
@@ -180,6 +208,7 @@ export default function AdminReports() {
               {/* Actions */}
               <div className="flex gap-3 mt-6">
                 <button
+                  onClick={() => toast.info(`Reviewing details for Post ID: ${r.postId || "N/A"}`)}
                   className="
                     px-5 py-2.5 rounded-xl
                     bg-gradient-to-r
@@ -193,6 +222,10 @@ export default function AdminReports() {
                 </button>
 
                 <button
+                  onClick={() => {
+                    handleUpdateStatus(r.id, "RESOLVED");
+                    toast.success(`Report #${r.id} marked as RESOLVED`);
+                  }}
                   className="
                     px-5 py-2.5 rounded-xl
                     bg-red-500/10
@@ -206,6 +239,10 @@ export default function AdminReports() {
                 </button>
 
                 <button
+                  onClick={() => {
+                    handleUpdateStatus(r.id, "IGNORED");
+                    toast.success(`Report #${r.id} marked as IGNORED`);
+                  }}
                   className="
                     px-5 py-2.5 rounded-xl
                     bg-white/5

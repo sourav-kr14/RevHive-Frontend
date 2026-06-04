@@ -5,9 +5,7 @@ export const useAuth = () => {
   const navigate = useNavigate();
 
   const login = async (credentials) => {
-    const response = await loginUser(credentials);
-
-    const data = response.data.data;
+    const data = await loginUser(credentials);
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("role", data.role);

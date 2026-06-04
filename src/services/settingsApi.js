@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
 
 const getToken = () => {
   return localStorage.getItem("token");
@@ -16,7 +16,7 @@ export const settingsAPI = {
   },
 
   async updateProfile(data) {
-    const res = await fetch(`${BASE_URL}/api/users/settings/profile`, {
+    const res = await fetch(`${BASE_URL}/api/users/profile`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

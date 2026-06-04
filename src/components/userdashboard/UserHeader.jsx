@@ -13,12 +13,89 @@ import {
   Search,
   ChevronDown,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { notificationAPI } from "../../services/api";
+import { connectWebSocket, disconnectWebSocket } from "../../services/webSocket";
 
 export default function UserHeader({ setActiveNav, profileData }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const token = localStorage.getItem("token");
+
+  let isPremium = false;
+
+  if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
+    try {
+      const base64Url = token.split(".")[1];
+      if (base64Url) {
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const pad = base64.length % 4;
+        const padded = pad ? base64 + "=".repeat(4 - pad) : base64;
+        const payload = JSON.parse(atob(padded));
+        isPremium = payload.premium === true;
+      }
+    } catch (e) {
+      console.log("Error decoding token in header:", e);
+    }
+  }
+
+  const userIsPremium = isPremium || profileData?.premium === true || profileData?.ispremium === true || profileData?.isPremium === true;
+
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [hasNewMessage, setHasNewMessage] = useState(
+    localStorage.getItem("unread_messages") === "true"
+  );
+
+  useEffect(() => {
+    if (location.pathname === "/messages") {
+      localStorage.removeItem("unread_messages");
+      setHasNewMessage(false);
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    let currentUserId = null;
+    try {
+      currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
+    } catch {}
+
+    const handleIncomingMessage = (msg) => {
+      if (msg && msg.receiverId === currentUserId && msg.senderId !== currentUserId) {
+        if (location.pathname !== "/messages") {
+          localStorage.setItem("unread_messages", "true");
+          setHasNewMessage(true);
+        }
+      }
+    };
+
+    connectWebSocket(token, "chat", handleIncomingMessage);
+
+    return () => {
+      disconnectWebSocket("chat", handleIncomingMessage);
+    };
+  }, [token, location.pathname]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await notificationAPI.getNotifications();
+        const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        const unread = list.filter((n) => !n.read).length;
+        setUnreadCount(unread);
+      } catch (err) {
+        console.log("Failed to fetch notification count", err);
+      }
+    };
+
+    if (token) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [token]);
 
   const navItems = [
     {
@@ -37,7 +114,7 @@ export default function UserHeader({ setActiveNav, profileData }) {
     {
       id: "notification",
       label: "Notifications",
-      path: "/notifications",
+      path: "/user/notifications",
       icon: Bell,
     },
     {
@@ -98,19 +175,27 @@ export default function UserHeader({ setActiveNav, profileData }) {
                 key={item.id}
                 type="button"
                 onClick={() => handleNavigate(item)}
-                className={`relative flex h-full items-center gap-2 px-4 text-sm font-semibold transition ${
+                className={`relative flex h-full items-center gap-2 px-4 text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? "text-slate-950"
-                    : "text-slate-500 hover:text-slate-950"
+                    ? "text-indigo-600"
+                    : "text-slate-500 hover:text-indigo-600"
                 }`}
               >
-                <Icon size={17} />
+                <div className="relative flex items-center justify-center">
+                  <Icon size={17} />
+                  {item.id === "notification" && unreadCount > 0 && (
+                    <span className="absolute -right-1.5 -top-1.5 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
+                  )}
+                  {item.id === "messaging" && hasNewMessage && (
+                    <span className="absolute -right-1.5 -top-1.5 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
+                  )}
+                </div>
                 {item.label}
 
                 {isActive && (
                   <motion.span
                     layoutId="headerActiveLine"
-                    className="absolute bottom-0 left-4 right-4 h-[3px] rounded-t-full bg-slate-950"
+                    className="absolute bottom-0 left-4 right-4 h-[3px] rounded-t-full bg-gradient-to-r from-purple-600 to-indigo-600"
                   />
                 )}
               </button>
@@ -131,26 +216,55 @@ export default function UserHeader({ setActiveNav, profileData }) {
             />
           </div>
 
-          {profileData?.ispremium ? (
-            <div className="flex h-10 items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-bold text-amber-700">
-              <Crown size={16} />
-              Premium
-            </div>
+          {userIsPremium ? (
+            <button
+              className="
+    relative overflow-hidden
+    rounded-2xl border border-yellow-400/30
+    bg-white/10 backdrop-blur-xl
+    px-5 py-2.5
+    text-sm font-semibold text-yellow-300
+    shadow-[0_8px_32px_rgba(250,204,21,0.18)]
+    transition-all duration-300
+    hover:scale-[1.03]
+    hover:bg-yellow-400/10
+    hover:shadow-[0_12px_40px_rgba(250,204,21,0.28)]
+  "
+            >
+              <span className="flex items-center gap-2 text-black font-medium">
+                Premium
+              </span>
+
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-white/5 to-yellow-300/10" />
+            </button>
           ) : (
             <button
-              type="button"
               onClick={() => navigate("/premium")}
-              className="flex h-10 items-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800"
+              className="
+    relative overflow-hidden
+    rounded-2xl border border-white/10
+    bg-white/10 backdrop-blur-xl
+    px-5 py-2.5
+    text-sm font-semibold text-white
+    shadow-[0_8px_32px_rgba(139,92,246,0.22)]
+    transition-all duration-300
+    hover:scale-[1.03]
+    hover:border-purple-400/30
+    hover:bg-white/15
+    hover:shadow-[0_12px_40px_rgba(139,92,246,0.35)]
+  "
             >
-              <Crown size={16} />
-              Upgrade
+              <span className="relative z-10 flex items-center gap-2">
+                Upgrade
+              </span>
+
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/10 to-cyan-400/20" />
             </button>
           )}
-
           <button
             type="button"
             onClick={() => navigate("/user/profile")}
-            className="flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 pr-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+            className="flex h-10 items-center gap-2 rounded-xl border border-slate-200/85 bg-white px-2 pr-3 text-sm font-bold text-slate-800 shadow-sm transition-all hover:bg-slate-50/80 hover:shadow hover:scale-[1.01] duration-200"
           >
             {avatarUrl ? (
               <img
@@ -232,7 +346,7 @@ export default function UserHeader({ setActiveNav, profileData }) {
                     @{userName}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {profileData?.ispremium ? "Premium member" : "Free member"}
+                    {userIsPremium ? "Premium member" : "Free member"}
                   </p>
                 </div>
               </div>
@@ -265,7 +379,15 @@ export default function UserHeader({ setActiveNav, profileData }) {
                           : "text-slate-700 hover:bg-slate-50"
                       }`}
                     >
-                      <Icon size={18} />
+                      <div className="relative flex items-center justify-center">
+                        <Icon size={18} />
+                        {item.id === "notification" && unreadCount > 0 && (
+                          <span className="absolute -right-1 -top-1 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
+                        )}
+                        {item.id === "messaging" && hasNewMessage && (
+                          <span className="absolute -right-1 -top-1 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
+                        )}
+                      </div>
                       {item.label}
                     </button>
                   );
@@ -273,7 +395,7 @@ export default function UserHeader({ setActiveNav, profileData }) {
               </div>
 
               <div className="mt-6 space-y-2">
-                {!profileData?.ispremium && (
+                {!userIsPremium && (
                   <button
                     type="button"
                     onClick={() => {

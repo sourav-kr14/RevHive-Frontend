@@ -33,11 +33,9 @@ export default function DashboardStats({ userId }) {
       const followingRes = await followAPI.getFollowingCount(userId);
 
       setStats({
-        postsCount: Number(postsRes.data?.postsCount) || 0,
-
-        followersCount: Number(followersRes.data?.followersCount) || 0,
-
-        followingCount: Number(followingRes.data?.followingCount) || 0,
+        postsCount: Number(postsRes.data?.data?.data) || 0, // ← add extra .data
+        followersCount: Number(followersRes.data?.followersCount) || 0, // direct field
+        followingCount: Number(followingRes.data?.followingCount) || 0, // direct field
       });
     } catch (err) {
       console.log(err);

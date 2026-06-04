@@ -18,7 +18,9 @@ import Premium from "./components/userdashboard/Premium";
 import SettingsPage from "./pages/settings/SettingsPage";
 import AdminPremium from "./components/admin/dashboard/AdminPremium";
 import AdminSearch from "./components/admin/users/AdminSearch";
-
+import Moderation from "./components/admin/ai/Moderation";
+import VerifyOtp from "./pages/Auth/VerifyOTP";
+import Notification from "./components/userdashboard/Notification";
 export default function App() {
   return (
     <BrowserRouter>
@@ -44,6 +46,7 @@ export default function App() {
 
           <Route path="reports" element={<AdminReports />} />
           <Route path="premium" element={<AdminPremium />} />
+          <Route path="moderation" element={<Moderation />} />
         </Route>
 
         <Route path="/messages" element={<MessagingLayout />} />
@@ -55,7 +58,9 @@ export default function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="profile" element={<ProfileLayout />} />
           <Route path="/user/settings" element={<SettingsPage />} />
+          <Route path="notifications" element={<Notification />} />
         </Route>
+        <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/premium" element={<Premium />} />
 
         {/* <Route index element={<ProfilePosts />} /> */}

@@ -1,39 +1,53 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Image,
-  Link2,
-  Hash,
   Loader,
   AlertCircle,
-  MapPin,
   Wand2,
   X,
   Video,
-  Sparkles,
   Send,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { postAPI } from "../../services/api";
 import { callAI } from "../../api/ai-content";
 
-export default function DashboardCompose({ profileData, onPostCreated }) {
-  const [postText, setPostText] = useState("");
+export default function DashboardCompose({
+  profileData,
+  draftText = "",
+  onPostCreated,
+}) {
+  const [postText, setPostText] = useState(draftText);
   const [isPosting, setIsPosting] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [showMediaInput, setShowMediaInput] = useState(false);
   const [mediaType, setMediaType] = useState("image");
   const [error, setError] = useState("");
-  const [charCount, setCharCount] = useState(0);
-
+  const [charCount, setCharCount] = useState(draftText.length);
   const [hashtags, setHashtags] = useState([]);
-  const [loadingTags, setLoadingTags] = useState(false);
-
   const [aiResult, setAiResult] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
   const [aiType, setAiType] = useState("");
-
   const textareaRef = useRef(null);
+  const token = localStorage.getItem("token");
+
+  let isPremium = false;
+
+  if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
+    try {
+      const base64Url = token.split(".")[1];
+      if (base64Url) {
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const pad = base64.length % 4;
+        const padded = pad ? base64 + "=".repeat(4 - pad) : base64;
+        const payload = JSON.parse(atob(padded));
+        isPremium = payload.premium === true;
+      }
+    } catch (e) {
+      console.log("Error decoding token in compose:", e);
+    }
+  }
 
   const initials = profileData?.username
     ? profileData.username.slice(0, 2).toUpperCase()
@@ -42,8 +56,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
   const avatarUrl = profileData?.avatarUrl || profileData?.avatar || "";
 
   const handleTextChange = (e) => {
-    const text = e.target.value;
-
     setPostText(text);
     setCharCount(text.length);
 
@@ -89,7 +101,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
   };
 
   const generateHashtags = async () => {
-    setLoadingTags(true);
     setHashtags([]);
     setLoadingAI(true);
     setAiType("hashtags");
@@ -113,7 +124,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
       setAiResult("Something went wrong");
     }
 
-    setLoadingTags(false);
     setLoadingAI(false);
   };
 
@@ -175,7 +185,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
           </div>
 
           <div className="hidden items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-500 sm:flex">
-            <Sparkles size={14} className="text-fuchsia-600" />
             AI assisted
           </div>
         </div>
@@ -199,6 +208,7 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
         <div className="relative">
           <textarea
             ref={textareaRef}
+            autoFocus={Boolean(draftText)}
             className="min-h-[148px] w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 pr-16 text-[15px] leading-6 text-slate-950 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
             placeholder="What's happening in your world?"
             rows="5"
@@ -401,30 +411,6 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
               <Image size={17} />
               Media
             </button>
-
-            <button type="button" className="tool-btn">
-              <Link2 size={17} />
-              Link
-            </button>
-
-            <button
-              type="button"
-              onClick={generateHashtags}
-              disabled={loadingTags || loadingAI}
-              className="tool-btn disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loadingTags ? (
-                <Loader size={17} className="animate-spin" />
-              ) : (
-                <Hash size={17} />
-              )}
-              Tags
-            </button>
-
-            <button type="button" className="tool-btn">
-              <MapPin size={17} />
-              Location
-            </button>
           </div>
 
           <button
@@ -461,23 +447,29 @@ export default function DashboardCompose({ profileData, onPostCreated }) {
             <button
               key={btn.label}
               type="button"
-              disabled={loadingAI}
-              onClick={() =>
+              disabled={!isPremium || loadingAI}
+              onClick={() => {
+                if (!isPremium) return;
+
                 btn.type === "hashtags"
                   ? generateHashtags()
-                  : handleAI(btn.type)
-              }
-              className={`rounded-full border px-3 py-1.5 text-xs font-bold transition ${
-                loadingAI
+                  : handleAI(btn.type);
+              }}
+              className={`rounded-full border px-3 py-1.5 text-xs font-bold transition flex items-center gap-2 ${
+                !isPremium
                   ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-fuchsia-200 hover:bg-fuchsia-50 hover:text-fuchsia-700"
+                  : loadingAI
+                    ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-fuchsia-200 hover:bg-fuchsia-50 hover:text-fuchsia-700"
               }`}
             >
+              {!isPremium && "🔒"}
+
               {loadingAI && aiType === btn.type ? (
-                <span className="flex items-center gap-2">
+                <>
                   <Loader size={13} className="animate-spin" />
                   Working
-                </span>
+                </>
               ) : (
                 btn.label
               )}

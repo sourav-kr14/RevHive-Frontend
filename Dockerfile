@@ -1,13 +1,8 @@
-FROM node:20
+FROM nginx:alpine
 
-WORKDIR /app
+COPY dist /usr/share/nginx/html
+COPY default.conf /etc/nginx/conf.d/default.conf
 
-COPY package*.json ./
+EXPOSE 80
 
-RUN npm install
-
-COPY . .
-
-EXPOSE 5173
-
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["nginx", "-g", "daemon off;"]

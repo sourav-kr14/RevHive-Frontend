@@ -6,11 +6,12 @@ export const loginUser = async (data) => {
     const res = await api.post("/auth/login", data);
     console.log("Login response received:", res.data);
 
-    if (!res.data || !res.data.token) {
+    const loginData = res.data?.data || res.data;
+    if (!loginData || !loginData.token) {
       throw new Error("Invalid response: missing token");
     }
 
-    return res.data;
+    return loginData;
   } catch (error) {
     console.error("loginUser error:", error);
     throw error;

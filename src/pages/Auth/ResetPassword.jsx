@@ -1,7 +1,7 @@
 import { Key, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import api from "../../services/api";
 import { toast } from "sonner";
 
 export default function ResetPassword() {
@@ -9,14 +9,28 @@ export default function ResetPassword() {
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [tokenInput, setTokenInput] = useState("");
 
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email || "";
+  useEffect(() => {
+    if (token) {
+      setTokenInput(token);
+    }
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const activeToken = tokenInput.trim() || token;
+    if (!activeToken) {
+      toast.warning("Verification code is required");
+      return;
+    }
 
     if (!password || password.length < 8) {
       toast.warning("Password must be at least 8 characters");
@@ -31,14 +45,20 @@ export default function ResetPassword() {
     try {
       setLoading(true);
 
-      await axios.post(
-        `http://localhost:8080/api/auth/reset-password?token=${token}&newPassword=${password}`,
-      );
+      await api.post("/auth/reset-password", {
+        token: activeToken,
+        newPassword: password,
+        confirmPassword: confirm,
+      });
 
       toast.success("Password updated successfully!");
       navigate("/signin");
     } catch (err) {
-      alert(err.response?.data?.message || "Invalid or expired token");
+      toast.error(
+        err.response?.data?.message ||
+          err.response?.data ||
+          "Invalid or expired token",
+      );
     } finally {
       setLoading(false);
     }
@@ -62,8 +82,27 @@ export default function ResetPassword() {
           </p>
         </div>
 
+        {/* Email display */}
+        {email && (
+          <div className="bg-slate-50 rounded-xl p-3 text-center mb-5 border text-sm text-slate-600 font-semibold">
+            Reset OTP sent to: <span className="text-slate-800">{email}</span>
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Token/OTP Input */}
+          <div>
+            <input
+              type="text"
+              placeholder="Enter Reset OTP"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              required
+              className="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-400 outline-none text-sm"
+            />
+          </div>
+
           {/* Password */}
           <div className="relative">
             <input

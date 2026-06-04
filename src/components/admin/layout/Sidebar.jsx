@@ -1,5 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, LogOut, Crown, Search } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  LogOut,
+  Crown,
+  Search,
+  ShieldAlert,
+} from "lucide-react";
 import { GoReport } from "react-icons/go";
 
 export default function Sidebar() {
@@ -29,6 +36,11 @@ export default function Sidebar() {
     { name: "Users", path: "/admin/users", icon: Users },
     { name: "Premium", path: "/admin/premium", icon: Crown },
     { name: "Reports", path: "/admin/reports", icon: GoReport },
+    {
+      name: "AI Moderation",
+      path: "/admin/moderation",
+      icon: ShieldAlert,
+    },
   ];
 
   return (

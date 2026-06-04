@@ -28,6 +28,7 @@ const Signup = () => {
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -102,7 +103,7 @@ const Signup = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await fetch("http://localhost:8080/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,10 +122,14 @@ const Signup = () => {
         return;
       }
 
-      toast.success("Account created successfully");
+      toast.success("OTP sent to your email");
 
       setTimeout(() => {
-        navigate("/signin");
+        navigate("/verify-otp", {
+          state: {
+            email: formData.email,
+          },
+        });
       }, 1200);
     } catch {
       toast.error("Server not responding");
@@ -425,7 +430,7 @@ const Signup = () => {
                   <div className="relative">
                     <input
                       name="confirmPassword"
-                      type={showPassword ? "text" : "password"}
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="Repeat password"
                       value={formData.confirmPassword}
                       onChange={handleChange}
@@ -434,13 +439,13 @@ const Signup = () => {
 
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="password-btn"
                       aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                        showConfirmPassword ? "Hide password" : "Show password"
                       }
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                   {errors.confirmPassword && (

@@ -1,47 +1,186 @@
 import {
+  BarChart3,
+  Clock3,
   Crown,
-  TrendingUp,
-  UserPlus,
-  CalendarDays,
-  Zap,
-  MessageCircle,
   Flame,
-  CheckCircle2,
+  Heart,
+  Image,
+  Target,
+  Trophy,
+  UserPlus,
+  MessageSquare,
 } from "lucide-react";
+
 import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api, { followAPI } from "@/services/api";
+import { toast } from "sonner";
 
-export default function DashboardRightSidebar({ profileData }) {
-  const creators = [
-    {
-      name: "Aarav",
-      handle: "@aarav.creates",
-      color: "from-fuchsia-500 to-pink-500",
-    },
-    {
-      name: "Maya",
-      handle: "@maya.social",
-      color: "from-cyan-500 to-sky-500",
-    },
-    {
-      name: "Riya",
-      handle: "@riya.life",
-      color: "from-orange-500 to-amber-500",
-    },
-  ];
+const formatCount = (value) => {
+  const count = Number(value) || 0;
+  if (count >= 1000) return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`;
+  return String(count);
+};
 
-  const trends = [
-    { tag: "#RevHiveDaily", posts: "18.4k" },
-    { tag: "#CreatorMode", posts: "11.2k" },
-    { tag: "#CampusBuzz", posts: "8.7k" },
-  ];
+export default function DashboardRightSidebar({
+  profileData,
+  insights,
+  trends = [],
+  onTopicSelect,
+  onPromptSelect,
+}) {
+  const navigate = useNavigate();
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [creators, setCreators] = useState([]);
+
+  const visibleTrends = useMemo(() => {
+    const defaults = [
+      { tag: "#RevHiveDaily", posts: 0 },
+      { tag: "#CreatorMode", posts: 0 },
+      { tag: "#CampusBuzz", posts: 0 },
+    ];
+
+    const mergedTrends = trends.length > 0 ? [...trends] : [];
+    const trendsSet = new Set(mergedTrends.map(t => t.tag));
+
+    defaults.forEach(def => {
+      if (!trendsSet.has(def.tag)) {
+        const count = insights?.allTagsMap?.[def.tag] || 0;
+        mergedTrends.push({ tag: def.tag, posts: count });
+      }
+    });
+
+    mergedTrends.sort((a, b) => b.posts - a.posts);
+    return mergedTrends.slice(0, 3);
+  }, [trends, insights]);
 
   const username = profileData?.username || "User";
   const avatarUrl = profileData?.avatarUrl || profileData?.avatar || "";
+  const totalPosts = insights?.totalPosts || 0;
+  const totalLikes = insights?.totalLikes || 0;
+  const totalComments = insights?.totalComments || 0;
+  const mediaPosts = insights?.mediaPosts || 0;
+  const freshPosts = insights?.freshPosts || 0;
+  const engagementRate =
+    totalPosts > 0 ? Math.round((totalLikes / totalPosts) * 10) / 10 : 0;
+
+  const missions = [
+    {
+      label: "Publish your first post",
+      done: totalPosts > 0,
+      action: () => onPromptSelect?.("Today I want to share "),
+    },
+    {
+      label: "Add media to your story",
+      done: mediaPosts > 0,
+      action: () => onPromptSelect?.("A quick visual update from me: "),
+    },
+    {
+      label: "Build your network",
+      done: followingCount >= 5,
+      action: () => null,
+    },
+    {
+      label: "Complete your profile",
+      done: Boolean(profileData?.bio && (profileData?.avatarUrl || profileData?.avatar)),
+      action: () => navigate("/user/settings"),
+    },
+  ];
+  const completedMissions = missions.filter((mission) => mission.done).length;
+  const token = localStorage.getItem("token");
+  let jwtPremium = false;
+  if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
+    try {
+      const base64Url = token.split(".")[1];
+      if (base64Url) {
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const pad = base64.length % 4;
+        const padded = pad ? base64 + "=".repeat(4 - pad) : base64;
+        const payload = JSON.parse(atob(padded));
+        jwtPremium = payload.premium === true;
+      }
+    } catch (e) {
+      console.log("Error decoding token in sidebar:", e);
+    }
+  }
+  const isPremiumUser = jwtPremium || profileData?.premium === true || profileData?.ispremium === true || profileData?.isPremium === true;
+
+  // Followers + Following Count
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const followersRes = await followAPI.getFollowersCount(profileData?.id);
+        const followingRes = await followAPI.getFollowingCount(profileData?.id);
+        setFollowersCount(followersRes.data?.followersCount || 0);
+        setFollowingCount(followingRes.data?.followingCount || 0);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (profileData?.id) {
+      fetchCounts();
+    }
+  }, [profileData?.id]);
+
+  // Who To Follow
+  useEffect(() => {
+    const fetchCreators = async () => {
+      try {
+        const currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
+
+        // FETCH USERS FROM DB
+        const usersRes = await api.get("/users/search?query=a");
+
+        // USERS YOU FOLLOW
+        const followingRes = await followAPI.getFollowing(currentUserId);
+
+        // ALL USERS
+        const allUsers = usersRes.data?.data || usersRes.data || [];
+
+        // FOLLOWING IDS
+        const followingData = followingRes.data?.data || [];
+
+        const followingIds = followingData.map((u) => Number(u.id || u));
+
+        // FILTER USERS
+        const filteredUsers = allUsers.filter(
+          (user) =>
+            Number(user.id) !== Number(currentUserId) &&
+            !followingIds.includes(Number(user.id)),
+        );
+
+        setCreators(filteredUsers.slice(0, 3));
+
+      } catch (err) {
+        console.log("FETCH CREATORS ERROR:", err);
+      }
+    };
+
+    fetchCreators();
+  }, []);
+
+  // Handle Follow Button click
+  const handleFollow = async (creatorId) => {
+    if (!creatorId || !profileData?.id) return;
+
+    try {
+      await followAPI.followUser(profileData.id, creatorId);
+      toast.success("Successfully followed user");
+      // Remove followed creator from list
+      setCreators((prev) => prev.filter((c) => c.id !== creatorId));
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Follow failed");
+    }
+  };
 
   return (
     <aside className="hidden xl:block w-[340px] shrink-0">
       <div className="sticky top-24 h-[calc(100vh-112px)] overflow-y-auto pr-1 right-panel-scroll">
         <div className="space-y-4">
+          {/* Profile Card */}
           <motion.div
             initial={{ opacity: 0, x: 18 }}
             animate={{ opacity: 1, x: 0 }}
@@ -72,6 +211,7 @@ export default function DashboardRightSidebar({ profileData }) {
                 <p className="text-lg font-extrabold text-slate-950">
                   @{username}
                 </p>
+
                 <p className="text-sm text-slate-500">
                   {profileData?.bio || "Building your RevHive presence"}
                 </p>
@@ -80,8 +220,9 @@ export default function DashboardRightSidebar({ profileData }) {
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-slate-50 p-3">
                   <p className="text-lg font-black text-slate-950">
-                    {profileData?.followersCount || 0}
+                    {followersCount}
                   </p>
+
                   <p className="text-xs font-semibold text-slate-500">
                     Followers
                   </p>
@@ -89,8 +230,9 @@ export default function DashboardRightSidebar({ profileData }) {
 
                 <div className="rounded-xl bg-slate-50 p-3">
                   <p className="text-lg font-black text-slate-950">
-                    {profileData?.followingCount || 0}
+                    {followingCount}
                   </p>
+
                   <p className="text-xs font-semibold text-slate-500">
                     Following
                   </p>
@@ -99,96 +241,228 @@ export default function DashboardRightSidebar({ profileData }) {
             </div>
           </motion.div>
 
-          <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400 text-white">
-                <Crown size={18} />
+          {/* Premium */}
+          {!isPremiumUser && (
+            <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400 text-white">
+                  <Crown size={18} />
+                </div>
+
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-amber-700">
+                  Premium
+                </span>
               </div>
 
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-amber-700">
-                Premium
-              </span>
+              <p className="text-sm font-extrabold text-slate-950">
+                Unlock creator insights
+              </p>
+
+              <p className="mt-1 text-xs leading-5 text-slate-600">
+                See profile reach, trending windows, engagement quality, and
+                smarter AI content suggestions.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => navigate("/premium")}
+                className="mt-4 w-full rounded-xl bg-slate-950 py-2.5 text-xs font-extrabold text-white transition hover:bg-slate-800"
+              >
+                Explore premium
+              </button>
+            </div>
+          )}
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-sm font-extrabold text-slate-950">
+                Creator pulse
+              </p>
+              <BarChart3 size={16} className="text-cyan-600" />
             </div>
 
-            <p className="text-sm font-extrabold text-slate-950">
-              Unlock creator insights
-            </p>
-            <p className="mt-1 text-xs leading-5 text-slate-600">
-              See profile reach, trending windows, engagement quality, and
-              smarter AI content suggestions.
-            </p>
-
-            <button
-              type="button"
-              className="mt-4 w-full rounded-xl bg-slate-950 py-2.5 text-xs font-extrabold text-white transition hover:bg-slate-800"
-            >
-              Explore premium
-            </button>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                {
+                  label: "Posts",
+                  value: formatCount(totalPosts),
+                  icon: Trophy,
+                  tone: "bg-violet-50 text-violet-700",
+                },
+                {
+                  label: "Total Likes",
+                  value: formatCount(totalLikes),
+                  icon: Heart,
+                  tone: "bg-rose-50 text-rose-700",
+                },
+                {
+                  label: "Comments",
+                  value: formatCount(totalComments),
+                  icon: MessageSquare,
+                  tone: "bg-amber-50 text-amber-700",
+                },
+                {
+                  label: "Likes/post",
+                  value: engagementRate,
+                  icon: Flame,
+                  tone: "bg-fuchsia-50 text-fuchsia-700",
+                },
+                {
+                  label: "Media",
+                  value: formatCount(mediaPosts),
+                  icon: Image,
+                  tone: "bg-sky-50 text-sky-700",
+                },
+                {
+                  label: "Fresh today",
+                  value: formatCount(freshPosts),
+                  icon: Clock3,
+                  tone: "bg-emerald-50 text-emerald-700",
+                },
+              ].map((metric) => {
+                const Icon = metric.icon;
+                return (
+                  <div key={metric.label} className="rounded-xl bg-slate-50 p-3">
+                    <div
+                      className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg ${metric.tone}`}
+                    >
+                      <Icon size={15} />
+                    </div>
+                    <p className="text-lg font-black text-slate-950">
+                      {metric.value}
+                    </p>
+                    <p className="text-[11px] font-bold text-slate-500">
+                      {metric.label}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-extrabold text-slate-950">
+                  Growth missions
+                </p>
+                <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                  {completedMissions}/{missions.length} completed
+                </p>
+              </div>
+              <Target size={16} className="text-emerald-600" />
+            </div>
+
+            <div className="space-y-2">
+              {missions.map((mission) => (
+                <button
+                  key={mission.label}
+                  type="button"
+                  onClick={mission.action}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-3 text-left transition hover:bg-emerald-50"
+                >
+                  <span className="text-xs font-extrabold text-slate-700">
+                    {mission.label}
+                  </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+                      mission.done
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-white text-slate-500"
+                    }`}
+                  >
+                    {mission.done ? "DONE" : "NEXT"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Who To Follow */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm font-extrabold text-slate-950">
                 Who to follow
               </p>
+
               <UserPlus size={16} className="text-fuchsia-600" />
             </div>
 
-            <div className="space-y-4">
-              {creators.map((creator) => (
-                <div
-                  key={creator.handle}
-                  className="flex items-center justify-between gap-3"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${creator.color} text-sm font-black text-white`}
-                    >
-                      {creator.name.charAt(0)}
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-slate-900">
-                        {creator.name}
-                      </p>
-                      <p className="truncate text-xs text-slate-500">
-                        {creator.handle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="rounded-full bg-fuchsia-50 px-3 py-1.5 text-xs font-extrabold text-fuchsia-700 transition hover:bg-fuchsia-600 hover:text-white"
+            {creators.length === 0 ? (
+              <p className="text-sm text-slate-500">No users found</p>
+            ) : (
+              <div className="space-y-4">
+                {creators.map((creator) => (
+                  <div
+                    key={creator.id}
+                    className="flex items-center justify-between gap-3"
                   >
-                    Follow
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <div className="flex min-w-0 items-center gap-3">
+                      {/* Avatar */}
+                      <div
+                        className="
+                          flex h-10 w-10 shrink-0
+                          items-center justify-center
+                          rounded-xl
+                          bg-gradient-to-br
+                          from-fuchsia-500 to-violet-500
+                          text-sm font-black text-white
+                        "
+                      >
+                        {creator.username?.charAt(0).toUpperCase()}
+                      </div>
+
+                      {/* User Info */}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-slate-900">
+                          {creator.username}
+                        </p>
+
+                        <p className="truncate text-xs text-slate-500">
+                          @{creator.username}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Follow Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleFollow(creator.id)}
+                      className="rounded-full bg-fuchsia-50 px-3 py-1.5 text-xs font-extrabold text-fuchsia-700 transition hover:bg-fuchsia-600 hover:text-white hover:cursor-pointer"
+                    >
+                      Follow
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
+          {/* Trending Topics */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm font-extrabold text-slate-950">
                 Trending topics
               </p>
+
               <Flame size={16} className="text-orange-500" />
             </div>
 
             <div className="space-y-3">
-              {trends.map((trend, index) => (
+              {visibleTrends.map((trend, index) => (
                 <button
                   key={trend.tag}
                   type="button"
+                  onClick={() => onTopicSelect?.(trend.tag)}
                   className="flex w-full items-center justify-between rounded-xl bg-slate-50 px-3 py-3 text-left transition hover:bg-orange-50"
                 >
                   <div>
                     <p className="text-sm font-bold text-slate-900">
                       {trend.tag}
                     </p>
+
                     <p className="text-xs text-slate-500">
-                      {trend.posts} posts
+                      {formatCount(trend.posts)} posts
                     </p>
                   </div>
 
@@ -198,57 +472,6 @@ export default function DashboardRightSidebar({ profileData }) {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm font-extrabold text-slate-950">
-                Today on RevHive
-              </p>
-              <CalendarDays size={16} className="text-cyan-600" />
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 rounded-xl bg-cyan-50 p-3">
-                <TrendingUp size={17} className="text-cyan-600" />
-                <p className="text-xs font-bold text-slate-700">
-                  Best posting window: 6 PM - 9 PM
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-xl bg-fuchsia-50 p-3">
-                <MessageCircle size={17} className="text-fuchsia-600" />
-                <p className="text-xs font-bold text-slate-700">
-                  14 conversations are active now
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-xl bg-emerald-50 p-3">
-                <CheckCircle2 size={17} className="text-emerald-600" />
-                <p className="text-xs font-bold text-slate-700">
-                  Your profile reach is growing
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-gradient-to-br from-slate-950 to-slate-800 p-5 text-white shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-extrabold">Daily challenge</p>
-              <Zap size={16} className="text-yellow-300" />
-            </div>
-
-            <p className="text-sm leading-6 text-white/75">
-              Post one photo that describes your day and tag it with
-              #RevHiveDaily.
-            </p>
-
-            <button
-              type="button"
-              className="mt-4 rounded-xl bg-white px-4 py-2.5 text-xs font-extrabold text-slate-950 transition hover:bg-yellow-100"
-            >
-              Join challenge
-            </button>
           </div>
         </div>
       </div>

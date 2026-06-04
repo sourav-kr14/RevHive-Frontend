@@ -12,9 +12,36 @@ export default function UserSearch() {
     try {
       setLoading(true);
 
+      const currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
+
       const res = await api.get(`/users/search?query=${query}`);
 
-      setUsers((res.data || []).filter((user) => !user.isFollowing));
+      const usersData = res.data.data || [];
+
+      const updatedUsers = await Promise.all(
+        usersData.map(async (user) => {
+          try {
+            const followRes = await api.get("/v1/follows/check", {
+              params: {
+                followerId: currentUserId,
+                followingId: user.id,
+              },
+            });
+
+            return {
+              ...user,
+              isFollowing: followRes.data.isFollowing,
+            };
+          } catch {
+            return {
+              ...user,
+              isFollowing: false,
+            };
+          }
+        }),
+      );
+
+      setUsers(updatedUsers);
     } catch (err) {
       console.log(err);
     } finally {

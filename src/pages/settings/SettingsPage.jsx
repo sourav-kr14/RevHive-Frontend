@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import SettingsSidebar from "../../components/settings/SettingsSidebar";
 import ProfileSection from "../../components/settings/ProfileSection";
 import SecuritySection from "../../components/settings/SecuritySection";
 import PreferencesSection from "../../components/settings/PreferencesSection";
 
 export default function SettingsPage() {
+  const { profileData, setUserData } = useOutletContext() || {};
   const [activeTab, setActiveTab] = useState("profile");
 
   return (
@@ -13,7 +15,9 @@ export default function SettingsPage() {
         <SettingsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
         <div className="flex-1">
-          {activeTab === "profile" && <ProfileSection />}
+          {activeTab === "profile" && (
+            <ProfileSection profileData={profileData} setUserData={setUserData} />
+          )}
           {activeTab === "security" && <SecuritySection />}
           {activeTab === "preferences" && <PreferencesSection />}
         </div>

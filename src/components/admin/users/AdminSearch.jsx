@@ -11,9 +11,9 @@ export default function AdminSearch() {
     try {
       setLoading(true);
 
-      const res = await api.get(`/users/search?query=${query}`);
-
-      setUsers(res.data || []);
+      const res = await api.get(`/admin/users/search?query=${query}`);
+      const usersList = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      setUsers(usersList);
     } catch (err) {
       console.log(err);
     } finally {
@@ -95,14 +95,14 @@ export default function AdminSearch() {
             <div
               key={user.id}
               className="
-                rounded-3xl
-                bg-[#111827]
-                border border-white/10
-                p-5
-                hover:border-purple-500/30
-                transition-all duration-300
-                hover:translate-y-[-2px]
-              "
+      rounded-3xl
+      bg-[#111827]
+      border border-white/10
+      p-5
+      hover:border-purple-500/30
+      transition-all duration-300
+      hover:translate-y-[-2px]
+    "
             >
               {/* Top */}
               <div className="flex items-center gap-4 mb-5">
