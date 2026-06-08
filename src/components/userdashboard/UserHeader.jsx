@@ -13,11 +13,12 @@ import {
   Search,
   ChevronDown,
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { notificationAPI } from "../../services/api";
+import { useState, useEffect, useRef } from "react";
+import { notificationAPI, chatAPI } from "../../services/api";
 import {
   connectWebSocket,
   disconnectWebSocket,
+  closeWebSocket,
 } from "../../services/webSocket";
 
 export default function UserHeader({ setActiveNav, profileData }) {
@@ -55,17 +56,22 @@ export default function UserHeader({ setActiveNav, profileData }) {
     profileData?.isPremium === true;
 
   const [unreadCount, setUnreadCount] = useState(0);
-  const [hasNewMessage, setHasNewMessage] = useState(
-    localStorage.getItem("unread_messages") === "true",
-  );
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
+  // Click outside handler for dropdown
   useEffect(() => {
-    if (location.pathname.startsWith("/messages")) {
-      localStorage.removeItem("unread_messages");
-      setHasNewMessage(false);
-    }
-  }, [location.pathname]);
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
+  // Fetch initial unread count on mount
   useEffect(() => {
     if (!token) return;
 
@@ -74,6 +80,44 @@ export default function UserHeader({ setActiveNav, profileData }) {
       currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
     } catch {}
 
+    if (!currentUserId) return;
+
+    const fetchInitialUnread = async () => {
+      try {
+        const convRes = await chatAPI.getConversations(currentUserId);
+        const conversations = convRes.data?.data || convRes.data || [];
+        const totalUnread = conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+        setUnreadMessagesCount(totalUnread);
+      } catch (err) {
+        console.error("Failed to fetch initial unread messages count:", err);
+      }
+    };
+
+    fetchInitialUnread();
+  }, [token]);
+
+  // Sync unread messages count with ChatList when it updates
+  useEffect(() => {
+    const handleUpdate = (e) => {
+      if (typeof e.detail?.count === "number") {
+        setUnreadMessagesCount(e.detail.count);
+      }
+    };
+    window.addEventListener("unread-count-updated", handleUpdate);
+    return () => window.removeEventListener("unread-count-updated", handleUpdate);
+  }, []);
+
+  // WebSocket real-time updates for unread count when NOT on /messages
+  useEffect(() => {
+    if (!token) return;
+
+    let currentUserId = null;
+    try {
+      currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
+    } catch {}
+
+    if (!currentUserId) return;
+
     const handleIncomingMessage = (msg) => {
       if (
         msg &&
@@ -81,8 +125,7 @@ export default function UserHeader({ setActiveNav, profileData }) {
         msg.senderId !== currentUserId
       ) {
         if (!location.pathname.startsWith("/messages")) {
-          localStorage.setItem("unread_messages", "true");
-          setHasNewMessage(true);
+          setUnreadMessagesCount((prev) => prev + 1);
         }
       }
     };
@@ -152,6 +195,12 @@ export default function UserHeader({ setActiveNav, profileData }) {
 
   const handleSignOut = () => {
     localStorage.clear();
+    sessionStorage.clear();
+    try {
+      closeWebSocket();
+    } catch (err) {
+      console.error("Failed to close WebSocket on logout:", err);
+    }
     navigate("/signin");
   };
 
@@ -202,8 +251,10 @@ export default function UserHeader({ setActiveNav, profileData }) {
                   {item.id === "notification" && unreadCount > 0 && (
                     <span className="absolute -right-1.5 -top-1.5 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
                   )}
-                  {item.id === "messaging" && hasNewMessage && (
-                    <span className="absolute -right-1.5 -top-1.5 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
+                  {item.id === "messaging" && unreadMessagesCount > 0 && (
+                    <span className="absolute -right-2 -top-2 flex min-w-4 h-4 px-1 rounded-full bg-rose-500 text-[9px] font-bold text-white items-center justify-center ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)]">
+                      {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
+                    </span>
                   )}
                 </div>
                 {item.label}
@@ -277,26 +328,87 @@ export default function UserHeader({ setActiveNav, profileData }) {
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/10 to-cyan-400/20" />
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => navigate("/user/profile")}
-            className="flex h-10 items-center gap-2 rounded-xl border border-slate-200/85 bg-white px-2 pr-3 text-sm font-bold text-slate-800 shadow-sm transition-all hover:bg-slate-50/80 hover:shadow hover:scale-[1.01] duration-200"
-          >
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={userName}
-                className="h-8 w-8 rounded-lg object-cover"
-              />
-            ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-xs font-bold text-white">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-            )}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex h-10 items-center gap-2 rounded-xl border border-slate-200/85 bg-white px-2 pr-3 text-sm font-bold text-slate-800 shadow-sm transition-all hover:bg-slate-50/80 hover:shadow hover:scale-[1.01] duration-200"
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={userName}
+                  className="h-8 w-8 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-xs font-bold text-white">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+              )}
 
-            <span className="max-w-[110px] truncate">@{userName}</span>
-            <ChevronDown size={15} className="text-slate-400" />
-          </button>
+              <span className="max-w-[110px] truncate">@{userName}</span>
+              <ChevronDown size={15} className={`text-slate-400 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-200/80 bg-white/90 p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl z-50 flex flex-col gap-0.5"
+                >
+                  <button
+                    onClick={() => {
+                      navigate("/user/profile");
+                      setDropdownOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors duration-200"
+                  >
+                    <User size={16} className="text-slate-500" />
+                    Profile
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      navigate("/user/settings");
+                      setDropdownOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors duration-200"
+                  >
+                    <Settings size={16} className="text-slate-500" />
+                    Settings
+                  </button>
+{/* 
+                  <button
+                    onClick={() => {
+                      navigate("/premium");
+                      setDropdownOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors duration-200"
+                  >
+                    <Crown size={16} className="text-amber-500" />
+                    Premium
+                  </button> */}
+                  
+
+                  <div className="h-px bg-slate-100 my-1" />
+
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setDropdownOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-600 hover:bg-rose-50/80 transition-colors duration-200"
+                  >
+                    <LogOut size={16} className="text-rose-500" />
+                    Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         <button
@@ -400,8 +512,10 @@ export default function UserHeader({ setActiveNav, profileData }) {
                         {item.id === "notification" && unreadCount > 0 && (
                           <span className="absolute -right-1 -top-1 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
                         )}
-                        {item.id === "messaging" && hasNewMessage && (
-                          <span className="absolute -right-1 -top-1 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
+                        {item.id === "messaging" && unreadMessagesCount > 0 && (
+                          <span className="absolute -right-2 -top-2 flex min-w-4 h-4 px-1 rounded-full bg-rose-500 text-[9px] font-bold text-white items-center justify-center ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)]">
+                            {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
+                          </span>
                         )}
                       </div>
                       {item.label}

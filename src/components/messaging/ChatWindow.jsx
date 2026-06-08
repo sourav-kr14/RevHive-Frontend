@@ -30,6 +30,9 @@ export default function ChatWindow({ selectedUser }) {
         const res = await chatAPI.getChatHistory(currentUser.id, selectedUser.id);
         const history = res.data?.data || res.data || [];
         setMessages(history);
+
+        // Mark incoming messages as read when opening a conversation
+        await chatAPI.markAsRead(selectedUser.id, currentUser.id);
       } catch (err) {
         console.error("Failed to load chat history:", err);
       }
@@ -49,6 +52,13 @@ export default function ChatWindow({ selectedUser }) {
         (incomingMessage.senderId === selectedUser.id && incomingMessage.receiverId === currentUser.id);
 
       if (isRelevant) {
+        // If the message is incoming, mark it read on the backend
+        if (incomingMessage.senderId === selectedUser.id) {
+          chatAPI.markAsRead(selectedUser.id, currentUser.id).catch((err) => {
+            console.error("Failed to mark incoming message as read:", err);
+          });
+        }
+
         setMessages((prev) => {
           // Prevent duplicates
           if (incomingMessage.id && prev.some((m) => m.id === incomingMessage.id)) {

@@ -200,6 +200,16 @@ export const chatAPI = {
     api.get("/chat/history", {
       params: { senderId, receiverId },
     }),
+
+  getConversations: (userId) =>
+    api.get("/chat/conversations", {
+      params: { userId },
+    }),
+
+  markAsRead: (senderId, receiverId) =>
+    api.put("/chat/read", null, {
+      params: { senderId, receiverId },
+    }),
 };
 
 export const searchUsers = async (query) => {

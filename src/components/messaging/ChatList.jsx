@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { followAPI, authAPI } from "../../services/api";
+import { followAPI, authAPI, chatAPI } from "../../services/api";
 import { Search, Loader2 } from "lucide-react";
+import { connectWebSocket, disconnectWebSocket } from "../../services/webSocket";
 
 export default function ChatList({ setSelectedUser, activeUserId }) {
   const [users, setUsers] = useState([]);
@@ -16,6 +17,21 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
     }
   })();
 
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return "";
+
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+
+    if (isToday) {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } else {
+      return date.toLocaleDateString([], { month: "short", day: "numeric" });
+    }
+  };
+
   useEffect(() => {
     const fetchFollowedUsers = async () => {
       if (!currentUser?.id) {
@@ -26,7 +42,7 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
 
       try {
         setLoading(true);
-        // 1. Fetch the IDs of users followed by current user
+        // 1. Fetch followed users
         const followRes = await followAPI.getFollowing(currentUser.id, 0, 100);
         const followedIds = followRes.data?.data || [];
 
@@ -35,22 +51,52 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
           setLoading(false);
           return;
         }
-        console.log("followedIds:", followedIds);
 
-        // 2. Fetch profile details for each followed user ID in parallel
+        // 2. Fetch profiles for all followed users in parallel
         const profilePromises = followedIds.map(async (user) => {
           try {
             const profileRes = await authAPI.getProfile(user.id);
-
-            return profileRes.data; // profile response fields: id, username, bio, avatarUrl
+            return profileRes.data;
           } catch (err) {
             console.error(`Failed to fetch profile for user ${user.id}:`, err);
             return null;
           }
         });
-
         const profiles = (await Promise.all(profilePromises)).filter(Boolean);
-        setUsers(profiles);
+
+        // 3. Fetch conversation list from backend
+        let conversations = [];
+        try {
+          const convRes = await chatAPI.getConversations(currentUser.id);
+          conversations = convRes.data?.data || convRes.data || [];
+          console.log("Conversations fetched:", conversations);
+        } catch (convErr) {
+          console.error("Failed to fetch conversations from backend:", convErr);
+        }
+
+        // 4. Merge conversations with profiles
+        const mergedUsers = profiles.map((p) => {
+          const matchedConv = conversations.find((c) => c.userId === p.id);
+          return {
+            ...p,
+            lastMessage: matchedConv ? matchedConv.lastMessage : null,
+            lastMessageTimestamp: matchedConv ? matchedConv.lastMessageTimestamp : null,
+            unreadCount: matchedConv ? matchedConv.unreadCount : 0,
+            online: matchedConv ? matchedConv.online : false,
+          };
+        });
+
+        // 5. Sort immediately: newest message first, nulls at bottom
+        mergedUsers.sort((a, b) => {
+          if (a.lastMessageTimestamp && b.lastMessageTimestamp) {
+            return new Date(b.lastMessageTimestamp) - new Date(a.lastMessageTimestamp);
+          }
+          if (a.lastMessageTimestamp) return -1;
+          if (b.lastMessageTimestamp) return 1;
+          return 0;
+        });
+
+        setUsers(mergedUsers);
       } catch (err) {
         console.error("Error fetching chat list users:", err);
         setError("Failed to load users");
@@ -61,6 +107,64 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
 
     fetchFollowedUsers();
   }, [currentUser?.id]);
+
+  // Subscribe to real-time WebSocket messages to update preview and sorting immediately
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    const token = localStorage.getItem("token");
+
+    const callback = (incomingMessage) => {
+      const isRelevant = incomingMessage.senderId === currentUser.id || incomingMessage.receiverId === currentUser.id;
+      if (!isRelevant) return;
+
+      const otherUserId = incomingMessage.senderId === currentUser.id ? incomingMessage.receiverId : incomingMessage.senderId;
+
+      setUsers((prevUsers) => {
+        const updatedUsers = prevUsers.map((user) => {
+          if (user.id === otherUserId) {
+            const isCurrentlyActive = activeUserId === otherUserId;
+            return {
+              ...user,
+              lastMessage: incomingMessage.content,
+              lastMessageTimestamp: incomingMessage.timestamp,
+              unreadCount: isCurrentlyActive ? 0 : user.unreadCount + (incomingMessage.senderId === otherUserId ? 1 : 0),
+            };
+          }
+          return user;
+        });
+
+        // Bubble to top instantly: sort by lastMessageTimestamp descending
+        return [...updatedUsers].sort((a, b) => {
+          if (a.lastMessageTimestamp && b.lastMessageTimestamp) {
+            return new Date(b.lastMessageTimestamp) - new Date(a.lastMessageTimestamp);
+          }
+          if (a.lastMessageTimestamp) return -1;
+          if (b.lastMessageTimestamp) return 1;
+          return 0;
+        });
+      });
+    };
+
+    connectWebSocket(token, "chat", callback);
+    return () => {
+      disconnectWebSocket("chat", callback);
+    };
+  }, [currentUser?.id, activeUserId]);
+
+  // Clear unread indicator locally immediately when a user becomes active
+  useEffect(() => {
+    if (activeUserId) {
+      setUsers((prevUsers) =>
+        prevUsers.map((u) => (u.id === activeUserId ? { ...u, unreadCount: 0 } : u))
+      );
+    }
+  }, [activeUserId]);
+
+  // Dispatch the unread count to the header when users state changes
+  useEffect(() => {
+    const totalUnread = users.reduce((acc, u) => acc + (u.unreadCount || 0), 0);
+    window.dispatchEvent(new CustomEvent("unread-count-updated", { detail: { count: totalUnread } }));
+  }, [users]);
 
   const filteredUsers = users.filter((u) =>
     u.username?.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -104,6 +208,8 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
         ) : (
           filteredUsers.map((user) => {
             const isActive = activeUserId === user.id;
+            const hasUnread = user.unreadCount > 0;
+            const formattedTime = formatTimestamp(user.lastMessageTimestamp);
             return (
               <div
                 key={user.id}
@@ -127,18 +233,37 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
                       {user.username?.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  {/* Follow indicator dot */}
-                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                  {/* Online status indicator dot */}
+                  <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-white rounded-full ${user.online ? "bg-emerald-500" : "bg-slate-450"}`}></span>
                 </div>
 
                 {/* USER INFO */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 truncate">
-                    {user.username}
-                  </p>
-                  <p className="text-xs text-slate-500 truncate">
-                    {user.bio || "Click to message"}
-                  </p>
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {hasUnread && (
+                        <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" title="Unread conversation"></span>
+                      )}
+                      <p className="font-semibold text-slate-900 truncate">
+                        {user.username}
+                      </p>
+                    </div>
+                    {formattedTime && (
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {formattedTime}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <p className="text-xs text-slate-500 truncate flex-1">
+                      {user.lastMessage || user.bio || "Click to message"}
+                    </p>
+                    {hasUnread && (
+                      <span className="flex-shrink-0 min-w-[20px] h-5 px-1 bg-red-500 text-[10px] font-bold text-white rounded-full flex items-center justify-center shadow-[0_2px_8px_rgba(239,68,68,0.3)] animate-pulse">
+                        {user.unreadCount > 99 ? "99+" : user.unreadCount}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             );

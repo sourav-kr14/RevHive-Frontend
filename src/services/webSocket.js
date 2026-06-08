@@ -116,3 +116,17 @@ export const disconnectWebSocket = (type, callback) => {
 
   console.log(` Removed ${type} listener. Connection remains persistent.`);
 };
+
+export const closeWebSocket = () => {
+  if (stompClient && stompClient.connected) {
+    stompClient.disconnect(() => {
+      console.log("WebSocket disconnected on logout");
+    });
+  }
+  stompClient = null;
+  socket = null;
+  chatSubscription = null;
+  notificationSubscription = null;
+  chatListeners.clear();
+  notificationListeners.clear();
+};
