@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Crown, Wand2, Hash, FileText, ShieldCheck } from "lucide-react";
 import api from "../../services/api";
 import { toast } from "sonner";
 
@@ -9,46 +10,140 @@ export default function Premium() {
     try {
       setLoading(true);
 
-      // baseURL already has /api
       const res = await api.post("/premium/upgrade");
 
-      // save new premium token
       localStorage.setItem("token", res.data.data);
 
-      toast.success("Congratulations! You are now Premium ⭐");
+      toast.success("Premium activated successfully");
 
-      // reload app with new token + premium state
       window.location.href = "/user/dashboard";
-    } catch (e) {
-      console.log(e);
-      toast.error("Upgrade failed");
+    } catch (err) {
+      console.error(err);
+      toast.error("Activation failed");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0b0f1a] text-white px-4">
-      <div
-        className="w-full max-w-md bg-white/5 backdrop-blur-xl
-        border border-white/10 p-8 rounded-2xl
-        shadow-[0_0_30px_rgba(139,92,246,0.2)] text-center"
-      >
-        <h2 className="text-3xl font-bold mb-3">Upgrade to Premium 🚀</h2>
+  const features = [
+    {
+      icon: Wand2,
+      title: "AI Caption Generator",
+    },
+    {
+      icon: Hash,
+      title: "Smart Hashtag Suggestions",
+    },
+    {
+      icon: FileText,
+      title: "Content Summaries",
+    },
+    {
+      icon: ShieldCheck,
+      title: "AI Safety Check",
+    },
+  ];
 
-        <p className="text-sm text-gray-400 mb-8">
-          Unlock AI captions, hashtags, summaries, premium tools and more.
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div
+        className="
+        w-full
+        max-w-lg
+        rounded-3xl
+        border
+        border-slate-200
+        bg-white/80
+        backdrop-blur-xl
+        shadow-xl
+        p-8
+      "
+      >
+        <div className="flex justify-center">
+          <div
+            className="
+            flex
+            h-16
+            w-16
+            items-center
+            justify-center
+            rounded-2xl
+            bg-gradient-to-r
+            from-fuchsia-500
+            to-violet-500
+            text-white
+          "
+          >
+            <Crown size={28} />
+          </div>
+        </div>
+
+        <h1 className="mt-5 text-center text-3xl font-black text-slate-900">
+          RevHive Premium
+        </h1>
+
+        <p className="mt-2 text-center text-sm text-slate-500">
+          Unlock advanced AI-powered creator tools.
         </p>
+
+        <div className="mt-8 space-y-3">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+
+            return (
+              <div
+                key={feature.title}
+                className="
+                flex
+                items-center
+                gap-4
+                rounded-2xl
+                bg-slate-50
+                p-4
+              "
+              >
+                <div
+                  className="
+                  flex
+                  h-10
+                  w-10
+                  items-center
+                  justify-center
+                  rounded-xl
+                  bg-fuchsia-100
+                  text-fuchsia-600
+                "
+                >
+                  <Icon size={18} />
+                </div>
+
+                <span className="font-semibold text-slate-700">
+                  {feature.title}
+                </span>
+              </div>
+            );
+          })}
+        </div>
 
         <button
           onClick={upgrade}
           disabled={loading}
-          className="w-full px-6 py-3 rounded-xl text-sm font-semibold
-          bg-gradient-to-r from-purple-500 to-blue-500
-          hover:scale-[1.02] transition-all duration-200
-          disabled:opacity-50"
+          className="
+          mt-8
+          w-full
+          rounded-2xl
+          bg-gradient-to-r
+          from-fuchsia-500
+          to-violet-500
+          py-3
+          font-bold
+          text-white
+          transition
+          hover:opacity-90
+          disabled:opacity-50
+        "
         >
-          {loading ? "Processing..." : "Upgrade Now"}
+          {loading ? "Activating..." : "Activate Premium"}
         </button>
       </div>
     </div>
