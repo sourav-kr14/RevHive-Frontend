@@ -11,8 +11,22 @@ export default function Premium() {
       setLoading(true);
 
       const res = await api.post("/premium/upgrade");
+      const newToken = res.data.data;
 
-      localStorage.setItem("token", res.data.data);
+      localStorage.setItem("token", newToken);
+
+      try {
+        const userRes = await api.get("/users/me");
+        const userData = userRes.data?.data || userRes.data;
+        if (userData) {
+          localStorage.setItem("user", JSON.stringify(userData));
+          if (userData.role) {
+            localStorage.setItem("role", userData.role);
+          }
+        }
+      } catch (profileErr) {
+        console.error("Failed to fetch updated profile immediately after upgrade", profileErr);
+      }
 
       toast.success("Premium activated successfully");
 

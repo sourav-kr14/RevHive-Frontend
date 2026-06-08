@@ -7,5 +7,5 @@ export const AdminRoute = ({ children }) => {
 
 export const UserRoute = ({ children }) => {
   const role = localStorage.getItem("role");
-  return role === "USER" ? children : <Navigate to="/" />;
+  return role === "USER" || role === "PREMIUM" ? children : <Navigate to="/" />;
 };
