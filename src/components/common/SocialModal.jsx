@@ -21,6 +21,11 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
       }
 
       const usersList = response.data.data || [];
+      if (type === "followers") {
+        console.log("Followers API:", usersList);
+      } else {
+        console.log("Following API:", usersList);
+      }
       setUsers(usersList);
 
       // Check following status for each user (if not viewing own list)
@@ -105,47 +110,19 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
                   >
                     <div className="flex items-center gap-3">
                       {/* Avatar */}
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">
                         {user.username?.slice(0, 2).toUpperCase() || "US"}
                       </div>
 
                       {/* User Info */}
                       <div>
-                        <p className="font-medium text-gray-900">
-                          @{user.username}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {user.bio || "No bio yet"}
-                        </p>
+                        {user.username ? (
+                          <p className="font-medium text-gray-900">
+                            @{user.username}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
-
-                    {/* Follow Button (if not current user) */}
-                    {user.id !== currentUserId && (
-                      <button
-                        onClick={() => handleFollowToggle(user.id)}
-                        disabled={processingId === user.id}
-                        className={`px-3 py-1 rounded-lg text-xs flex items-center gap-1 transition-all ${
-                          followingStatus[user.id]
-                            ? "bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-500 hover:text-red-400"
-                            : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
-                        } ${processingId === user.id ? "opacity-50 cursor-not-allowed" : ""}`}
-                      >
-                        {processingId === user.id ? (
-                          <Loader size={12} className="animate-spin" />
-                        ) : followingStatus[user.id] ? (
-                          <>
-                            <UserCheck size={12} />
-                            Following
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus size={12} />
-                            Follow
-                          </>
-                        )}
-                      </button>
-                    )}
                   </div>
                 ))}
               </div>

@@ -24,6 +24,11 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
       }
 
       const usersData = response.data.data || [];
+      if (type === "followers") {
+        console.log("Followers API:", usersData);
+      } else {
+        console.log("Following API:", usersData);
+      }
 
       setUsers(usersData);
 
@@ -174,41 +179,13 @@ export default function SocialModal({ userId, type, onClose, currentUserId }) {
                       </div>
 
                       <div className="min-w-0">
-                        <h3 className="truncate font-semibold text-gray-900">
-                          @{user.username}
-                        </h3>
-
-                        <p className="truncate text-xs text-gray-500">
-                          {user.bio || "No bio available"}
-                        </p>
+                        {user.username ? (
+                          <h3 className="truncate font-semibold text-gray-900">
+                            @{user.username}
+                          </h3>
+                        ) : null}
                       </div>
                     </div>
-
-                    {/* Follow Button */}
-                    {user.id !== currentUserId && (
-                      <button
-                        onClick={() => handleFollowToggle(user.id)}
-                        className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-                          followingStatus[user.id]
-                            ? "border border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:bg-red-50 hover:text-red-500"
-                            : "bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md hover:scale-[1.03] hover:shadow-lg"
-                        }`}
-                      >
-                        <span className="flex items-center gap-1.5">
-                          {followingStatus[user.id] ? (
-                            <>
-                              <UserCheck size={14} />
-                              Following
-                            </>
-                          ) : (
-                            <>
-                              <UserPlus size={14} />
-                              Follow
-                            </>
-                          )}
-                        </span>
-                      </button>
-                    )}
                   </motion.div>
                 ))}
               </div>
