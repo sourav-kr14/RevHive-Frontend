@@ -34,7 +34,12 @@ export default function DashboardCompose({
 
   let isPremium = false;
 
-  if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
+  if (
+    token &&
+    token !== "undefined" &&
+    token !== "null" &&
+    token.trim() !== ""
+  ) {
     try {
       const base64Url = token.split(".")[1];
       if (base64Url) {
@@ -56,8 +61,8 @@ export default function DashboardCompose({
   const avatarUrl = profileData?.avatarUrl || profileData?.avatar || "";
 
   const handleTextChange = (e) => {
-    setPostText(text);
-    setCharCount(text.length);
+    setPostText(e.target.value);
+    setCharCount(e.target.value.length);
 
     if (error) setError("");
   };

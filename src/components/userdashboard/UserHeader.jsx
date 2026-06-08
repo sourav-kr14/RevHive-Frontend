@@ -15,7 +15,10 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { notificationAPI } from "../../services/api";
-import { connectWebSocket, disconnectWebSocket } from "../../services/webSocket";
+import {
+  connectWebSocket,
+  disconnectWebSocket,
+} from "../../services/webSocket";
 
 export default function UserHeader({ setActiveNav, profileData }) {
   const navigate = useNavigate();
@@ -25,7 +28,12 @@ export default function UserHeader({ setActiveNav, profileData }) {
 
   let isPremium = false;
 
-  if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
+  if (
+    token &&
+    token !== "undefined" &&
+    token !== "null" &&
+    token.trim() !== ""
+  ) {
     try {
       const base64Url = token.split(".")[1];
       if (base64Url) {
@@ -40,15 +48,19 @@ export default function UserHeader({ setActiveNav, profileData }) {
     }
   }
 
-  const userIsPremium = isPremium || profileData?.premium === true || profileData?.ispremium === true || profileData?.isPremium === true;
+  const userIsPremium =
+    isPremium ||
+    profileData?.premium === true ||
+    profileData?.ispremium === true ||
+    profileData?.isPremium === true;
 
   const [unreadCount, setUnreadCount] = useState(0);
   const [hasNewMessage, setHasNewMessage] = useState(
-    localStorage.getItem("unread_messages") === "true"
+    localStorage.getItem("unread_messages") === "true",
   );
 
   useEffect(() => {
-    if (location.pathname === "/messages") {
+    if (location.pathname.startsWith("/messages")) {
       localStorage.removeItem("unread_messages");
       setHasNewMessage(false);
     }
@@ -63,8 +75,12 @@ export default function UserHeader({ setActiveNav, profileData }) {
     } catch {}
 
     const handleIncomingMessage = (msg) => {
-      if (msg && msg.receiverId === currentUserId && msg.senderId !== currentUserId) {
-        if (location.pathname !== "/messages") {
+      if (
+        msg &&
+        msg.receiverId === currentUserId &&
+        msg.senderId !== currentUserId
+      ) {
+        if (!location.pathname.startsWith("/messages")) {
           localStorage.setItem("unread_messages", "true");
           setHasNewMessage(true);
         }
@@ -82,7 +98,7 @@ export default function UserHeader({ setActiveNav, profileData }) {
     const fetchNotifications = async () => {
       try {
         const res = await notificationAPI.getNotifications();
-        const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        const list = Array.isArray(res.data) ? res.data : res.data?.data || [];
         const unread = list.filter((n) => !n.read).length;
         setUnreadCount(unread);
       } catch (err) {

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import DashboardStats from "./UserStats";
 import UserFeed from "@/components/userdashboard/UserFeed";
 import FollowButton from "@/components/common/FollowButton";
+import { DashboardProvider } from "@/components/userdashboard/DashboardContext";
 
 export default function ProfileLayout() {
   const { profileData } = useOutletContext();
@@ -79,7 +80,9 @@ export default function ProfileLayout() {
         rounded-2xl p-5 shadow-sm
         "
       >
-        <UserFeed profileData={profileData} onlyUserPosts={true} />
+        <DashboardProvider profileData={profileData}>
+          <UserFeed profileData={profileData} onlyUserPosts={true} />
+        </DashboardProvider>
       </div>
     </div>
   );

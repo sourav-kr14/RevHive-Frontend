@@ -8,6 +8,7 @@ export default function CommentSection({
   postUserId, // ← post owner's userId for notifications
   currentUserId,
   onCommentAdded,
+  onCommentCountChange,
 }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -20,7 +21,9 @@ export default function CommentSection({
   const fetchCommentCount = async () => {
     try {
       const response = await commentAPI.getCommentCount(postId);
-      setCommentCount(response.data.count || 0);
+      const count = response.data.count || 0;
+      setCommentCount(count);
+      if (onCommentCountChange) onCommentCountChange(count);
     } catch (error) {
       console.error("Error fetching comment count:", error);
     }
@@ -34,7 +37,9 @@ export default function CommentSection({
       const commentsData =
         response.data.data?.content || response.data?.content || [];
       setComments(commentsData);
-      setCommentCount(commentsData.length);
+      const count = commentsData.length;
+      setCommentCount(count);
+      if (onCommentCountChange) onCommentCountChange(count);
     } catch (error) {
       console.error("Error fetching comments:", error);
       setError("Failed to load comments");

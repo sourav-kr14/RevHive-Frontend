@@ -16,17 +16,17 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api, { followAPI } from "@/services/api";
 import { toast } from "sonner";
+import { useDashboard } from "./DashboardContext";
 
 const formatCount = (value) => {
   const count = Number(value) || 0;
-  if (count >= 1000) return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`;
+  if (count >= 1000)
+    return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`;
   return String(count);
 };
 
 export default function DashboardRightSidebar({
   profileData,
-  insights,
-  trends = [],
   onTopicSelect,
   onPromptSelect,
 }) {
@@ -35,6 +35,23 @@ export default function DashboardRightSidebar({
   const [followingCount, setFollowingCount] = useState(0);
   const [creators, setCreators] = useState([]);
 
+  // Consume dashboard context values
+  const {
+    feedInsights,
+    trendingTags,
+    setActiveTopic,
+    setFeedType,
+  } = useDashboard();
+
+  const handleTopicClick = (tag) => {
+    if (onTopicSelect) {
+      onTopicSelect(tag);
+    } else {
+      setActiveTopic(tag);
+      setFeedType("trending");
+    }
+  };
+
   const visibleTrends = useMemo(() => {
     const defaults = [
       { tag: "#RevHiveDaily", posts: 0 },
@@ -42,27 +59,27 @@ export default function DashboardRightSidebar({
       { tag: "#CampusBuzz", posts: 0 },
     ];
 
-    const mergedTrends = trends.length > 0 ? [...trends] : [];
-    const trendsSet = new Set(mergedTrends.map(t => t.tag));
+    const mergedTrends = trendingTags && trendingTags.length > 0 ? [...trendingTags] : [];
+    const trendsSet = new Set(mergedTrends.map((t) => t.tag));
 
-    defaults.forEach(def => {
+    defaults.forEach((def) => {
       if (!trendsSet.has(def.tag)) {
-        const count = insights?.allTagsMap?.[def.tag] || 0;
+        const count = feedInsights?.allTagsMap?.[def.tag] || 0;
         mergedTrends.push({ tag: def.tag, posts: count });
       }
     });
 
     mergedTrends.sort((a, b) => b.posts - a.posts);
     return mergedTrends.slice(0, 3);
-  }, [trends, insights]);
+  }, [trendingTags, feedInsights]);
 
   const username = profileData?.username || "User";
   const avatarUrl = profileData?.avatarUrl || profileData?.avatar || "";
-  const totalPosts = insights?.totalPosts || 0;
-  const totalLikes = insights?.totalLikes || 0;
-  const totalComments = insights?.totalComments || 0;
-  const mediaPosts = insights?.mediaPosts || 0;
-  const freshPosts = insights?.freshPosts || 0;
+  const totalPosts = feedInsights?.totalPosts || 0;
+  const totalLikes = feedInsights?.totalLikes || 0;
+  const totalComments = feedInsights?.totalComments || 0;
+  const mediaPosts = feedInsights?.mediaPosts || 0;
+  const freshPosts = feedInsights?.freshPosts || 0;
   const engagementRate =
     totalPosts > 0 ? Math.round((totalLikes / totalPosts) * 10) / 10 : 0;
 
@@ -84,14 +101,21 @@ export default function DashboardRightSidebar({
     },
     {
       label: "Complete your profile",
-      done: Boolean(profileData?.bio && (profileData?.avatarUrl || profileData?.avatar)),
+      done: Boolean(
+        profileData?.bio && (profileData?.avatarUrl || profileData?.avatar),
+      ),
       action: () => navigate("/user/settings"),
     },
   ];
   const completedMissions = missions.filter((mission) => mission.done).length;
   const token = localStorage.getItem("token");
   let jwtPremium = false;
-  if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
+  if (
+    token &&
+    token !== "undefined" &&
+    token !== "null" &&
+    token.trim() !== ""
+  ) {
     try {
       const base64Url = token.split(".")[1];
       if (base64Url) {
@@ -105,7 +129,11 @@ export default function DashboardRightSidebar({
       console.log("Error decoding token in sidebar:", e);
     }
   }
-  const isPremiumUser = jwtPremium || profileData?.premium === true || profileData?.ispremium === true || profileData?.isPremium === true;
+  const isPremiumUser =
+    jwtPremium ||
+    profileData?.premium === true ||
+    profileData?.ispremium === true ||
+    profileData?.isPremium === true;
 
   // Followers + Following Count
   useEffect(() => {
@@ -153,7 +181,6 @@ export default function DashboardRightSidebar({
         );
 
         setCreators(filteredUsers.slice(0, 3));
-
       } catch (err) {
         console.log("FETCH CREATORS ERROR:", err);
       }
@@ -273,6 +300,7 @@ export default function DashboardRightSidebar({
             </div>
           )}
 
+          {/* Creator Pulse Analytics */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm font-extrabold text-slate-950">
@@ -322,7 +350,10 @@ export default function DashboardRightSidebar({
               ].map((metric) => {
                 const Icon = metric.icon;
                 return (
-                  <div key={metric.label} className="rounded-xl bg-slate-50 p-3">
+                  <div
+                    key={metric.label}
+                    className="rounded-xl bg-slate-50 p-3"
+                  >
                     <div
                       className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg ${metric.tone}`}
                     >
@@ -340,6 +371,7 @@ export default function DashboardRightSidebar({
             </div>
           </div>
 
+          {/* Growth Missions */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div>
@@ -438,6 +470,64 @@ export default function DashboardRightSidebar({
             )}
           </div>
 
+          {/* Top Creators (Dynamic display from currently active posts) */}
+          {feedInsights?.topCreators?.length > 0 && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm font-extrabold text-slate-950">
+                  Top creators
+                </p>
+                <Crown size={16} className="text-yellow-500" />
+              </div>
+
+              <div className="space-y-3">
+                {feedInsights.topCreators.slice(0, 3).map((creator, index) => {
+                  const initials = creator.username.slice(0, 2).toUpperCase();
+                  const color = [
+                    "from-yellow-400 to-amber-500",
+                    "from-fuchsia-400 to-pink-500",
+                    "from-cyan-400 to-sky-500",
+                  ][index % 3];
+
+                  return (
+                    <div
+                      key={creator.username}
+                      className="flex items-center justify-between gap-3"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div
+                          className={`
+                            flex h-9 w-9 shrink-0
+                            items-center justify-center
+                            rounded-xl
+                            bg-gradient-to-br ${color}
+                            text-xs font-black text-white shadow-sm
+                          `}
+                        >
+                          {initials}
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold text-slate-900">
+                            @{creator.username}
+                          </p>
+
+                          <p className="truncate text-[11px] text-slate-500 font-semibold">
+                            {creator.postCount} {creator.postCount === 1 ? "post" : "posts"} · {formatCount(creator.likes + creator.comments)} engagement
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className="text-xs font-black text-amber-500">
+                        #{index + 1}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Trending Topics */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
@@ -453,7 +543,7 @@ export default function DashboardRightSidebar({
                 <button
                   key={trend.tag}
                   type="button"
-                  onClick={() => onTopicSelect?.(trend.tag)}
+                  onClick={() => handleTopicClick(trend.tag)}
                   className="flex w-full items-center justify-between rounded-xl bg-slate-50 px-3 py-3 text-left transition hover:bg-orange-50"
                 >
                   <div>

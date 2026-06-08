@@ -15,10 +15,10 @@ import {
   BookOpen,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { followAPI } from "@/services/api";
 import UserSearch from "./UserSearch";
+import { useDashboard } from "./DashboardContext";
 
 const promptBank = [
   "What is one thing you discovered this week?",
@@ -26,55 +26,46 @@ const promptBank = [
   "What tool, idea, or habit helped you recently?",
 ];
 
-const fallbackTrends = [
-  { tag: "#RevHiveDaily", posts: 0, color: "bg-fuchsia-500" },
-  { tag: "#CreatorMode", posts: 0, color: "bg-sky-500" },
-  { tag: "#CampusBuzz", posts: 0, color: "bg-orange-500" },
-];
-
 const formatCount = (value) => {
   const count = Number(value) || 0;
-  if (count >= 1000) return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`;
+  if (count >= 1000)
+    return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`;
   return String(count);
 };
 
 export default function UserSidebar({
-  feedType,
-  setFeedType,
   profileData,
-  feedInsights,
-  activeTopic,
   onTopicSelect,
   onPromptSelect,
   onLogout,
 }) {
   const navigate = useNavigate();
-  const [followingUsers, setFollowingUsers] = useState([]);
-  const [loadingFollowing, setLoadingFollowing] = useState(false);
+
+  // Consume dashboard context values
+  const {
+    feedType,
+    setFeedType,
+    activeTopic,
+    setActiveTopic,
+    feedInsights,
+    trendingTags,
+    followingUsers,
+    loadingFollowing,
+  } = useDashboard();
 
   const todayPrompt = useMemo(() => {
     const dayIndex = new Date().getDate() % promptBank.length;
     return promptBank[dayIndex];
   }, []);
 
-  useEffect(() => {
-    if (!profileData?.id) return;
-
-    const fetchFollowing = async () => {
-      setLoadingFollowing(true);
-      try {
-        const response = await followAPI.getFollowing(profileData.id, 0, 5);
-        const data = response.data?.data?.content || response.data?.data || [];
-        setFollowingUsers(Array.isArray(data) ? data : []);
-      } catch {
-        setFollowingUsers([]);
-      } finally {
-        setLoadingFollowing(false);
-      }
-    };
-
-    fetchFollowing();
-  }, [profileData?.id]);
+  const handleTopicClick = (tag) => {
+    if (onTopicSelect) {
+      onTopicSelect(tag);
+    } else {
+      setActiveTopic(tag);
+      setFeedType("trending");
+    }
+  };
 
   const profileFields = [
     profileData?.username,
@@ -86,23 +77,22 @@ export default function UserSidebar({
   ];
   const profileStrength = Math.max(
     15,
-    Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100),
+    Math.round(
+      (profileFields.filter(Boolean).length / profileFields.length) * 100,
+    ),
   );
 
-  const trendingTags = useMemo(() => {
+  const trendingTagsList = useMemo(() => {
     const defaults = [
       { tag: "#RevHiveDaily", posts: 0 },
       { tag: "#CreatorMode", posts: 0 },
       { tag: "#CampusBuzz", posts: 0 },
     ];
 
-    const mergedTags = feedInsights?.trendingTags?.length > 0
-      ? [...feedInsights.trendingTags]
-      : [];
+    const mergedTags = trendingTags && trendingTags.length > 0 ? [...trendingTags] : [];
+    const tagsSet = new Set(mergedTags.map((t) => t.tag));
 
-    const tagsSet = new Set(mergedTags.map(t => t.tag));
-
-    defaults.forEach(def => {
+    defaults.forEach((def) => {
       if (!tagsSet.has(def.tag)) {
         const count = feedInsights?.allTagsMap?.[def.tag] || 0;
         mergedTags.push({ tag: def.tag, posts: count });
@@ -113,12 +103,14 @@ export default function UserSidebar({
 
     return mergedTags.slice(0, 3).map((trend, index) => ({
       ...trend,
-      color:
-        ["bg-fuchsia-500", "bg-sky-500", "bg-orange-500", "bg-emerald-500"][
-          index % 4
-        ],
+      color: [
+        "bg-fuchsia-500",
+        "bg-sky-500",
+        "bg-orange-500",
+        "bg-emerald-500",
+      ][index % 4],
     }));
-  }, [feedInsights]);
+  }, [trendingTags, feedInsights]);
 
   const communities = [
     {
@@ -207,7 +199,10 @@ export default function UserSidebar({
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setFeedType(item.id)}
+                    onClick={() => {
+                      setFeedType(item.id);
+                      setActiveTopic("");
+                    }}
                     className={`group flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm font-bold transition-all duration-300 ${
                       isActive
                         ? item.active
@@ -246,9 +241,7 @@ export default function UserSidebar({
                 <Zap size={16} className="text-yellow-200" />
               </div>
 
-              <p className="text-sm leading-5 text-white/85">
-                {todayPrompt}
-              </p>
+              <p className="text-sm leading-5 text-white/85">{todayPrompt}</p>
 
               <button
                 type="button"
@@ -268,17 +261,21 @@ export default function UserSidebar({
               </div>
 
               <div className="space-y-2">
-                {trendingTags.map((item) => (
+                {trendingTagsList.map((item) => (
                   <button
                     key={item.tag}
                     type="button"
-                    onClick={() => onTopicSelect?.(item.tag)}
+                    onClick={() => handleTopicClick(item.tag)}
                     className="group flex w-full items-center justify-between rounded-xl px-2 py-2 text-left transition hover:bg-white hover:shadow-sm"
                   >
                     <div>
-                      <p className={`text-sm font-bold transition group-hover:text-fuchsia-700 ${
-                        activeTopic === item.tag ? "text-fuchsia-700" : "text-slate-800"
-                      }`}>
+                      <p
+                        className={`text-sm font-bold transition group-hover:text-fuchsia-700 ${
+                          activeTopic === item.tag
+                            ? "text-fuchsia-700"
+                            : "text-slate-800"
+                        }`}
+                      >
                         {item.tag}
                       </p>
                       <p className="text-xs text-slate-500">
@@ -301,7 +298,9 @@ export default function UserSidebar({
                 </p>
 
                 <span className="rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-600">
-                  {loadingFollowing ? "Syncing" : `${followingUsers.length} active`}
+                  {loadingFollowing
+                    ? "Syncing"
+                    : `${followingUsers.length} active`}
                 </span>
               </div>
 
@@ -311,45 +310,46 @@ export default function UserSidebar({
                 </p>
               ) : (
                 <div className="space-y-3">
-                {followingUsers.map((friend, index) => {
-                  const name = friend.username || friend.name || `User ${friend.id}`;
-                  const color = [
-                    "from-fuchsia-500 to-pink-500",
-                    "from-cyan-500 to-sky-500",
-                    "from-orange-500 to-amber-500",
-                    "from-violet-500 to-indigo-500",
-                  ][index % 4];
-                  return (
-                  <div
-                    key={friend.id || name}
-                    className="flex items-center justify-between rounded-xl p-1 transition hover:bg-slate-50"
-                  >
-                    <div className="flex items-center gap-3">
+                  {followingUsers.map((friend, index) => {
+                    const name = friend.username || `User ${friend.id}`;
+                    const color = [
+                      "from-fuchsia-500 to-pink-500",
+                      "from-cyan-500 to-sky-500",
+                      "from-orange-500 to-amber-500",
+                      "from-violet-500 to-indigo-500",
+                    ][index % 4];
+                    return (
                       <div
-                        className={`relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${color} text-xs font-bold text-white shadow-sm`}
+                        key={friend.id}
+                        className="flex items-center justify-between rounded-xl p-1 transition hover:bg-slate-50"
                       >
-                        {name.charAt(0).toUpperCase()}
-                        <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
-                      </div>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${color} text-xs font-bold text-white shadow-sm`}
+                          >
+                            {name.charAt(0).toUpperCase()}
+                            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+                          </div>
 
-                      <div>
-                        <p className="text-sm font-bold text-slate-800">
-                          {name}
-                        </p>
-                        <p className="text-xs text-slate-500">Active now</p>
-                      </div>
-                    </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800">
+                              {name}
+                            </p>
+                            <p className="text-xs text-slate-500">Active now</p>
+                          </div>
+                        </div>
 
-                    <button
-                      type="button"
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600 transition hover:bg-cyan-500 hover:text-white"
-                    >
-                      <MessageCircle size={15} />
-                    </button>
-                  </div>
-                  );
-                })}
-              </div>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/messages/${friend.id}`)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600 transition hover:bg-cyan-500 hover:text-white"
+                        >
+                          <MessageCircle size={15} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
@@ -369,7 +369,7 @@ export default function UserSidebar({
                     <button
                       key={community.name}
                       type="button"
-                      onClick={() => onTopicSelect?.(community.tag)}
+                      onClick={() => handleTopicClick(community.tag)}
                       className={`rounded-xl border border-white bg-white p-3 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 ${community.hover}`}
                     >
                       <div

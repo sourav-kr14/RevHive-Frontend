@@ -48,8 +48,8 @@ export default function App() {
           <Route path="premium" element={<AdminPremium />} />
           <Route path="moderation" element={<Moderation />} />
         </Route>
-
         <Route path="/messages" element={<MessagingLayout />} />
+        <Route path="/messages/:userId" element={<MessagingLayout />} />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />

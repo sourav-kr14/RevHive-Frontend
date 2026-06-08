@@ -35,14 +35,16 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
           setLoading(false);
           return;
         }
+        console.log("followedIds:", followedIds);
 
         // 2. Fetch profile details for each followed user ID in parallel
-        const profilePromises = followedIds.map(async (id) => {
+        const profilePromises = followedIds.map(async (user) => {
           try {
-            const profileRes = await authAPI.getProfile(id);
+            const profileRes = await authAPI.getProfile(user.id);
+
             return profileRes.data; // profile response fields: id, username, bio, avatarUrl
           } catch (err) {
-            console.error(`Failed to fetch profile for user ${id}:`, err);
+            console.error(`Failed to fetch profile for user ${user.id}:`, err);
             return null;
           }
         });
@@ -61,7 +63,7 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
   }, [currentUser?.id]);
 
   const filteredUsers = users.filter((u) =>
-    u.username?.toLowerCase().includes(searchQuery.toLowerCase())
+    u.username?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -95,7 +97,9 @@ export default function ChatList({ setSelectedUser, activeUserId }) {
           <div className="text-center text-rose-500 text-sm p-4">{error}</div>
         ) : filteredUsers.length === 0 ? (
           <div className="text-center text-slate-500 text-sm p-4 leading-relaxed">
-            {searchQuery ? "No matches found" : "Follow users to start messaging them!"}
+            {searchQuery
+              ? "No matches found"
+              : "Follow users to start messaging them!"}
           </div>
         ) : (
           filteredUsers.map((user) => {

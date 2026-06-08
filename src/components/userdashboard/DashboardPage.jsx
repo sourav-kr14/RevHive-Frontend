@@ -5,32 +5,39 @@ import { useOutletContext, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import DashboardRightSidebar from "./DashboardRightSidebar";
 import CommandPalette from "./CommandPalette";
+import { DashboardProvider, useDashboard } from "./DashboardContext";
 
 export default function DashboardPage() {
   const { profileData } = useOutletContext();
-
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [feedType, setFeedType] = useState("forYou");
-  const [activeTopic, setActiveTopic] = useState("");
-  const [composeDraft, setComposeDraft] = useState({ id: 0, text: "" });
-  const [feedInsights, setFeedInsights] = useState({
-    totalPosts: 0,
-    mediaPosts: 0,
-    totalLikes: 0,
-    freshPosts: 0,
-    trendingTags: [],
-    topCreators: [],
-  });
-
   const navigate = useNavigate();
-
-  const handlePostCreated = () => {
-    setRefreshTrigger((prev) => prev + 1);
-  };
 
   const handleLogout = () => {
     localStorage.clear();
     navigate("/signin");
+  };
+
+  return (
+    <DashboardProvider profileData={profileData}>
+      <DashboardContent profileData={profileData} onLogout={handleLogout} />
+    </DashboardProvider>
+  );
+}
+
+function DashboardContent({ profileData, onLogout }) {
+  const {
+    feedType,
+    setFeedType,
+    activeTopic,
+    setActiveTopic,
+    feedInsights,
+    trendingTags,
+    triggerRefresh,
+  } = useDashboard();
+
+  const [composeDraft, setComposeDraft] = useState({ id: 0, text: "" });
+
+  const handlePostCreated = () => {
+    triggerRefresh();
   };
 
   return (
@@ -52,7 +59,7 @@ export default function DashboardPage() {
           onPromptSelect={(prompt) =>
             setComposeDraft({ id: Date.now(), text: prompt })
           }
-          onLogout={handleLogout}
+          onLogout={onLogout}
         />
 
         <main className="min-w-0">
@@ -64,24 +71,12 @@ export default function DashboardPage() {
           />
 
           <div className="mt-6">
-            <UserFeed
-              profileData={profileData}
-              refreshTrigger={refreshTrigger}
-              feedType={feedType}
-              activeTopic={activeTopic}
-              onTopicClear={() => setActiveTopic("")}
-              onFeedStatsChange={setFeedInsights}
-              onPromptSelect={(prompt) =>
-                setComposeDraft({ id: Date.now(), text: prompt })
-              }
-            />
+            <UserFeed profileData={profileData} />
           </div>
         </main>
 
         <DashboardRightSidebar
           profileData={profileData}
-          insights={feedInsights}
-          trends={feedInsights.trendingTags}
           onTopicSelect={(topic) => {
             setActiveTopic(topic);
             setFeedType("trending");
@@ -93,7 +88,7 @@ export default function DashboardPage() {
       </div>
 
       <CommandPalette
-        trends={feedInsights.trendingTags}
+        trends={trendingTags}
         onCreatePost={(prompt) =>
           setComposeDraft({
             id: Date.now(),
@@ -112,3 +107,4 @@ export default function DashboardPage() {
     </>
   );
 }
+
