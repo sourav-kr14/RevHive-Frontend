@@ -43,20 +43,24 @@ const Moderation = () => {
   }, []);
   const fetchModerationData = async () => {
     try {
+      console.log("[Dashboard Fetch] Fetching moderation results...");
       const response = await getModerationResults();
-
+      console.log("[Dashboard Fetch] Received moderation results:", response.data);
       setModerationData(response.data);
+
       const statsResponse = await getModerationStats();
-
+      console.log("[Dashboard Fetch] Received stats:", statsResponse.data);
       setStats(statsResponse.data);
-      const activityResponse = await getRecentActivity();
 
+      const activityResponse = await getRecentActivity();
+      console.log("[Dashboard Fetch] Received recent activity:", activityResponse.data);
       setRecentActivity(activityResponse.data);
       
       const analyticsResponse = await getAnalytics();
+      console.log("[Dashboard Fetch] Received analytics:", analyticsResponse.data);
       setChartData(analyticsResponse.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("[Dashboard Fetch] Fetching moderation data failed:", error);
     } finally {
       setLoading(false);
     }

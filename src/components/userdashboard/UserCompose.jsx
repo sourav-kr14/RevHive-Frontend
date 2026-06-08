@@ -7,6 +7,13 @@ import {
   X,
   Video,
   Send,
+  FileText,
+  Sparkles,
+  Hash,
+  FileSearch,
+  ShieldCheck,
+  Bot,
+  Lock,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { postAPI } from "../../services/api";
@@ -144,14 +151,19 @@ export default function DashboardCompose({
     setAiType(type);
     setAiResult("");
 
-    try {
-      const res = await callAI({
-        type,
-        content: postText || "social media post",
-      });
+    const payload = {
+      type,
+      content: postText || "social media post",
+      userId: profileData?.id,
+    };
+    console.log("[Frontend Request Payload] Sending AI request:", payload);
 
+    try {
+      const res = await callAI(payload);
+      console.log("[Frontend Request Payload] Received AI response:", res.data);
       setAiResult(res.data.result);
-    } catch {
+    } catch (err) {
+      console.error("[Frontend Request Payload] AI request failed:", err);
       setAiResult("Something went wrong");
     }
 
@@ -444,42 +456,47 @@ export default function DashboardCompose({
 
         <div className="mt-4 flex flex-wrap gap-2">
           {[
-            { label: "Improve caption", type: "caption" },
-            { label: "Generate tags", type: "hashtags" },
-            { label: "Summarize", type: "summarize" },
-            { label: "Safety check", type: "moderate" },
-          ].map((btn) => (
-            <button
-              key={btn.label}
-              type="button"
-              disabled={!isPremium || loadingAI}
-              onClick={() => {
-                if (!isPremium) return;
+            { label: "Improve", type: "caption", icon: Sparkles },
+            { label: "Tags", type: "hashtags", icon: Hash },
+            { label: "Summary", type: "summarize", icon: FileText },
+            { label: "Safety", type: "moderate", icon: ShieldCheck },
+          ].map((btn) => {
+            const Icon = btn.icon;
 
-                btn.type === "hashtags"
-                  ? generateHashtags()
-                  : handleAI(btn.type);
-              }}
-              className={`rounded-full border px-3 py-1.5 text-xs font-bold transition flex items-center gap-2 ${
-                !isPremium
-                  ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                  : loadingAI
+            return (
+              <button
+                key={btn.type}
+                type="button"
+                disabled={!isPremium || loadingAI}
+                onClick={() => {
+                  if (!isPremium) return;
+
+                  btn.type === "hashtags"
+                    ? generateHashtags()
+                    : handleAI(btn.type);
+                }}
+                className={`rounded-full border px-3 py-1.5 text-xs font-bold transition flex items-center gap-2 ${
+                  !isPremium || loadingAI
                     ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
                     : "border-slate-200 bg-white text-slate-600 hover:border-fuchsia-200 hover:bg-fuchsia-50 hover:text-fuchsia-700"
-              }`}
-            >
-              {!isPremium && "🔒"}
+                }`}
+              >
+                {!isPremium && <Lock size={13} />}
 
-              {loadingAI && aiType === btn.type ? (
-                <>
-                  <Loader size={13} className="animate-spin" />
-                  Working
-                </>
-              ) : (
-                btn.label
-              )}
-            </button>
-          ))}
+                {loadingAI && aiType === btn.type ? (
+                  <>
+                    <Loader size={13} className="animate-spin" />
+                    Working
+                  </>
+                ) : (
+                  <>
+                    <Icon size={13} />
+                    {btn.label}
+                  </>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
