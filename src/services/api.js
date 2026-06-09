@@ -104,6 +104,9 @@ export const postAPI = {
   deletePost: (postId) => api.delete(`/posts/${postId}`),
 
   getPostsCount: (userId) => api.get(`/posts/user/${userId}/count`),
+
+  searchPosts: (query, page = 0, size = 10) =>
+    api.get("/posts/search", { params: { q: query, page, size } }),
 };
 
 // ==================== LIKES ====================

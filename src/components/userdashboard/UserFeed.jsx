@@ -8,8 +8,9 @@ import {
   Image as ImageIcon,
   Trash2,
   Pencil,
+  Search,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDashboard } from "./DashboardContext";
 import { postAPI } from "../../services/api";
 
@@ -37,11 +38,21 @@ export default function UserFeed({
     deletePostLocally,
     followingStatus,
     followLoading,
+    searchPosts,
   } = useDashboard();
 
   const [editingPost, setEditingPost] = useState(null);
   const [showReport, setShowReport] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      searchPosts(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, searchPosts]);
 
   const handleDeletePost = async (postId) => {
     toast.custom(
@@ -161,13 +172,26 @@ export default function UserFeed({
         <div className="mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="mb-2 flex w-fit items-center gap-2 rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-bold text-fuchsia-700">
+              {/* <div className="mb-2 flex w-fit items-center gap-2 rounded-full bg-fuchsia-50 px-3 py-1 text-xs font-bold text-fuchsia-700">
                 Live feed
-              </div>
+              </div> */}
               <h2 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
                 {getFeedTitle()}
               </h2>
               <p className="mt-1 text-sm text-slate-500">{getFeedSubtitle()}</p>
+            </div>
+            <div className="relative">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="text"
+                placeholder="Search posts..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-violet-500 sm:w-64"
+              />
             </div>
             <div className="flex rounded-xl bg-slate-100 p-1">
               <button

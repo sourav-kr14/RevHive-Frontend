@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { postAPI, followAPI, bookmarkAPI, likeAPI } from "@/services/api";
 
 const DashboardContext = createContext(null);
@@ -41,15 +49,15 @@ export function DashboardProvider({ children, profileData }) {
       const response = await followAPI.getFollowing(profileData.id, 0, 100);
       const data = response.data?.data || response.data || [];
       setFollowingUsers(Array.isArray(data) ? data : []);
-      
+
       // Update follow status map based on the fetched list
       const statusMap = {};
-      data.forEach(user => {
+      data.forEach((user) => {
         if (user.id) {
           statusMap[user.id] = true;
         }
       });
-      setFollowingStatus(prev => ({ ...prev, ...statusMap }));
+      setFollowingStatus((prev) => ({ ...prev, ...statusMap }));
     } catch (err) {
       console.error("Error fetching following users:", err);
       setFollowingUsers([]);
@@ -81,17 +89,24 @@ export function DashboardProvider({ children, profileData }) {
       }
 
       const rawData = response.data?.data?.data;
-      const content = rawData?.content || response.data?.data?.content || response.data?.content || [];
-      const validPosts = content.filter((p) => p?.id).map((post) => {
-        const username = post.username || (post.userId ? `User_${post.userId}` : "Unknown");
-        return {
-          ...post,
-          user: {
-            id: post.userId,
-            username,
-          },
-        };
-      });
+      const content =
+        rawData?.content ||
+        response.data?.data?.content ||
+        response.data?.content ||
+        [];
+      const validPosts = content
+        .filter((p) => p?.id)
+        .map((post) => {
+          const username =
+            post.username || (post.userId ? `User_${post.userId}` : "Unknown");
+          return {
+            ...post,
+            user: {
+              id: post.userId,
+              username,
+            },
+          };
+        });
 
       if (!isMounted.current) return;
       setPosts(validPosts);
@@ -104,7 +119,11 @@ export function DashboardProvider({ children, profileData }) {
 
         validPosts.forEach((post) => {
           const authorId = post.user?.id;
-          if (authorId && authorId !== currentUserId && currentStatus[authorId] === undefined) {
+          if (
+            authorId &&
+            authorId !== currentUserId &&
+            currentStatus[authorId] === undefined
+          ) {
             authorsToFetch.push(authorId);
           }
         });
@@ -113,12 +132,15 @@ export function DashboardProvider({ children, profileData }) {
           await Promise.allSettled(
             authorsToFetch.map(async (authorId) => {
               try {
-                const res = await followAPI.isFollowing(profileData.id, authorId);
+                const res = await followAPI.isFollowing(
+                  profileData.id,
+                  authorId,
+                );
                 newStatuses[authorId] = res.data?.isFollowing ?? false;
               } catch {
                 newStatuses[authorId] = false;
               }
-            })
+            }),
           );
           if (isMounted.current) {
             setFollowingStatus((prev) => ({ ...prev, ...newStatuses }));
@@ -140,6 +162,89 @@ export function DashboardProvider({ children, profileData }) {
     fetchFeed();
   }, [fetchFeed]);
 
+  const searchPosts = useCallback(
+    async (query) => {
+      if (!query || !query.trim()) {
+        await fetchFeed();
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await postAPI.searchPosts(query);
+        const rawData = response.data?.data?.data || response.data?.data;
+        const content =
+          rawData?.content ||
+          response.data?.data?.content ||
+          response.data?.content ||
+          [];
+        const validPosts = content
+          .filter((p) => p?.id)
+          .map((post) => {
+            const username =
+              post.username ||
+              (post.userId ? `User_${post.userId}` : "Unknown");
+            return {
+              ...post,
+              user: {
+                id: post.userId,
+                username,
+              },
+            };
+          });
+
+        if (!isMounted.current) return;
+        setPosts(validPosts);
+
+        // Check following status for each post author if not cached yet
+        if (profileData?.id && validPosts.length > 0) {
+          const currentStatus = followingStatusRef.current;
+          const newStatuses = {};
+          const authorsToFetch = [];
+
+          validPosts.forEach((post) => {
+            const authorId = post.user?.id;
+            if (
+              authorId &&
+              authorId !== currentUserId &&
+              currentStatus[authorId] === undefined
+            ) {
+              authorsToFetch.push(authorId);
+            }
+          });
+
+          if (authorsToFetch.length > 0) {
+            await Promise.allSettled(
+              authorsToFetch.map(async (authorId) => {
+                try {
+                  const res = await followAPI.isFollowing(
+                    profileData.id,
+                    authorId,
+                  );
+                  newStatuses[authorId] = res.data?.isFollowing ?? false;
+                } catch {
+                  newStatuses[authorId] = false;
+                }
+              }),
+            );
+            if (isMounted.current) {
+              setFollowingStatus((prev) => ({ ...prev, ...newStatuses }));
+            }
+          }
+        }
+      } catch (err) {
+        if (isMounted.current) {
+          setError(err.message || "Failed to search posts");
+        }
+      } finally {
+        if (isMounted.current) {
+          setLoading(false);
+        }
+      }
+    },
+    [fetchFeed, profileData?.id, currentUserId],
+  );
+
   // Filtered and sorted posts feed (Memoized)
   const filteredPosts = useMemo(() => {
     let result = [...posts];
@@ -149,7 +254,7 @@ export function DashboardProvider({ children, profileData }) {
       result = result.filter(
         (post) =>
           followingStatus[post.user?.id] === true ||
-          Number(post.user?.id) === Number(currentUserId)
+          Number(post.user?.id) === Number(currentUserId),
       );
     }
 
@@ -158,7 +263,9 @@ export function DashboardProvider({ children, profileData }) {
       result = result.filter((post) => {
         const text = post.content || "";
         const tags = text.match(/#\w+/g) || [];
-        return tags.some((tag) => tag.toLowerCase() === activeTopic.toLowerCase());
+        return tags.some(
+          (tag) => tag.toLowerCase() === activeTopic.toLowerCase(),
+        );
       });
     }
 
@@ -185,7 +292,10 @@ export function DashboardProvider({ children, profileData }) {
     const total = filteredPosts.length;
     const media = filteredPosts.filter((p) => p.imageUrl || p.videoUrl).length;
     const likes = filteredPosts.reduce((sum, p) => sum + (p.likeCount || 0), 0);
-    const comments = filteredPosts.reduce((sum, p) => sum + (p.commentCount || 0), 0);
+    const comments = filteredPosts.reduce(
+      (sum, p) => sum + (p.commentCount || 0),
+      0,
+    );
 
     const now = new Date();
     const fresh = filteredPosts.filter((p) => {
@@ -200,7 +310,9 @@ export function DashboardProvider({ children, profileData }) {
     filteredPosts.forEach((post) => {
       const text = post.content || "";
       const matches = text.match(/#\w+/g) || [];
-      const uniqueTags = Array.from(new Set(matches.map((t) => t.toLowerCase())));
+      const uniqueTags = Array.from(
+        new Set(matches.map((t) => t.toLowerCase())),
+      );
       uniqueTags.forEach((tagLower) => {
         const originalTag = matches.find((m) => m.toLowerCase() === tagLower);
         if (tagsMap[tagLower]) {
@@ -211,8 +323,9 @@ export function DashboardProvider({ children, profileData }) {
       });
     });
 
-    const trendingTags = Object.values(tagsMap)
-      .sort((a, b) => b.posts - a.posts);
+    const trendingTags = Object.values(tagsMap).sort(
+      (a, b) => b.posts - a.posts,
+    );
 
     const allTagsMap = {};
     Object.keys(tagsMap).forEach((key) => {
@@ -222,7 +335,8 @@ export function DashboardProvider({ children, profileData }) {
     // Calculate Top Creators dynamically based on visible posts
     const creatorsMap = {};
     filteredPosts.forEach((post) => {
-      const username = post.user?.username || `User_${post.user?.id || "Unknown"}`;
+      const username =
+        post.user?.username || `User_${post.user?.id || "Unknown"}`;
       const userId = post.user?.id;
       if (!username) return;
       if (!creatorsMap[username]) {
@@ -238,7 +352,8 @@ export function DashboardProvider({ children, profileData }) {
       creatorsMap[username].postCount += 1;
       creatorsMap[username].likes += post.likeCount || 0;
       creatorsMap[username].comments += post.commentCount || 0;
-      creatorsMap[username].engagement += (post.likeCount || 0) + (post.commentCount || 0);
+      creatorsMap[username].engagement +=
+        (post.likeCount || 0) + (post.commentCount || 0);
     });
 
     const topCreators = Object.values(creatorsMap)
@@ -260,108 +375,131 @@ export function DashboardProvider({ children, profileData }) {
   // Synchronized Handlers
 
   // Optimistic Like synchronization
-  const handleLike = useCallback(async (postId) => {
-    const post = posts.find((p) => p.id === postId);
-    if (!post || !currentUserId || likeLoading[postId]) return;
+  const handleLike = useCallback(
+    async (postId) => {
+      const post = posts.find((p) => p.id === postId);
+      if (!post || !currentUserId || likeLoading[postId]) return;
 
-    setLikeLoading((prev) => ({ ...prev, [postId]: true }));
-    const previousLiked = post.liked;
-    const previousCount = post.likeCount || 0;
+      setLikeLoading((prev) => ({ ...prev, [postId]: true }));
+      const previousLiked = post.liked;
+      const previousCount = post.likeCount || 0;
 
-    // Optimistic Update
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              liked: !p.liked,
-              likeCount: (p.likeCount || 0) + (p.liked ? -1 : 1),
-            }
-          : p
-      )
-    );
-
-    try {
-      if (!previousLiked) {
-        await likeAPI.addLike(currentUserId, postId);
-      } else {
-        await likeAPI.removeLike(currentUserId, postId);
-      }
-
-      // Fetch actual count to ensure sync with server
-      const countResponse = await likeAPI.getLikeCount(postId);
-      const newCount = countResponse.data?.likeCount ?? 0;
-      setPosts((prev) =>
-        prev.map((p) => (p.id === postId ? { ...p, likeCount: newCount } : p))
-      );
-    } catch (err) {
-      console.error("Error toggling like:", err);
-      // Rollback
+      // Optimistic Update
       setPosts((prev) =>
         prev.map((p) =>
           p.id === postId
-            ? { ...p, liked: previousLiked, likeCount: previousCount }
-            : p
-        )
+            ? {
+                ...p,
+                liked: !p.liked,
+                likeCount: (p.likeCount || 0) + (p.liked ? -1 : 1),
+              }
+            : p,
+        ),
       );
-    } finally {
-      setLikeLoading((prev) => ({ ...prev, [postId]: false }));
-    }
-  }, [posts, currentUserId, likeLoading]);
+
+      try {
+        if (!previousLiked) {
+          await likeAPI.addLike(currentUserId, postId);
+        } else {
+          await likeAPI.removeLike(currentUserId, postId);
+        }
+
+        // Fetch actual count to ensure sync with server
+        const countResponse = await likeAPI.getLikeCount(postId);
+        const newCount = countResponse.data?.likeCount ?? 0;
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === postId ? { ...p, likeCount: newCount } : p,
+          ),
+        );
+      } catch (err) {
+        console.error("Error toggling like:", err);
+        // Rollback
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === postId
+              ? { ...p, liked: previousLiked, likeCount: previousCount }
+              : p,
+          ),
+        );
+      } finally {
+        setLikeLoading((prev) => ({ ...prev, [postId]: false }));
+      }
+    },
+    [posts, currentUserId, likeLoading],
+  );
 
   // Real-time Comment Count synchronization
   const updatePostCommentCount = useCallback((postId, newCount) => {
     setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, commentCount: newCount } : p))
+      prev.map((p) => (p.id === postId ? { ...p, commentCount: newCount } : p)),
     );
   }, []);
 
   // Follow Toggle synchronizing left/right sidebars and feed cards
-  const handleFollowToggle = useCallback(async (authorId) => {
-    if (!authorId || !profileData?.id) return;
-    setFollowLoading((prev) => ({ ...prev, [authorId]: true }));
-    const currentlyFollowing = followingStatus[authorId];
+  const handleFollowToggle = useCallback(
+    async (authorId) => {
+      if (!authorId || !profileData?.id) return;
+      setFollowLoading((prev) => ({ ...prev, [authorId]: true }));
+      const currentlyFollowing = followingStatus[authorId];
 
-    try {
-      if (currentlyFollowing) {
-        await followAPI.unfollowUser(profileData.id, authorId);
-      } else {
-        await followAPI.followUser(profileData.id, authorId);
+      try {
+        if (currentlyFollowing) {
+          await followAPI.unfollowUser(profileData.id, authorId);
+        } else {
+          await followAPI.followUser(profileData.id, authorId);
+        }
+
+        setFollowingStatus((prev) => ({
+          ...prev,
+          [authorId]: !currentlyFollowing,
+        }));
+        // Fetch fresh list of online following users
+        fetchFollowingUsers();
+      } catch (err) {
+        console.error("Follow toggling failed:", err);
+        alert("Follow operation failed");
+      } finally {
+        setFollowLoading((prev) => ({ ...prev, [authorId]: false }));
       }
-      
-      setFollowingStatus((prev) => ({ ...prev, [authorId]: !currentlyFollowing }));
-      // Fetch fresh list of online following users
-      fetchFollowingUsers();
-    } catch (err) {
-      console.error("Follow toggling failed:", err);
-      alert("Follow operation failed");
-    } finally {
-      setFollowLoading((prev) => ({ ...prev, [authorId]: false }));
-    }
-  }, [profileData?.id, followingStatus, fetchFollowingUsers]);
+    },
+    [profileData?.id, followingStatus, fetchFollowingUsers],
+  );
 
   // Bookmark toggling
-  const handleBookmark = useCallback(async (postId) => {
-    const post = posts.find((p) => p.id === postId);
-    if (!post || !profileData?.id) return;
-    try {
-      if (post.bookmarked) {
-        await bookmarkAPI.removeBookmark(profileData.id, postId);
-      } else {
-        await bookmarkAPI.addBookmark(profileData.id, postId);
+  const handleBookmark = useCallback(
+    async (postId) => {
+      const post = posts.find((p) => p.id === postId);
+      if (!post || !profileData?.id) return;
+      try {
+        if (post.bookmarked) {
+          await bookmarkAPI.removeBookmark(profileData.id, postId);
+        } else {
+          await bookmarkAPI.addBookmark(profileData.id, postId);
+        }
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === postId ? { ...p, bookmarked: !p.bookmarked } : p,
+          ),
+        );
+      } catch (err) {
+        console.error("Bookmark operation failed:", err);
       }
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId ? { ...p, bookmarked: !p.bookmarked } : p
-        )
-      );
-    } catch (err) {
-      console.error("Bookmark operation failed:", err);
-    }
-  }, [posts, profileData?.id]);
+    },
+    [posts, profileData?.id],
+  );
 
   const updatePostLocally = useCallback((updatedPost) => {
-    setPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === updatedPost.id
+          ? {
+              ...p,
+              ...updatedPost,
+            }
+          : p,
+      ),
+    );
   }, []);
 
   const deletePostLocally = useCallback((postId) => {
@@ -397,6 +535,7 @@ export function DashboardProvider({ children, profileData }) {
     followingUsers,
     loadingFollowing,
     followLoading,
+    searchPosts,
   };
 
   return (

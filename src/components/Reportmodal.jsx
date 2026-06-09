@@ -14,8 +14,8 @@ export default function ReportModal({ isOpen, onClose, targetType, targetId }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  console.log("targetId:", targetId);
-  console.log("targetType:", targetType);
+  // console.log("targetId:", targetId);
+  // console.log("targetType:", targetType);
   const handleReport = async (reason) => {
     try {
       setLoading(true);

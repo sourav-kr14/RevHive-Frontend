@@ -21,8 +21,9 @@ export default function EditPostModal({ post, onClose, onUpdate }) {
 
     try {
       const response = await postAPI.updatePost(post.id, content, imageUrl);
+      // console.log(response.data.data.data);
 
-      onUpdate(response.data);
+      onUpdate(response.data.data.data);
       onClose();
     } catch (error) {
       console.error("Error updating post:", error);

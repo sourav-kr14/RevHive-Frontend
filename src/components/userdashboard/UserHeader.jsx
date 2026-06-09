@@ -12,6 +12,7 @@ import {
   LogOut,
   Search,
   ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { notificationAPI, chatAPI } from "../../services/api";
@@ -86,7 +87,10 @@ export default function UserHeader({ setActiveNav, profileData }) {
       try {
         const convRes = await chatAPI.getConversations(currentUserId);
         const conversations = convRes.data?.data || convRes.data || [];
-        const totalUnread = conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+        const totalUnread = conversations.reduce(
+          (acc, c) => acc + (c.unreadCount || 0),
+          0,
+        );
         setUnreadMessagesCount(totalUnread);
       } catch (err) {
         console.error("Failed to fetch initial unread messages count:", err);
@@ -104,7 +108,8 @@ export default function UserHeader({ setActiveNav, profileData }) {
       }
     };
     window.addEventListener("unread-count-updated", handleUpdate);
-    return () => window.removeEventListener("unread-count-updated", handleUpdate);
+    return () =>
+      window.removeEventListener("unread-count-updated", handleUpdate);
   }, []);
 
   // WebSocket real-time updates for unread count when NOT on /messages
@@ -269,9 +274,8 @@ export default function UserHeader({ setActiveNav, profileData }) {
             );
           })}
         </nav>
-
         <div className="hidden min-w-[360px] items-center justify-end gap-3 lg:flex">
-          <div className="relative w-[220px] xl:w-[280px]">
+          {/* <div className="relative w-[220px] xl:w-[280px]">
             <Search
               size={17}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -281,51 +285,92 @@ export default function UserHeader({ setActiveNav, profileData }) {
               placeholder="Search RevHive"
               className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-900 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
             />
-          </div>
-
+          </div> */}
           {userIsPremium ? (
             <button
               className="
-    relative overflow-hidden
-    rounded-2xl border border-yellow-400/30
-    bg-white/10 backdrop-blur-xl
-    px-5 py-2.5
-    text-sm font-semibold text-yellow-300
-    shadow-[0_8px_32px_rgba(250,204,21,0.18)]
-    transition-all duration-300
-    hover:scale-[1.03]
-    hover:bg-yellow-400/10
-    hover:shadow-[0_12px_40px_rgba(250,204,21,0.28)]
-  "
+      group relative overflow-hidden
+      rounded-4xl p-[1px]
+    border-2 border-gray-100
+ 
+      transition-all duration-300
+      hover:scale-105
+    "
             >
-              <span className="flex items-center gap-2 text-black font-medium">
-                Premium
-              </span>
+              <div
+                className="
+        flex items-center gap-2
+        rounded-xl
+        bg-white
+        px-2.5 py-2
+      "
+              >
+                <Crown size={16} className="text-red-700" />
 
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-white/5 to-yellow-300/10" />
+                <span className="font-semibold text-black">Premium Active</span>
+
+                <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+              </div>
+
+              <div className="absolute inset-0 -z-10 bg-yellow-400/20 blur-xl" />
             </button>
           ) : (
             <button
               onClick={() => navigate("/premium")}
               className="
-    relative overflow-hidden
-    rounded-2xl border border-white/10
-    bg-white/10 backdrop-blur-xl
-    px-5 py-2.5
-    text-sm font-semibold text-white
-    shadow-[0_8px_32px_rgba(139,92,246,0.22)]
-    transition-all duration-300
-    hover:scale-[1.03]
-    hover:border-purple-400/30
-    hover:bg-white/15
-    hover:shadow-[0_12px_40px_rgba(139,92,246,0.35)]
-  "
+      group relative overflow-hidden
+      rounded-xl p-[1px]
+      bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500
+      shadow-[0_10px_35px_rgba(139,92,246,0.35)]
+      transition-all duration-300
+      hover:scale-105
+      hover:shadow-[0_15px_50px_rgba(139,92,246,0.5)]
+    "
             >
-              <span className="relative z-10 flex items-center gap-2">
-                Upgrade
-              </span>
+              <div
+                className="
+        relative flex items-center gap-2
+        rounded-xl
+        bg-[#0f172a]
+        px-5 py-2.5
+      "
+              >
+                <Sparkles
+                  size={16}
+                  className="text-violet-400 transition-transform group-hover:rotate-12"
+                />
 
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/10 to-cyan-400/20" />
+                <span className="font-semibold text-white">Upgrade Pro</span>
+
+                <span
+                  className="
+          rounded-full
+          bg-violet-500/15
+          px-2 py-0.5
+          text-[10px]
+          font-bold
+          uppercase
+          tracking-wider
+          text-violet-300
+        "
+                >
+                  New
+                </span>
+              </div>
+
+              <div
+                className="
+        absolute inset-0
+        translate-x-[-100%]
+        bg-gradient-to-r
+        from-transparent
+        via-white/20
+        to-transparent
+        transition-transform
+        duration-1000
+        group-hover:translate-x-[100%]
+      "
+              />
             </button>
           )}
           <div className="relative" ref={dropdownRef}>
@@ -347,7 +392,10 @@ export default function UserHeader({ setActiveNav, profileData }) {
               )}
 
               <span className="max-w-[110px] truncate">@{userName}</span>
-              <ChevronDown size={15} className={`text-slate-400 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+              <ChevronDown
+                size={15}
+                className={`text-slate-400 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+              />
             </button>
 
             <AnimatePresence>
@@ -380,7 +428,7 @@ export default function UserHeader({ setActiveNav, profileData }) {
                     <Settings size={16} className="text-slate-500" />
                     Settings
                   </button>
-{/* 
+                  {/* 
                   <button
                     onClick={() => {
                       navigate("/premium");
@@ -391,7 +439,6 @@ export default function UserHeader({ setActiveNav, profileData }) {
                     <Crown size={16} className="text-amber-500" />
                     Premium
                   </button> */}
-                  
 
                   <div className="h-px bg-slate-100 my-1" />
 
@@ -514,7 +561,9 @@ export default function UserHeader({ setActiveNav, profileData }) {
                         )}
                         {item.id === "messaging" && unreadMessagesCount > 0 && (
                           <span className="absolute -right-2 -top-2 flex min-w-4 h-4 px-1 rounded-full bg-rose-500 text-[9px] font-bold text-white items-center justify-center ring-2 ring-white shadow-[0_0_8px_rgba(244,63,94,0.8)]">
-                            {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
+                            {unreadMessagesCount > 99
+                              ? "99+"
+                              : unreadMessagesCount}
                           </span>
                         )}
                       </div>
