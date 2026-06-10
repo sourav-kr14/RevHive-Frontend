@@ -123,7 +123,6 @@ const Signup = () => {
       }
 
       toast.success("OTP sent to your email");
-
       setTimeout(() => {
         navigate("/verify-otp", {
           state: {
@@ -439,13 +438,19 @@ const Signup = () => {
 
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="password-btn"
                       aria-label={
                         showConfirmPassword ? "Hide password" : "Show password"
                       }
                     >
-                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showConfirmPassword ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
                     </button>
                   </div>
                   {errors.confirmPassword && (

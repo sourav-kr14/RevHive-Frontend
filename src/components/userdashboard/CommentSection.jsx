@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { Send, Trash2, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { commentAPI } from "../../services/api";
-
+import { toast } from "sonner";
 export default function CommentSection({
   postId,
-  postUserId, // ← post owner's userId for notifications
+  postUserId,
   currentUserId,
   onCommentAdded,
   onCommentCountChange,
@@ -96,16 +96,30 @@ export default function CommentSection({
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-    if (window.confirm("Delete this comment?")) {
-      try {
-        await commentAPI.deleteComment(commentId);
-        await fetchComments();
-      } catch (error) {
-        console.error("Error deleting comment:", error);
-        setError("Failed to delete comment");
-      }
-    }
+  const handleDeleteComment = (commentId) => {
+    toast("Delete this comment?", {
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            const res = await commentAPI.deleteComment(
+              commentId,
+              currentUserId,
+            );
+            console.log("DELETE SUCCESS", res.data);
+
+            await fetchComments();
+
+            toast.success("Comment deleted");
+          } catch (error) {
+            console.log("URL:", error.config?.url);
+            console.log("STATUS:", error.response?.status);
+            console.log("DATA:", error.response?.data);
+            console.error(error);
+          }
+        },
+      },
+    });
   };
 
   return (

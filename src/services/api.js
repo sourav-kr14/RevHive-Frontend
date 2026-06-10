@@ -15,7 +15,12 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-    if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
+    if (
+      token &&
+      token !== "undefined" &&
+      token !== "null" &&
+      token.trim() !== ""
+    ) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
@@ -156,7 +161,10 @@ export const commentAPI = {
   getComments: (postId, page = 0, size = 10) =>
     api.get(`/comments/post/${postId}`, { params: { page, size } }),
 
-  deleteComment: (commentId) => api.delete(`/comments/${commentId}`),
+  deleteComment: (commentId, userId) =>
+    api.delete(`/comments/${commentId}`, {
+      params: { userId },
+    }),
 
   getCommentCount: (postId) => api.get(`/comments/count/${postId}`),
 

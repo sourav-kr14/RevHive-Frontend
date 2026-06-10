@@ -142,6 +142,30 @@ export default function UserHeader({ setActiveNav, profileData }) {
     };
   }, [token, location.pathname]);
 
+  // WebSocket real-time updates for unread notifications count
+  useEffect(() => {
+    if (!token) return;
+
+    let currentUserId = null;
+    try {
+      currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
+    } catch {}
+
+    if (!currentUserId) return;
+
+    const handleIncomingNotification = (newNotif) => {
+      if (newNotif && newNotif.userId === currentUserId && !newNotif.read) {
+        setUnreadCount((prev) => prev + 1);
+      }
+    };
+
+    connectWebSocket(token, "notification", handleIncomingNotification);
+
+    return () => {
+      disconnectWebSocket("notification", handleIncomingNotification);
+    };
+  }, [token]);
+
   useEffect(() => {
     const fetchNotifications = async () => {
       try {

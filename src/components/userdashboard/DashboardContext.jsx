@@ -101,6 +101,7 @@ export function DashboardProvider({ children, profileData }) {
             post.username || (post.userId ? `User_${post.userId}` : "Unknown");
           return {
             ...post,
+            liked: post.isLikedByCurrentUser || false,
             user: {
               id: post.userId,
               username,
@@ -186,6 +187,7 @@ export function DashboardProvider({ children, profileData }) {
               (post.userId ? `User_${post.userId}` : "Unknown");
             return {
               ...post,
+              liked: post.isLikedByCurrentUser || false,
               user: {
                 id: post.userId,
                 username,
